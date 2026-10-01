@@ -1,0 +1,2843 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MEF en mouvement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global' },
+  options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'svg'] }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<style>
+/* Layout : cahier d'atelier. Colonne de lecture ~68ch, figures pleine largeur (1040px max) posées sur papier millimétré, barre des chapitres collante. */
+:root {
+  --paper: #F1F3F7;
+  --sheet: #FFFFFF;
+  --ink: #131A26;
+  --muted: #586378;
+  --rule: #D2D8E2;
+  --grid: #E9EDF3;
+  --grid-strong: #DCE2EB;
+  --node: #2451DE;
+  --load: #DB3B20;
+  --mark: #FFD43B;
+  --mark-soft: #FFEFAA;
+  --tens: #1E6BD0;
+  --comp: #D4461C;
+  --exact: #BE1778;
+  --fe: #22853A;
+  --e1: #1595BD;
+  --e2: #CF4497;
+  --e3: #4A9821;
+  --f-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E131A; --sheet: #151B24; --ink: #E4E9F1; --muted: #97A2B4; --rule: #2A3341;
+    --grid: #1A212C; --grid-strong: #222B38; --node: #6F95FF; --load: #FF6A4C; --mark: #FFD43B;
+    --mark-soft: #4B3F10; --tens: #5EA3FF; --comp: #FF7C50; --exact: #FF5EB3; --fe: #5BC771;
+    --e1: #38B7DC; --e2: #F06AB7; --e3: #7CC34C; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E131A; --sheet: #151B24; --ink: #E4E9F1; --muted: #97A2B4; --rule: #2A3341;
+  --grid: #1A212C; --grid-strong: #222B38; --node: #6F95FF; --load: #FF6A4C; --mark: #FFD43B;
+  --mark-soft: #4B3F10; --tens: #5EA3FF; --comp: #FF7C50; --exact: #FF5EB3; --fe: #5BC771;
+  --e1: #38B7DC; --e2: #F06AB7; --e3: #7CC34C; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-body); font-size: 16.5px; line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; }
+@media (max-width: 520px) { .wrap { padding-inline: 16px; } body { font-size: 16px; } }
+
+h1, h2, h3, h4 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+p { margin: 0; }
+.prose { max-width: 68ch; display: grid; gap: 14px; }
+mark { background: var(--mark-soft); color: inherit; padding: 0 .2em; border-radius: 2px; }
+code, .mono { font-family: var(--f-mono); font-size: .9em; }
+a { color: var(--node); }
+:focus-visible { outline: 2.5px solid var(--node); outline-offset: 2px; border-radius: 4px; }
+
+/* ------- Barre des chapitres ------- */
+.chapters {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+}
+.chapters .wrap { display: flex; gap: 6px; align-items: center; overflow-x: auto; padding-block: 10px; scrollbar-width: none; }
+.chapters .wrap::-webkit-scrollbar { display: none; }
+.chapters .brand { font-family: var(--f-display); font-weight: 800; font-stretch: 75%; font-size: 17px; margin-right: 10px; white-space: nowrap; letter-spacing: .01em; }
+.chapters a {
+  text-decoration: none; color: var(--muted); white-space: nowrap;
+  font-size: 14px; font-weight: 500; padding: 5px 11px; border-radius: 999px; border: 1px solid transparent;
+}
+.chapters a:hover { color: var(--ink); border-color: var(--rule); }
+.chapters a.on { color: var(--ink); background: var(--sheet); border-color: var(--rule); }
+.chapters a b { font-family: var(--f-mono); font-weight: 600; margin-right: 5px; color: var(--node); }
+
+/* ------- En-tête ------- */
+.hero { padding-block: 44px 28px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 36px; align-items: center; }
+@media (max-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr); gap: 22px; padding-block: 28px 16px; } }
+.eyebrow { font-family: var(--f-mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font-size: clamp(44px, 7.4vw, 84px); font-weight: 800; font-stretch: 72%; letter-spacing: -.01em; margin-top: 10px; line-height: .95; }
+.hero h1 span { display: block; color: var(--node); }
+.hero .lede { margin-top: 18px; font-size: 18px; max-width: 46ch; color: var(--ink); }
+.hero .lede + .lede { margin-top: 10px; font-size: 15.5px; color: var(--muted); }
+.hero-fig { background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 10px 10px 6px; }
+.hero-fig figcaption { font-size: 13px; color: var(--muted); padding: 2px 6px 4px; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+
+/* ------- Fil rouge ------- */
+.recipe { padding-block: 26px 10px; }
+.recipe h2 { font-size: 30px; font-weight: 750; font-stretch: 80%; }
+.recipe .subtitle { color: var(--muted); margin-top: 6px; max-width: 70ch; }
+.steps { list-style: none; padding: 0; margin: 20px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; counter-reset: st; }
+@media (max-width: 900px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 460px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+.steps li { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px 13px; display: grid; gap: 4px; align-content: start; counter-increment: st; }
+.steps li::before { content: counter(st); font-family: var(--f-mono); font-weight: 600; font-size: 12px; color: var(--sheet); background: var(--ink); width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; }
+.steps h3 { font-size: 19px; font-weight: 750; font-stretch: 85%; }
+.steps p { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.steps .where { font-family: var(--f-mono); font-size: 11.5px; color: var(--node); display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.steps .where a { text-decoration: none; }
+.steps .where a:hover { text-decoration: underline; }
+
+.notation { margin-top: 18px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px 22px; background: var(--sheet); border: 1px dashed var(--grid-strong); border-radius: 10px; padding: 16px 18px; }
+@media (max-width: 640px) { .notation { grid-template-columns: minmax(0, 1fr); } }
+.notation h3 { font-size: 18px; font-stretch: 85%; }
+.notation dl { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 22px; font-size: 14.5px; }
+@media (max-width: 860px) { .notation dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 460px) { .notation dl { grid-template-columns: minmax(0, 1fr); } }
+.notation dt { font-weight: 600; }
+.notation dd { margin: 0; color: var(--muted); }
+
+/* ------- Chapitres ------- */
+.chapter { padding-block: 54px 10px; }
+.ch-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 20px; align-items: end; border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+.ch-letter { font-family: var(--f-display); font-weight: 800; font-stretch: 62%; font-size: 108px; line-height: .78; color: var(--node); grid-row: span 2; }
+.ch-head h2 { font-size: clamp(30px, 4.6vw, 46px); font-weight: 800; font-stretch: 75%; }
+.ch-head p { color: var(--muted); font-size: 15.5px; }
+.ch-head .src { font-family: var(--f-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .07em; }
+@media (max-width: 520px) { .ch-letter { font-size: 76px; } }
+
+.sub { padding-top: 40px; display: grid; gap: 16px; }
+.sub > h3 { font-size: 26px; font-weight: 750; font-stretch: 82%; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.sub > h3 .sid { font-family: var(--f-mono); font-size: 14px; font-weight: 600; color: var(--node); letter-spacing: .02em; }
+.sub .prose p strong { font-weight: 600; }
+
+/* ------- Figures interactives ------- */
+.lab { background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.stage {
+  position: relative;
+  background-color: var(--sheet);
+  background-image:
+    linear-gradient(var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+  background-position: -1px -1px;
+  border-bottom: 1px solid var(--rule);
+}
+.stage svg { display: block; width: 100%; height: auto; touch-action: none; }
+.stage.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+@media (max-width: 760px) { .stage.split { grid-template-columns: minmax(0, 1fr); } }
+.lab-body { padding: 14px 16px 16px; display: grid; gap: 14px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: end; }
+.ctl { display: grid; gap: 3px; min-width: 150px; flex: 1 1 160px; max-width: 260px; }
+.ctl label { font-family: var(--f-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.ctl output { color: var(--ink); font-weight: 600; text-transform: none; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--node); margin: 4px 0 0; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  font: 500 14px/1 var(--f-body); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--rule); border-radius: 8px; padding: 9px 13px; cursor: pointer;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.btn:disabled { opacity: .4; cursor: default; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.seg .btn { border: 0; border-radius: 0; }
+.seg .btn + .btn { border-left: 1px solid var(--rule); }
+
+.readout { display: flex; flex-wrap: wrap; gap: 8px 26px; font-family: var(--f-mono); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.readout div { display: grid; gap: 1px; }
+.readout span { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.readout b { font-weight: 600; font-size: 15px; }
+.status { font-size: 14.5px; padding: 9px 12px; border-radius: 8px; background: var(--paper); border: 1px solid var(--rule); }
+.status.bad { border-color: var(--load); color: var(--load); background: color-mix(in srgb, var(--load) 8%, var(--sheet)); }
+.status.good { border-color: color-mix(in srgb, var(--fe) 60%, var(--rule)); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.hint { font-size: 13.5px; color: var(--muted); }
+
+/* ------- Encadrés ------- */
+.takeaways { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.takeaways > div { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; line-height: 1.5; display: grid; gap: 4px; align-content: start; }
+.takeaways b { font-family: var(--f-display); font-stretch: 85%; font-size: 16px; font-weight: 700; }
+.trap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; background: color-mix(in srgb, var(--mark) 14%, var(--sheet)); border: 1px solid color-mix(in srgb, var(--mark) 55%, var(--rule)); border-radius: 10px; padding: 11px 14px; font-size: 14.5px; max-width: 78ch; }
+.trap .tag { font-family: var(--f-mono); font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; background: var(--mark); color: #131A26; padding: 3px 7px; border-radius: 4px; margin-top: 2px; }
+
+.chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 14px; }
+.chain .q { flex: 1 1 150px; display: grid; gap: 4px; align-content: start; padding: 8px 12px; border-radius: 8px; background: var(--paper); min-width: 0; }
+.chain .q h4 { font-size: 15px; font-weight: 700; font-stretch: 85%; }
+.chain .q div { font-size: 14px; color: var(--muted); }
+.chain .op { flex: 0 0 auto; display: grid; place-items: center; padding: 4px 8px; font-family: var(--f-mono); font-size: 11.5px; color: var(--node); text-align: center; line-height: 1.25; }
+.chain .op::before { content: "→"; display: block; font-size: 20px; line-height: 1; }
+@media (max-width: 700px) { .chain { flex-direction: column; } .chain .op::before { content: "↓"; } .chain .q { flex: 0 0 auto; } }
+
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .compare { grid-template-columns: minmax(0, 1fr); } }
+.compare > div { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; }
+.compare h4 { font-size: 20px; font-stretch: 80%; font-weight: 800; margin-bottom: 8px; }
+.compare dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; font-size: 14.5px; }
+.compare dt { color: var(--muted); font-family: var(--f-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; padding-top: 2px; }
+.compare dd { margin: 0; }
+
+.math-scroll { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+mjx-container[display="true"] { margin: 6px 0 !important; }
+
+/* ------- Matrices ------- */
+.mat-wrap { overflow-x: auto; }
+table.mat { border-collapse: separate; border-spacing: 0; font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums; margin: 0 auto; }
+table.mat th { font-weight: 500; color: var(--node); padding: 3px 8px; font-size: 12px; }
+table.mat td { padding: 5px 9px; text-align: center; border-top: 1px solid var(--grid); min-width: 52px; white-space: nowrap; transition: background .25s; }
+table.mat td.hl { background: color-mix(in srgb, var(--mark) 45%, var(--sheet)); font-weight: 600; }
+table.mat td.zero { color: var(--muted); opacity: .55; }
+table.mat td.neg { color: var(--comp); }
+.eq-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; font-family: var(--f-mono); font-size: 14px; }
+.eq-row .vec { display: grid; gap: 2px; padding: 4px 9px; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); border-radius: 8px; font-variant-numeric: tabular-nums; text-align: right; }
+.eq-row .bmat { display: grid; grid-template-columns: repeat(2, auto); gap: 2px 14px; padding: 4px 9px; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+
+/* ------- Assemblage ------- */
+.asm { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 0; }
+@media (max-width: 760px) { .asm { grid-template-columns: minmax(0, 1fr); } }
+.asm .struct { border-right: 1px solid var(--rule); display: grid; place-items: center; padding: 8px; }
+@media (max-width: 760px) { .asm .struct { border-right: 0; border-bottom: 1px solid var(--rule); } }
+.asm .mgrid-wrap { overflow-x: auto; padding: 16px; display: grid; place-items: center; }
+.mgrid { display: grid; gap: 3px; font-family: var(--f-mono); font-size: 12px; }
+.mgrid .h { color: var(--node); display: grid; place-items: center; font-weight: 600; font-size: 12px; position: relative; }
+.mgrid .h.fx { color: var(--load); text-decoration: line-through; }
+.mgrid .c { min-width: 30px; height: 34px; border: 1px solid var(--grid-strong); border-radius: 4px; display: grid; place-items: center; background: var(--sheet); transition: opacity .35s, background .35s, transform .35s; font-size: 11.5px; white-space: nowrap; padding: 0 3px; position: relative; overflow: hidden; }
+.mgrid.big .c { min-width: 32px; height: 30px; font-size: 10.5px; }
+.mgrid .c.pop { animation: pop .55s ease; }
+@keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+.mgrid .c.struck { opacity: .28; }
+.mgrid .c.struck::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 46%, var(--load) 46%, var(--load) 54%, transparent 54%); opacity: .8; }
+.mgrid .c.struck.col::after { background: linear-gradient(90deg, transparent 46%, var(--load) 46%, var(--load) 54%, transparent 54%); }
+.mgrid .c.gone { opacity: .06; }
+.mgrid .c.keep { border-color: var(--ink); border-width: 1.5px; }
+.asm-foot { display: grid; gap: 10px; padding: 14px 16px 16px; }
+.asm-cap { font-size: 15px; min-height: 3.2em; max-width: 78ch; }
+.asm-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.dots { display: flex; gap: 6px; }
+.dots button { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--muted); background: transparent; padding: 0; cursor: pointer; }
+.dots button.on { background: var(--node); border-color: var(--node); }
+
+/* ------- SVG ------- */
+svg text { font-family: var(--f-mono); fill: var(--ink); font-size: 13px; }
+svg text.lbl-m { fill: var(--muted); font-size: 12px; }
+svg text.lbl-n { fill: var(--node); font-weight: 600; }
+svg text.lbl-l { fill: var(--load); font-weight: 600; }
+svg text.lbl-e { fill: var(--exact); font-weight: 600; }
+svg text.lbl-f { fill: var(--fe); font-weight: 600; }
+svg text.big { font-size: 15px; }
+svg text.mid { text-anchor: middle; }
+svg text.end { text-anchor: end; }
+.ax { stroke: var(--muted); stroke-width: 1.2; fill: none; }
+.ax-head { fill: var(--muted); stroke: none; }
+.gridl { stroke: var(--grid-strong); stroke-width: 1; }
+.ghost { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 5; fill: none; opacity: .6; }
+.barl { stroke: var(--ink); stroke-width: 6; stroke-linecap: round; fill: none; }
+.beam-fill { fill: color-mix(in srgb, var(--muted) 22%, var(--sheet)); stroke: var(--ink); stroke-width: 1.4; }
+.node { fill: var(--node); stroke: var(--sheet); stroke-width: 2.2; }
+.node.drag { cursor: grab; }
+.node-ring { fill: none; stroke: var(--node); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.arr { stroke: var(--load); stroke-width: 2.6; fill: none; }
+.arr.head { fill: var(--load); stroke: none; }
+.arr-n { stroke: var(--node); stroke-width: 2.4; fill: none; }
+.arr-n.head { fill: var(--node); stroke: none; }
+.arr-f { stroke: var(--fe); stroke-width: 3.2; fill: none; }
+.arr-f.head { fill: var(--fe); stroke: none; }
+.arr-m { stroke: var(--muted); stroke-width: 1.8; fill: none; }
+.arr-m.head { fill: var(--muted); stroke: none; }
+.curve-e { stroke: var(--exact); stroke-width: 2.6; fill: none; }
+.curve-f { stroke: var(--fe); stroke-width: 2.6; fill: none; }
+.curve-n { stroke: var(--node); stroke-width: 2.4; fill: none; }
+.curve-m { stroke: var(--muted); stroke-width: 1.6; fill: none; stroke-dasharray: 5 4; }
+.dot-e { fill: var(--exact); }
+.dot-f { fill: var(--fe); stroke: var(--sheet); stroke-width: 1.5; }
+.wall { fill: url(#hatch); stroke: var(--ink); stroke-width: 1.4; }
+.support { fill: color-mix(in srgb, var(--muted) 35%, var(--sheet)); stroke: var(--ink); stroke-width: 1.4; }
+.hatch-line { stroke: var(--muted); stroke-width: 1; }
+.spring { stroke: var(--ink); stroke-width: 2.2; fill: none; stroke-linejoin: round; }
+.mass { fill: color-mix(in srgb, var(--muted) 30%, var(--sheet)); stroke: var(--ink); stroke-width: 1.6; }
+.ball { fill: var(--node); stroke: var(--sheet); stroke-width: 2; }
+.sec { stroke: var(--fe); stroke-width: 3; stroke-linecap: round; }
+.sec-n { stroke: var(--exact); stroke-width: 1.4; stroke-dasharray: 3 3; }
+.tbar { stroke-linecap: round; cursor: pointer; transition: opacity .2s; }
+.tbar-hit { stroke: transparent; stroke-width: 18; cursor: pointer; }
+.tbar.off { stroke-dasharray: 3 6; opacity: .45; }
+.elem-hl { stroke-linecap: round; transition: stroke .3s, stroke-width .3s, opacity .3s; }
+.slide-arrow { transition: transform .9s cubic-bezier(.6, 0, .3, 1), opacity .7s; }
+@media (prefers-reduced-motion: reduce) { .slide-arrow { transition: none; } .mgrid .c.pop { animation: none; } }
+
+/* ------- Formulaire ------- */
+.sheet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.sheet-grid > section { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.sheet-grid h4 { font-size: 19px; font-weight: 800; font-stretch: 80%; }
+.sheet-grid p { font-size: 14px; color: var(--muted); }
+.traps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+.traps li { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; line-height: 1.5; display: grid; gap: 4px; }
+.traps li b { font-family: var(--f-display); font-stretch: 85%; font-size: 16.5px; }
+footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
+
+/* ------- Entraînement ------- */
+.exam-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 860px) { .exam-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .exam-flow { grid-template-columns: minmax(0, 1fr); } }
+.exam-flow > div { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; font-size: 14px; line-height: 1.5; }
+.exam-flow b { font-family: var(--f-display); font-stretch: 85%; font-size: 16.5px; }
+.exam-flow span { color: var(--muted); }
+
+.ex { border-top: 1px solid var(--rule); margin-top: 34px; }
+.ex-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.ex-head h3 { font-size: 26px; font-weight: 750; font-stretch: 82%; }
+.ex-tag { font-family: var(--f-mono); font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--sheet); background: var(--node); padding: 3px 8px; border-radius: 4px; }
+.ex-src { font-size: 13px; color: var(--muted); }
+.ex-src.warn { color: var(--comp); }
+.ex-grid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.ex-grid.wide { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+@media (max-width: 760px) { .ex-grid, .ex-grid.wide { grid-template-columns: minmax(0, 1fr); } }
+.ex-fig { border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+.ex-statement { display: grid; gap: 10px; font-size: 15.5px; align-content: start; min-width: 0; }
+.ex-statement .ctl { max-width: 320px; }
+.data { font-family: var(--f-mono); font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.ex-read { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; }
+.ex-read:empty { display: none; }
+.pb { font-size: 19px; font-weight: 750; font-stretch: 85%; margin-top: 12px; }
+.ex-qs { display: grid; gap: 8px; }
+.ex-qs details { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; }
+.ex-qs details[open] { border-color: var(--muted); }
+.ex-qs summary { cursor: pointer; padding: 11px 14px; font-size: 15px; list-style: none; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: baseline; }
+.ex-qs summary::-webkit-details-marker { display: none; }
+.ex-qs summary b { font-family: var(--f-mono); font-size: 12.5px; color: var(--node); white-space: nowrap; }
+.ex-qs summary::after { content: "Voir la correction"; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.ex-qs details[open] summary::after { content: "Masquer"; }
+@media (max-width: 520px) { .ex-qs summary { grid-template-columns: auto minmax(0, 1fr); } .ex-qs summary::after { display: none; } }
+.ans { padding: 2px 16px 14px; display: grid; gap: 10px; font-size: 15px; border-top: 1px dashed var(--rule); padding-top: 12px; max-width: 86ch; }
+.ans .note { font-size: 13.5px; color: var(--muted); background: var(--paper); border-radius: 8px; padding: 8px 10px; }
+.mirror-ghost { opacity: .32; }
+.mdiag { fill: color-mix(in srgb, var(--fe) 22%, transparent); stroke: var(--fe); stroke-width: 2; }
+.mdiag.ghost-m { fill: color-mix(in srgb, var(--fe) 10%, transparent); stroke-dasharray: 4 3; }
+.axis-sym { stroke: var(--node); stroke-width: 1.3; stroke-dasharray: 8 4 2 4; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="var(--sheet)"></rect>
+      <line x1="0" y1="0" x2="0" y2="7" stroke="var(--muted)" stroke-width="1.4"></line>
+    </pattern>
+  </defs>
+</svg>
+
+<nav class="chapters" aria-label="Chapitres">
+  <div class="wrap">
+    <span class="brand">MEF en mouvement</span>
+    <a href="#recette"><b>0</b>La recette</a>
+    <a href="#barre1d"><b>A</b>Barre 1D</a>
+    <a href="#barre2d"><b>B</b>Barres 2D/3D</a>
+    <a href="#poutre"><b>C</b>Poutre 2D</a>
+    <a href="#formulaire"><b>D</b>Formulaire</a>
+    <a href="#entrainement"><b>E</b>Entraînement</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="hero">
+  <div>
+    <div class="eyebrow">AM11 · Méthode des éléments finis · cours C2 → C5</div>
+    <h1>La MEF <span>en mouvement</span></h1>
+    <p class="lede">Barre 1D, treillis, poutre : les trois cours appliquent la même recette. Ici chaque étape bouge, et tu peux changer les paramètres pour voir ce qui se passe.</p>
+    <p class="lede">Tous les calculs de la page tournent en direct et retrouvent les valeurs des diapos (pont : 2,4 mm ; portique : 3,6 mm). La partie <a href="#entrainement">E</a> reprend tes 4 TD et les médians A24 et A25 avec leurs corrections.</p>
+  </div>
+  <figure class="hero-fig" style="margin:0">
+    <svg id="hero-svg" viewBox="0 0 640 270" role="img" aria-label="Pont en treillis du cours qui se déforme sous trois charges"></svg>
+    <figcaption>
+      <span>Le pont du cours C3, calculé ici avec 13 éléments de barre.</span>
+      <span class="legend"><span><i style="background:var(--tens)"></i>traction</span><span><i style="background:var(--comp)"></i>compression</span></span>
+    </figcaption>
+  </figure>
+</header>
+
+<section id="recette" class="recipe">
+  <h2>Une seule recette, trois types d'éléments</h2>
+  <p class="subtitle">Retiens ces huit gestes. Chaque chapitre ne fait que les répéter avec un élément différent. Les liens t'emmènent à l'animation correspondante.</p>
+  <ol class="steps">
+    <li><h3>Mailler</h3><p>Découper la structure en éléments reliés par des nœuds. Les inconnues sont les déplacements des nœuds : les ddl.</p><span class="where"><a href="#a-conv">A.7</a><a href="#b-pont">B.3</a></span></li>
+    <li><h3>Approcher</h3><p>Entre deux nœuds, on impose la forme du déplacement avec des fonctions de forme N<sub>i</sub>(x).</p><span class="where"><a href="#a-forme">A.3</a><a href="#c-hermite">C.2</a></span></li>
+    <li><h3>Élément</h3><p>Pour chaque élément : sa matrice de rigidité [k] et son vecteur de charges {f<sub>n</sub>}, dans son repère local.</p><span class="where"><a href="#a-k">A.4</a><a href="#a-charges">A.5</a><a href="#c-k">C.3</a></span></li>
+    <li><h3>Tourner</h3><p>Si l'élément est incliné, on l'exprime dans le repère global : [k]<sub>g</sub> = [T]<sup>T</sup>[k]<sub>l</sub>[T].</p><span class="where"><a href="#b-repere">B.1</a><a href="#c-global">C.6</a></span></li>
+    <li><h3>Assembler</h3><p>Additionner toutes les [k] dans la grande matrice [K], case par case, selon les ddl de chaque élément.</p><span class="where"><a href="#a-asm">A.6</a><a href="#b-asm">B.2</a><a href="#c-portique">C.7</a></span></li>
+    <li><h3>Bloquer</h3><p>Conditions aux limites : on barre les lignes et colonnes des ddl imposés à zéro.</p><span class="where"><a href="#a-asm">A.6</a><a href="#b-asm">B.2</a></span></li>
+    <li><h3>Résoudre</h3><p>[K′]{U′} = {F′} : un système linéaire. C'est la condition « Π minimum ».</p><span class="where"><a href="#a-pmept">A.2</a></span></li>
+    <li><h3>Exploiter</h3><p>Réactions {R} = [K]{U} − {F}, puis N, M et les contraintes σ dans chaque élément.</p><span class="where"><a href="#a-conv">A.7</a><a href="#c-portique">C.7</a></span></li>
+  </ol>
+
+  <div class="notation">
+    <h3>Lire les notations du cours</h3>
+    <dl>
+      <div><dt>[k], [K]</dt><dd>matrice (élémentaire, globale)</dd></div>
+      <div><dt>{u<sub>n</sub>}</dt><dd>vecteur colonne des ddl d'un élément</dd></div>
+      <div><dt>⟨u<sub>n</sub>⟩</dt><dd>le même vecteur, couché en ligne (transposé)</dd></div>
+      <div><dt>u<sub>,x</sub></dt><dd>la virgule veut dire « dérivée » : du/dx</dd></div>
+      <div><dt>H<sub>m</sub>, H<sub>f</sub></dt><dd>rigidités : H<sub>m</sub> = EA (membrane), H<sub>f</sub> = EI (flexion)</dd></div>
+      <div><dt>ddl</dt><dd>degré de liberté : un déplacement ou une rotation de nœud</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ===================================================== A ===================================================== -->
+<section id="barre1d" class="chapter">
+  <div class="ch-head">
+    <div class="ch-letter">A</div>
+    <span class="src">Cours C2</span>
+    <div><h2>Barre 1D</h2><p>Une barre ne travaille qu'en traction ou en compression, le long de son axe.</p></div>
+  </div>
+
+  <div class="sub" id="a-continu">
+    <h3><span class="sid">A.1</span>Le modèle continu : quatre quantités enchaînées</h3>
+    <div class="prose">
+      <p>Une barre est longue et fine, reliée aux autres pièces par des rotules. Elle ne transmet qu'un <strong>effort normal N</strong> : pas de flexion. Toute la section avance d'un bloc le long de x, donc une seule fonction u(x) décrit la barre entière. Le reste en découle :</p>
+    </div>
+    <div class="chain">
+      <div class="q"><h4>Déplacement</h4><div>\(u(x)\)</div><div>de combien chaque section avance</div></div>
+      <div class="op">dériver</div>
+      <div class="q"><h4>Déformation</h4><div>\(\varepsilon_{xx} = u_{,x}\)</div><div>allongement relatif</div></div>
+      <div class="op">× E<br>(Hooke)</div>
+      <div class="q"><h4>Contrainte</h4><div>\(\sigma_{xx} = E\,u_{,x}\)</div><div>constante sur la section</div></div>
+      <div class="op">∫ sur la<br>section</div>
+      <div class="q"><h4>Effort normal</h4><div>\(N = EA\,u_{,x} = H_m u_{,x}\)</div><div>traction si N &gt; 0</div></div>
+    </div>
+    <div class="prose">
+      <p>On ajoute l'équilibre d'un petit tronçon dx, \(N_{,x} + f_x = 0\) (f<sub>x</sub> = charge répartie en N/m), et les conditions aux limites : un déplacement imposé (u = 0 à l'encastrement) ou une force imposée (N = F au bout chargé).</p>
+      <p>Exemple du cours, la barre pendue sous son poids : \(N = \rho g (L - x)\) est <mark>linéaire</mark> et \(u = \frac{\rho g}{EA}\left(Lx - \frac{x^2}{2}\right)\) est <mark>quadratique</mark>. Tu verras en <a href="#a-conv">A.7</a> ce que la MEF fait de cette solution.</p>
+    </div>
+  </div>
+
+  <div class="sub" id="a-pmept">
+    <h3><span class="sid">A.2</span>Le principe du minimum d'énergie (PMEPT)</h3>
+    <div class="prose">
+      <p>C'est le moteur de toute la méthode. Parmi toutes les positions possibles, la structure prend celle qui rend l'<strong>énergie potentielle totale Π minimale</strong>, avec Π = énergie élastique stockée − travail des forces extérieures.</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="pm-svg" viewBox="0 0 680 300" role="img" aria-label="Masse suspendue à un ressort et courbe de l'énergie potentielle totale"></svg></div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="ctl"><label for="pm-u">Position u <output id="pm-u-out"></output></label><input id="pm-u" type="range" min="0" max="6" step="0.05" value="1"></div>
+          <div class="btns"><button class="btn primary" id="pm-go" type="button">Lâcher la masse</button></div>
+        </div>
+        <div class="readout" id="pm-read"></div>
+        <p class="hint">Ressort k = 10 N/mm, poids F = 40 N. Déplace la masse, puis lâche-la : la bille roule toujours vers le fond de la parabole.</p>
+      </div>
+    </figure>
+    <div class="prose">
+      <p>Au fond de la parabole la pente est nulle : \(\dfrac{d\Pi}{du} = ku - F = 0\), donc \(ku = F\). C'est la loi du ressort, retrouvée par l'énergie.</p>
+      <p>La MEF fait exactement la même chose avec plusieurs inconnues : \(\Pi = \tfrac12\langle U\rangle[K]\{U\} - \langle U\rangle\{F\}\), et \(\dfrac{\partial \Pi}{\partial\{U\}} = \{0\}\) donne <mark>\([K]\{U\} = \{F\}\)</mark>. La matrice [K] joue le rôle de k : c'est un ressort dans plusieurs directions à la fois.</p>
+    </div>
+  </div>
+
+  <div class="sub" id="a-forme">
+    <h3><span class="sid">A.3</span>Fonctions de forme : deviner u entre deux nœuds</h3>
+    <div class="prose">
+      <p>On renonce à trouver u(x) partout. On cherche seulement les valeurs aux nœuds, u<sub>1</sub> et u<sub>2</sub>, et on les relie par une droite :</p>
+      <div class="math-scroll">\[u(x) = N_1(x)\,u_1 + N_2(x)\,u_2 \qquad N_1 = 1 - \frac{x}{L},\quad N_2 = \frac{x}{L}\]</div>
+      <p>Chaque N<sub>i</sub> vaut 1 sur son nœud et 0 sur l'autre (condition d'interpolation nodale). Résultat : u(0) = u<sub>1</sub> et u(L) = u<sub>2</sub> automatiquement.</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="sf-svg" viewBox="0 0 680 300" role="img" aria-label="Fonctions de forme N1 et N2 et déplacement interpolé"></svg></div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="ctl"><label for="sf-u1">u₁ <output id="sf-u1-out"></output></label><input id="sf-u1" type="range" min="-1" max="1" step="0.05" value="0.5"></div>
+          <div class="ctl"><label for="sf-u2">u₂ <output id="sf-u2-out"></output></label><input id="sf-u2" type="range" min="-1" max="1" step="0.05" value="-0.3"></div>
+          <div class="ctl"><label for="sf-x">Position x/L <output id="sf-x-out"></output></label><input id="sf-x" type="range" min="0" max="1" step="0.01" value="0.3"></div>
+        </div>
+        <div class="status" id="sf-read"></div>
+      </div>
+    </figure>
+    <div class="trap"><span class="tag">À retenir</span><p>u est une droite, donc \(\varepsilon = u_{,x} = \frac{u_2 - u_1}{L}\) est <strong>constante</strong> dans l'élément, et σ et N aussi. Le cours l'écrit \(\varepsilon = \langle B\rangle\{u_n\}\) avec \(\langle B\rangle = \langle -\tfrac1L \;\; \tfrac1L\rangle\) : B, c'est juste la dérivée des fonctions de forme.</p></div>
+  </div>
+
+  <div class="sub" id="a-k">
+    <h3><span class="sid">A.4</span>Ce que veut dire la matrice de rigidité [k]</h3>
+    <div class="prose">
+      <p>En injectant u(x) dans l'énergie, le cours obtient \([k] = \dfrac{EA}{L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix}\). Pas besoin de refaire l'intégrale pour la comprendre : <strong>[k]{u} donne les forces à appliquer aux nœuds</strong> pour obtenir les déplacements u<sub>1</sub>, u<sub>2</sub>.</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="k1-svg" viewBox="0 0 680 190" role="img" aria-label="Élément de barre déformé et forces nodales"></svg></div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="ctl"><label for="k1-u1">u₁ <output id="k1-u1-out"></output></label><input id="k1-u1" type="range" min="-1" max="1" step="0.05" value="0"></div>
+          <div class="ctl"><label for="k1-u2">u₂ <output id="k1-u2-out"></output></label><input id="k1-u2" type="range" min="-1" max="1" step="0.05" value="1"></div>
+          <div class="btns">
+            <button class="btn" type="button" data-k1="0,1">u₂ = 1 seul</button>
+            <button class="btn" type="button" data-k1="1,0">u₁ = 1 seul</button>
+            <button class="btn" type="button" data-k1="0.6,0.6">Translation</button>
+            <button class="btn" type="button" data-k1="0.5,-0.5">Compression</button>
+          </div>
+        </div>
+        <div class="eq-row" id="k1-eq"></div>
+        <div class="status" id="k1-read"></div>
+      </div>
+    </figure>
+    <div class="takeaways">
+      <div><b>Une colonne = un test</b>La colonne j de [k] donne les forces nécessaires pour imposer u<sub>j</sub> = 1, les autres ddl restant à 0.</div>
+      <div><b>Toujours en équilibre</b>Les deux forces nodales sont opposées : leur somme est nulle, comme chaque colonne de [k].</div>
+      <div><b>Pourquoi on bloque</b>Si u<sub>1</sub> = u<sub>2</sub>, la barre glisse sans s'allonger : forces nulles. [k] seule n'est donc pas inversible. Il faut au moins un appui.</div>
+    </div>
+  </div>
+
+  <div class="sub" id="a-charges">
+    <h3><span class="sid">A.5</span>Charges réparties → forces aux nœuds</h3>
+    <div class="prose">
+      <p>La MEF ne parle qu'aux nœuds. Une charge répartie f<sub>x</sub> (le poids propre, par exemple) est remplacée par des forces nodales équivalentes, pondérées par les fonctions de forme :</p>
+      <div class="math-scroll">\[\{f_n\} = \int_0^L \{N\}\, f_x\, dx = f_x \frac{L}{2}\begin{Bmatrix}1\\1\end{Bmatrix}\]</div>
+      <p>Pour une charge uniforme, chaque nœud reçoit la moitié de la charge totale f<sub>x</sub>L.</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="ch1-svg" viewBox="0 0 680 160" role="img" aria-label="Charge répartie concentrée en deux forces nodales"></svg></div>
+      <div class="lab-body"><div class="btns"><button class="btn primary" id="ch1-go" type="button" aria-pressed="false">Concentrer aux nœuds</button></div></div>
+    </figure>
+  </div>
+
+  <div class="sub" id="a-asm">
+    <h3><span class="sid">A.6</span>Assemblage : trois petites matrices dans une grande</h3>
+    <div class="prose">
+      <p>Chaque élément ne connaît que ses deux nœuds. On recopie sa matrice 2×2 dans la grande matrice [K], aux lignes et colonnes de ses ddl. Quand deux éléments partagent un nœud, leurs termes <strong>s'additionnent</strong> sur la case commune.</p>
+    </div>
+    <figure class="lab" style="margin:0" id="asm1"></figure>
+  </div>
+
+  <div class="sub" id="a-conv">
+    <h3><span class="sid">A.7</span>Convergence : la barre pendue sous son poids</h3>
+    <div class="prose">
+      <p>Les données du cours : L = 1 m, Ø 40 mm (A = 1256,64 mm²), acier ρ = 7800 kg/m³, E = 210 GPa. En magenta la solution exacte, en vert la MEF. Ajoute des éléments.</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="cv-svg" viewBox="0 0 680 330" role="img" aria-label="Déplacement et contrainte exacts et éléments finis le long de la barre"></svg></div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="ctl"><label for="cv-n">Nombre d'éléments <output id="cv-n-out"></output></label><input id="cv-n" type="range" min="1" max="10" step="1" value="1"></div>
+        </div>
+        <div class="readout" id="cv-read"></div>
+        <div class="legend"><span><i style="background:var(--exact)"></i>exact</span><span><i style="background:var(--fe)"></i>éléments finis</span></div>
+      </div>
+    </figure>
+    <div class="takeaways">
+      <div><b>Nœuds exacts</b>Le déplacement EF aux nœuds est exact quel que soit le maillage (u₂ = ρgL²/2E dès 1 élément). La réaction R₁ = −ρgLA aussi.</div>
+      <div><b>Intérieur approché</b>Entre les nœuds u est une droite : la courbure de la parabole est perdue.</div>
+      <div><b>σ en escalier</b>σ est constante par élément. L'escalier se rapproche de la droite exacte quand on raffine.</div>
+      <div><b>Quand s'arrêter</b>On compare deux maillages successifs : 33 %, puis 10 %, puis 5 %. On fixe un seuil : c'est le critère de convergence.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== B ===================================================== -->
+<section id="barre2d" class="chapter">
+  <div class="ch-head">
+    <div class="ch-letter">B</div>
+    <span class="src">Cours C3</span>
+    <div><h2>Barres 2D et 3D : les treillis</h2><p>Les mêmes barres, mais inclinées et reliées par des pivots.</p></div>
+  </div>
+
+  <div class="sub" id="b-repere">
+    <h3><span class="sid">B.1</span>Repère local, repère global</h3>
+    <div class="prose">
+      <p>Dans un treillis chaque barre a sa propre direction. On sait calculer une barre dans son axe x (repère local), mais pour assembler il faut un repère commun (X, Y). Chaque nœud a maintenant <strong>2 ddl : U et V</strong>.</p>
+      <p>La barre ne « voit » que la partie du déplacement qui est dans son axe : c'est une <strong>projection</strong>. Avec \(c = \frac{X_2 - X_1}{L}\) et \(s = \frac{Y_2 - Y_1}{L}\) :</p>
+      <div class="math-scroll">\[u_l = c\,U + s\,V = \langle c \;\; s\rangle\begin{Bmatrix}U\\V\end{Bmatrix} = \langle t\rangle\{u_g\}\]</div>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage split">
+        <svg id="rp-svg" viewBox="0 0 420 330" role="img" aria-label="Barre inclinée et projection du déplacement nodal sur son axe"></svg>
+        <div style="padding:14px; display:grid; gap:10px; align-content:center; min-width:0">
+          <div class="hint">[k]<sub>g</sub> en unités de EA/L, ddl U₁ V₁ U₂ V₂</div>
+          <div class="mat-wrap"><table class="mat" id="rp-mat"></table></div>
+          <div class="readout" id="rp-read"></div>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="ctl"><label for="rp-a">Angle de la barre <output id="rp-a-out"></output></label><input id="rp-a" type="range" min="-180" max="180" step="1" value="30"></div>
+          <div class="ctl"><label for="rp-U">U du nœud 2 <output id="rp-U-out"></output></label><input id="rp-U" type="range" min="-1" max="1" step="0.05" value="0.8"></div>
+          <div class="ctl"><label for="rp-V">V du nœud 2 <output id="rp-V-out"></output></label><input id="rp-V" type="range" min="-1" max="1" step="0.05" value="0.3"></div>
+        </div>
+        <p class="hint">Tu peux aussi attraper le nœud 2 pour faire tourner la barre. À 0° tu retrouves la barre 1D ; à 90° seuls les V travaillent.</p>
+      </div>
+    </figure>
+    <div class="prose">
+      <div class="math-scroll">\[[k]_g = [T]^T[k]_l[T] = \frac{EA}{L}\begin{bmatrix}[P] & -[P]\\ -[P] & [P]\end{bmatrix} \qquad [P] = \begin{bmatrix}c^2 & cs\\ cs & s^2\end{bmatrix}\]</div>
+    </div>
+    <div class="trap"><span class="tag">Piège de signe</span><p>Dans le cours, l'angle α est compté dans le sens horaire, d'où les « −sin α ». Pour ne jamais se tromper : calcule <strong>c = ΔX/L et s = ΔY/L à partir des coordonnées</strong> des nœuds, et mets-les dans [P]. Les signes sortent tout seuls.</p></div>
+  </div>
+
+  <div class="sub" id="b-asm">
+    <h3><span class="sid">B.2</span>Assembler un treillis</h3>
+    <div class="prose">
+      <p>Le triangle du cours : 3 nœuds, 3 barres. Chaque barre apporte un bloc 4×4 (2 nœuds × 2 ddl). Les demi-carrés montrent les cases où deux barres se superposent.</p>
+    </div>
+    <figure class="lab" style="margin:0" id="asm2"></figure>
+  </div>
+
+  <div class="sub" id="b-pont">
+    <h3><span class="sid">B.3</span>Labo : le pont en treillis</h3>
+    <div class="prose">
+      <p>Le pont du cours : 13 barres IPN160 (A = 22,8 cm², acier E = 210 GPa), travées de 3 m, trois charges de 3 tonnes. 8 nœuds × 2 = 16 ddl, 3 bloqués, il reste 13 inconnues. Le calcul est refait à chaque changement.</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="tr-svg" viewBox="0 0 680 300" role="img" aria-label="Pont en treillis déformé, barres colorées selon l'effort normal"></svg></div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="ctl"><label for="tr-load">Charge par nœud <output id="tr-load-out"></output></label><input id="tr-load" type="range" min="0" max="6" step="0.5" value="3"></div>
+          <div class="ctl"><label for="tr-amp">Amplification <output id="tr-amp-out"></output></label><input id="tr-amp" type="range" min="0" max="600" step="10" value="250"></div>
+          <div class="seg" role="group" aria-label="Appui gauche">
+            <button class="btn" type="button" id="tr-fix" aria-pressed="true">Appui gauche fixe</button>
+            <button class="btn" type="button" id="tr-roll" aria-pressed="false">Rouleau</button>
+          </div>
+          <button class="btn" type="button" id="tr-reset">Remettre toutes les barres</button>
+        </div>
+        <div class="readout" id="tr-read"></div>
+        <div class="status" id="tr-status"></div>
+        <div class="legend"><span><i style="background:var(--tens)"></i>traction (N &gt; 0)</span><span><i style="background:var(--comp)"></i>compression (N &lt; 0)</span><span>épaisseur ∝ |N|</span><span>Clique une barre pour la retirer</span></div>
+      </div>
+    </figure>
+    <div class="takeaways">
+      <div><b>Mécanisme interne</b>Retire une diagonale : un panneau devient un carré articulé qui se déforme sans allonger aucune barre. [K′] est singulière, pas de solution.</div>
+      <div><b>Mode rigide</b>Mets l'appui gauche sur rouleau : rien n'empêche le pont de glisser horizontalement. Conditions aux limites insuffisantes.</div>
+      <div><b>Petits déplacements</b>2,4 mm sur 12 m de portée : l'hypothèse des petits déplacements est largement vérifiée (la déformée est amplifiée à l'écran).</div>
+    </div>
+  </div>
+
+  <div class="sub" id="b-3d">
+    <h3><span class="sid">B.4</span>Et en 3D ? Et la stabilité ?</h3>
+    <div class="prose">
+      <p>Rien de neuf en 3D : 3 ddl par nœud (U, V, W) et le vecteur de transformation contient les trois cosinus directeurs. [T] fait 2×6 et [k]<sub>g</sub> 6×6.</p>
+      <div class="math-scroll">\[\langle t\rangle = \left\langle \frac{X_2-X_1}{L}\;\; \frac{Y_2-Y_1}{L}\;\; \frac{Z_2-Z_1}{L}\right\rangle \qquad [k]_g = [T]^T[k]_l[T]\]</div>
+      <p>Stabilité : une structure <strong>hypostatique extérieurement</strong> (appuis insuffisants) ou <strong>intérieurement</strong> (mécanisme, comme un carré sans diagonale) donne une matrice [K′] singulière. Le logiciel renvoie des déplacements infinis ou pas de solution du tout. Tu peux provoquer les deux cas dans le labo ci-dessus.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== C ===================================================== -->
+<section id="poutre" class="chapter">
+  <div class="ch-head">
+    <div class="ch-letter">C</div>
+    <span class="src">Cours C4 · C5</span>
+    <div><h2>Poutre 2D</h2><p>La poutre fléchit : il faut suivre la flèche w et la rotation θ des sections.</p></div>
+  </div>
+
+  <div class="sub" id="c-vs">
+    <h3><span class="sid">C.1</span>Barre ou poutre ?</h3>
+    <div class="compare">
+      <div>
+        <h4>Barre</h4>
+        <dl>
+          <dt>ddl / nœud</dt><dd>u (1D), U V (2D)</dd>
+          <dt>efforts</dt><dd>N seulement</dd>
+          <dt>liaisons</dt><dd>rotules (pivots)</dd>
+          <dt>approx.</dt><dd>u linéaire</dd>
+          <dt>[k]</dt><dd>2×2 local, 4×4 en 2D</dd>
+        </dl>
+      </div>
+      <div>
+        <h4>Poutre 2D</h4>
+        <dl>
+          <dt>ddl / nœud</dt><dd>U, W, θ</dd>
+          <dt>efforts</dt><dd>N, T (tranchant), M (moment)</dd>
+          <dt>liaisons</dt><dd>rigides (soudures, encastrements)</dd>
+          <dt>approx.</dt><dd>u linéaire + w cubique</dd>
+          <dt>[k]</dt><dd>6×6</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="prose">
+      <p>Les deux théories partent de la même idée : <strong>une section plane reste plane</strong>. Euler-Bernoulli ajoute qu'elle reste <strong>perpendiculaire</strong> à la fibre moyenne, donc \(\theta = -w_{,x}\) et le cisaillement est ignoré. Timoshenko laisse la section tourner un peu moins que la fibre : l'écart est le cisaillement \(\gamma = \theta + w_{,x}\).</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="tm-svg" viewBox="0 0 680 250" role="img" aria-label="Console fléchie avec ses sections, selon Euler-Bernoulli ou Timoshenko"></svg></div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="ctl"><label for="tm-r">Élancement L/h <output id="tm-r-out"></output></label><input id="tm-r" type="range" min="0" max="100" step="1" value="47"></div>
+          <div class="seg" role="group" aria-label="Théorie">
+            <button class="btn" type="button" id="tm-eb" aria-pressed="false">Euler-Bernoulli</button>
+            <button class="btn" type="button" id="tm-ti" aria-pressed="true">Timoshenko</button>
+          </div>
+          <div class="btns"><button class="btn" type="button" data-tm="4">L/h = 4 (cours : épaisse)</button><button class="btn" type="button" data-tm="100">L/h = 100 (mince)</button></div>
+        </div>
+        <div class="readout" id="tm-read"></div>
+        <div class="legend"><span><i style="background:var(--fe)"></i>section réelle</span><span><i style="background:var(--exact)"></i>perpendiculaire à la fibre</span><span>Quand les deux traits se séparent, c'est du cisaillement.</span></div>
+      </div>
+    </figure>
+    <div class="prose"><p>Le coefficient du cours \(\phi = \frac{12EI}{L^2 kGA} \approx 3\left(\frac{h}{L}\right)^2\) mesure le poids du cisaillement. Pour une poutre élancée il est minuscule : l'élément fini du cours utilise donc la théorie des <strong>poutres minces</strong> (Euler-Bernoulli).</p></div>
+  </div>
+
+  <div class="sub" id="c-hermite">
+    <h3><span class="sid">C.2</span>Trois ddl par nœud et fonctions d'Hermite</h3>
+    <div class="prose">
+      <p>u se traite comme dans la barre (linéaire). Pour w il faut respecter <strong>4 conditions</strong> : w et θ aux deux nœuds. Il faut donc un polynôme à 4 coefficients, une <strong>cubique</strong> :</p>
+      <div class="math-scroll">\[w(x) = N_1\,w_1 + N_2\,\theta_1 + N_3\,w_2 + N_4\,\theta_2\]</div>
+      <p>Clique une des quatre vignettes pour voir chaque fonction seule, ou règle les quatre ddl toi-même.</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="hm-svg" viewBox="0 0 680 250" role="img" aria-label="Déformée cubique de l'élément de poutre"></svg></div>
+      <div class="lab-body">
+        <div class="btns" id="hm-cards"></div>
+        <div class="controls">
+          <div class="ctl"><label for="hm-w1">w₁ <output id="hm-w1-out"></output></label><input id="hm-w1" type="range" min="-1" max="1" step="0.05" value="0.4"></div>
+          <div class="ctl"><label for="hm-t1">θ₁ <output id="hm-t1-out"></output></label><input id="hm-t1" type="range" min="-2" max="2" step="0.05" value="-1"></div>
+          <div class="ctl"><label for="hm-w2">w₂ <output id="hm-w2-out"></output></label><input id="hm-w2" type="range" min="-1" max="1" step="0.05" value="-0.3"></div>
+          <div class="ctl"><label for="hm-t2">θ₂ <output id="hm-t2-out"></output></label><input id="hm-t2" type="range" min="-2" max="2" step="0.05" value="0.5"></div>
+          <div class="btns"><button class="btn" type="button" id="hm-parts" aria-pressed="false">Montrer les 4 contributions</button></div>
+        </div>
+      </div>
+    </figure>
+    <div class="prose">
+      <div class="math-scroll">\[N_1 = 1 - 3\tfrac{x^2}{L^2} + 2\tfrac{x^3}{L^3} \quad N_2 = -x + 2\tfrac{x^2}{L} - \tfrac{x^3}{L^2} \quad N_3 = 3\tfrac{x^2}{L^2} - 2\tfrac{x^3}{L^3} \quad N_4 = \tfrac{x^2}{L} - \tfrac{x^3}{L^2}\]</div>
+    </div>
+    <div class="trap"><span class="tag">Piège de signe</span><p>Dans le cours, θ est positif dans le sens <strong>horaire</strong>, d'où \(\theta = -w_{,x}\). Une rotation positive au nœud 1 fait <em>descendre</em> la poutre (regarde N₂, qui part vers le bas). C'est aussi pour ça que \(M = -EI\,w_{,xx}\).</p></div>
+  </div>
+
+  <div class="sub" id="c-k">
+    <h3><span class="sid">C.3</span>Lire la matrice 6×6</h3>
+    <div class="prose">
+      <p>Même lecture que pour la barre : la <strong>colonne j</strong> donne les forces et moments à appliquer aux nœuds pour imposer le ddl j à 1, tous les autres à 0. Choisis un ddl.</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="kc-svg" viewBox="0 0 680 230" role="img" aria-label="Déformée unitaire de l'élément de poutre et efforts nodaux"></svg></div>
+      <div class="lab-body">
+        <div class="btns" id="kc-btns"></div>
+        <div class="mat-wrap"><table class="mat" id="kc-mat"></table></div>
+        <div class="status" id="kc-read"></div>
+      </div>
+    </figure>
+    <div class="takeaways">
+      <div><b>Deux mondes séparés</b>Les termes EA/L (membrane) ne touchent que u ; les termes en EI (flexion) que w et θ. Ils ne se mélangent pas dans le repère local.</div>
+      <div><b>Équilibre</b>Dans chaque colonne, les forces verticales s'annulent et les moments aussi (n'oublie pas le couple des forces).</div>
+      <div><b>Symétrique</b>[k] = [k]<sup>T</sup> : l'effet de j sur i égale l'effet de i sur j (réciprocité de Maxwell-Betti).</div>
+    </div>
+  </div>
+
+  <div class="sub" id="c-charges">
+    <h3><span class="sid">C.4</span>Charge répartie sur une poutre</h3>
+    <div class="prose">
+      <p>Même formule \(\{f_n\} = \int_0^L \{N\} f_z\, dx\), mais avec les 4 fonctions d'Hermite. Les fonctions des rotations (N₂, N₄) ne s'intègrent pas à zéro : la charge répartie donne aussi des <strong>moments</strong> aux nœuds.</p>
+      <div class="math-scroll">\[\langle f_n\rangle = \left\langle f_x\tfrac L2 \;\;\; f_z\tfrac L2 \;\;\; -f_z\tfrac{L^2}{12} \;\;\; f_x\tfrac L2 \;\;\; f_z\tfrac L2 \;\;\; f_z\tfrac{L^2}{12}\right\rangle\]</div>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage"><svg id="ch2-svg" viewBox="0 0 680 190" role="img" aria-label="Charge répartie transversale remplacée par forces et moments nodaux"></svg></div>
+      <div class="lab-body"><div class="btns"><button class="btn primary" id="ch2-go" type="button" aria-pressed="false">Concentrer aux nœuds</button></div></div>
+    </figure>
+  </div>
+
+  <div class="sub" id="c-console">
+    <h3><span class="sid">C.5</span>Console : quand la MEF est exacte, et quand elle ne l'est pas</h3>
+    <div class="prose">
+      <p>Les exemples 1 et 2 du cours : une poutre encastrée, chargée au bout ou sur toute sa longueur. Les résultats sont donnés en fractions de FL³/EI (ou qL⁴/EI).</p>
+    </div>
+    <figure class="lab" style="margin:0">
+      <div class="stage split">
+        <svg id="cs-w" viewBox="0 0 400 240" role="img" aria-label="Flèche exacte et éléments finis"></svg>
+        <svg id="cs-m" viewBox="0 0 400 240" role="img" aria-label="Moment fléchissant exact et éléments finis"></svg>
+      </div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Chargement">
+            <button class="btn" type="button" id="cs-p" aria-pressed="true">Force au bout</button>
+            <button class="btn" type="button" id="cs-q" aria-pressed="false">Charge répartie</button>
+          </div>
+          <div class="ctl"><label for="cs-n">Nombre d'éléments <output id="cs-n-out"></output></label><input id="cs-n" type="range" min="1" max="8" step="1" value="1"></div>
+        </div>
+        <div class="readout" id="cs-read"></div>
+        <div class="status" id="cs-msg"></div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="sub" id="c-global">
+    <h3><span class="sid">C.6</span>Repère global et conditions aux limites</h3>
+    <div class="prose">
+      <p>Pour une poutre inclinée de α, on tourne U et W comme pour la barre. La rotation θ ne change pas : elle se fait autour de l'axe perpendiculaire au plan, commun aux deux repères.</p>
+      <div class="math-scroll">\[\begin{Bmatrix}u_l\\ w_l\\ \theta\end{Bmatrix} = \underbrace{\begin{bmatrix}C & S & 0\\ -S & C & 0\\ 0 & 0 & 1\end{bmatrix}}_{[t]}\begin{Bmatrix}U\\ W\\ \theta\end{Bmatrix} \qquad [T] = \begin{bmatrix}[t] & [0]\\ [0] & [t]\end{bmatrix}\]</div>
+    </div>
+    <div class="compare">
+      <div>
+        <h4>Appuis</h4>
+        <dl>
+          <dt>encastrement</dt><dd>U = W = θ = 0</dd>
+          <dt>appui fixe</dt><dd>U = W = 0, θ libre</dd>
+          <dt>appui X</dt><dd>U = 0</dd>
+          <dt>appui Z</dt><dd>W = 0</dd>
+          <dt>appui incliné</dt><dd>tourner le nœud de θ, puis U′ = 0</dd>
+        </dl>
+      </div>
+      <div>
+        <h4>Couper en deux</h4>
+        <dl>
+          <dt>symétrie</dt><dd>sur l'axe : U = 0 et θ = 0, on garde la moitié de la charge (exemple 3, portique)</dd>
+          <dt>antisymétrie</dt><dd>sur l'axe : W = 0, θ libre (exemple 4)</dd>
+          <dt>gain</dt><dd>moitié moins de ddl, même résultat</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" id="c-portique">
+    <h3><span class="sid">C.7</span>Labo : le portique de levage</h3>
+    <div class="prose">
+      <p>Le portique du cours : traverse IPN220 de 8 m (A = 39,6 cm², I = 3060 cm⁴), poteaux en tube carré 100×100×3,2 de 5 m (A = 12,4 cm², I = 193,4 cm⁴), acier S235, charge de 250 kg au milieu. Par symétrie on garde la moitié : <strong>2 éléments, 3 nœuds, 9 ddl, 5 bloqués, 4 inconnues</strong>.</p>
+    </div>
+    <figure class="lab" style="margin:0" id="asm3"></figure>
+    <figure class="lab" style="margin:0">
+      <div class="stage split">
+        <svg id="pq-svg" viewBox="0 0 440 380" role="img" aria-label="Demi-portique déformé"></svg>
+        <div style="padding:14px; display:grid; gap:10px; align-content:center; min-width:0">
+          <div class="mat-wrap"><table class="mat" id="pq-tab"></table></div>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="controls">
+          <div class="ctl"><label for="pq-m">Charge levée <output id="pq-m-out"></output></label><input id="pq-m" type="range" min="0" max="1000" step="10" value="250"></div>
+          <div class="ctl"><label for="pq-amp">Amplification <output id="pq-amp-out"></output></label><input id="pq-amp" type="range" min="0" max="200" step="5" value="60"></div>
+        </div>
+        <div class="readout" id="pq-read"></div>
+        <div class="status good" id="pq-msg"></div>
+      </div>
+    </figure>
+    <div class="takeaways">
+      <div><b>Petits déplacements ?</b>3,6 mm de flèche pour 4 m de demi-traverse : oui.</div>
+      <div><b>Élasticité ?</b>σ max ≈ 16 MPa, très loin des 235 MPa de l'acier S235 : oui.</div>
+      <div><b>Résultante ?</b>R<sub>W1</sub> = F/2 = 1226 N : la réaction verticale reprend bien la demi-charge.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== D ===================================================== -->
+<section id="formulaire" class="chapter">
+  <div class="ch-head">
+    <div class="ch-letter">D</div>
+    <span class="src">Révision</span>
+    <div><h2>Formulaire et pièges</h2><p>Tout ce qu'il faut avoir en tête le jour de l'examen.</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sheet-grid">
+      <section>
+        <h4>Barre 1D</h4>
+        <div class="math-scroll">\[[k] = \frac{EA}{L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix} \quad \{f_n\} = f_x\frac L2\begin{Bmatrix}1\\1\end{Bmatrix}\]</div>
+        <div class="math-scroll">\[N = \frac{EA}{L}(u_2 - u_1) \qquad \sigma = \frac NA\]</div>
+      </section>
+      <section>
+        <h4>Barre 2D</h4>
+        <div class="math-scroll">\[[k]_g = \frac{EA}{L}\begin{bmatrix}[P]&-[P]\\-[P]&[P]\end{bmatrix} \quad [P] = \begin{bmatrix}c^2&cs\\cs&s^2\end{bmatrix}\]</div>
+        <p>c = ΔX/L, s = ΔY/L. Effort normal : N = (EA/L)·[c(U₂−U₁) + s(V₂−V₁)].</p>
+      </section>
+      <section>
+        <h4>Poutre 2D (local)</h4>
+        <div class="math-scroll">\[[k] = \begin{bmatrix}\frac{EA}{L}&0&0&-\frac{EA}{L}&0&0\\ &\frac{12EI}{L^3}&-\frac{6EI}{L^2}&0&-\frac{12EI}{L^3}&-\frac{6EI}{L^2}\\ &&\frac{4EI}{L}&0&\frac{6EI}{L^2}&\frac{2EI}{L}\\ &&&\frac{EA}{L}&0&0\\ &\text{sym}&&&\frac{12EI}{L^3}&\frac{6EI}{L^2}\\ &&&&&\frac{4EI}{L}\end{bmatrix}\]</div>
+        <p>ddl : u₁ w₁ θ₁ u₂ w₂ θ₂, θ positif horaire.</p>
+      </section>
+      <section>
+        <h4>Post-traitement poutre</h4>
+        <div class="math-scroll">\[N = EA\,u_{,x} \quad M = -EI\,w_{,xx} \quad T = M_{,x}\]</div>
+        <div class="math-scroll">\[\sigma_{xx} = \frac NA + z\frac MI \quad \text{(max en } z = \pm h/2)\]</div>
+        <p>Dans un élément : N constant, M linéaire, T constant.</p>
+      </section>
+      <section>
+        <h4>Toujours vrai</h4>
+        <div class="math-scroll">\[[k]_g = [T]^T[k]_l[T] \qquad \{f_n\}_g = [T]^T\{f_n\}_l\]</div>
+        <div class="math-scroll">\[[K'] \{U'\} = \{F'\} \qquad \{R\} = [K]\{U\} - \{F\}\]</div>
+        <p>Les réactions se calculent avec la matrice complète [K], pas la réduite.</p>
+      </section>
+      <section>
+        <h4>Valeurs exactes utiles</h4>
+        <p>Console, force F au bout : w = FL³/3EI, θ = FL²/2EI, M<sub>max</sub> = FL.</p>
+        <p>Console, charge q : w = qL⁴/8EI, θ = qL³/6EI, M<sub>max</sub> = qL²/2.</p>
+        <p>Bi-encastrée, charge q : w au milieu = qL⁴/384EI.</p>
+        <p>Barre pendue : u(L) = ρgL²/2E, σ<sub>max</sub> = ρgL.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Les pièges classiques</h3>
+    <ul class="traps">
+      <li><b>« Les nœuds sont exacts »</b>Vrai pour la barre 1D, et pour la poutre aux nœuds. À l'intérieur des éléments (σ barre, M sous charge répartie), c'est approché.</li>
+      <li><b>σ en escalier</b>Dans un élément de barre, σ est constante. Pour capter une contrainte qui varie, il faut raffiner le maillage.</li>
+      <li><b>Matrice singulière</b>Mécanisme interne ou appuis insuffisants. Avant de résoudre, vérifie que la structure ne peut ni glisser, ni tourner, ni se plier sans effort.</li>
+      <li><b>Le signe de θ</b>θ positif horaire, θ = −w<sub>,x</sub>, M = −EI w<sub>,xx</sub>. Les moments nodaux de la charge répartie sont −f<sub>z</sub>L²/12 puis +f<sub>z</sub>L²/12.</li>
+      <li><b>c et s</b>Toujours ΔX/L et ΔY/L depuis le nœud 1 vers le nœud 2 de l'élément. Un sens différent change les signes de c et s, pas [P].</li>
+      <li><b>Barrer, pas effacer</b>On barre lignes et colonnes des ddl bloqués pour résoudre, mais on les garde pour calculer les réactions ensuite.</li>
+      <li><b>Symétrie</b>Sur l'axe : U = 0 et θ = 0, et on ne met que la moitié de la charge sur le nœud de l'axe.</li>
+      <li><b>Vérifier les hypothèses</b>Petits déplacements (u ≪ L) et élasticité linéaire (σ &lt; limite élastique) : le cours pose la question à chaque exemple.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================================================== E ===================================================== -->
+<section id="entrainement" class="chapter">
+  <div class="ch-head">
+    <div class="ch-letter">E</div>
+    <span class="src">TD 1 à 4 · médians A24 et A25</span>
+    <div><h2>Entraînement : TD et médians</h2><p>Chaque exercice avec sa figure, la déformée recalculée en direct, et la correction à dévoiler question par question.</p></div>
+  </div>
+
+  <div class="sub" id="e-methode">
+    <h3><span class="sid">E.0</span>Ce que le médian demande, à chaque fois</h3>
+    <div class="prose">
+      <p>Les deux médians ont la même structure : un <strong>treillis de barres 2D</strong> (≈ 7 pts), une <strong>poutre en flexion</strong> réduite par symétrie ou antisymétrie (≈ 7,5 pts), puis un problème de <strong>choix de modélisation</strong> (3 à 5 pts). Le sujet fournit une page « Notes de cours » avec [k]<sub>g</sub> barre, [k]<sub>l</sub> poutre, {f<sub>n</sub>} et les N<sub>i,xx</sub> : inutile de les apprendre par cœur, il faut savoir <em>s'en servir</em>.</p>
+    </div>
+    <div class="exam-flow">
+      <div><b>1 · Modéliser</b><span>Géométrie (1 direction privilégiée), maillage (n segments à 2 nœuds), type d'EF et ddl/nœud, matériau et section de chaque élément, longueurs, CL, symétrie, chargement. Une liste, un schéma.</span></div>
+      <div><b>2 · Matrices effectives</b><span>c, s pour chaque élément, [P], puis on ne garde que les lignes/colonnes des ddl libres.</span></div>
+      <div><b>3 · Assembler et charger</b><span>Compléter [K]<sub>eff</sub>, écrire {F}<sub>eff</sub> (charges équivalentes « intuitives » : moitié à chaque nœud, ±fL²/12).</span></div>
+      <div><b>4 · Déformée</b><span>À partir des valeurs données : barres qui restent droites (treillis), courbe respectant w et θ aux nœuds (poutre).</span></div>
+      <div><b>5 · N, M, σ</b><span>N = EA(u₂−u₁)/L avec u = cU + sV ; M = −EI w,<sub>xx</sub> ; σ = N/A + zM/I. Préciser traction/compression et la répartition dans la section.</span></div>
+      <div><b>6 · Commenter</b><span>Exact ou approché ? Raffiner ? Hypothèses (petits déplacements, élasticité) ? Rôle des barres à effort nul ?</span></div>
+    </div>
+    <div class="trap"><span class="tag">Convention</span><p>Dans les sujets, α est l'angle de X vers x compté dans le <strong>sens horaire</strong>, et \(u = \cos\alpha\,U - \sin\alpha\,V\). C'est la même chose que \(u = cU + sV\) avec c = ΔX/L et s = ΔY/L. Exemple : une barre qui monte verticalement a α = −90° (ou 270°) dans le sujet, et s = +1 avec c, s.</p></div>
+    <div class="btns"><button class="btn" type="button" id="e-reveal-all">Tout dévoiler</button><button class="btn" type="button" id="e-hide-all">Tout masquer</button></div>
+  </div>
+
+  <!-- ---------------- TD1 ---------------- -->
+  <article class="ex sub" id="ex-td1">
+    <header class="ex-head"><span class="ex-tag">TD 1 · Barre 1D</span><h3>Arbre en traction</h3><span class="ex-src">corrigé fourni</span></header>
+    <div class="ex-grid">
+      <div class="ex-fig stage"><svg id="fig-td1" viewBox="0 0 320 330" role="img" aria-label="Arbre vertical en deux tronçons, encastré en haut, masse en bas"></svg></div>
+      <div class="ex-statement">
+        <p>Arbre vertical encastré en haut. Tronçon 1 : longueur 2L, section 2A, module 3E, soumis à son poids réparti ρg. Tronçon 2 : longueur L, section A, module E. Une masse M pend au bout.</p>
+        <p class="data">L = 1 m · d = 100 mm → A = 7850 mm² · E = 70 000 MPa · ρ = 600 kg/m · M = 1000 kg · g = 9,81 m/s²</p>
+      </div>
+    </div>
+    <div class="ex-qs">
+      <details><summary><b>Q1</b>Proposer un modèle EF (géométrie, maillage, type d'EF, matériau, CL, chargement).</summary><div class="ans">
+        <p>1 direction privilégiée ; <strong>2 éléments de barre 1D</strong>, un par tronçon (E et A changent, il faut un nœud à la jonction) ; 3 nœuds, 1 ddl u par nœud.</p>
+        <p>Élément 1 : 3E, 2A, 2L. Élément 2 : E, A, L. CL : U₁ = 0.</p>
+        <p>Chargement : le poids réparti du tronçon 1 vaut ρg·2L au total, donc <strong>ρgL au nœud 1 et ρgL au nœud 2</strong> ; Mg au nœud 3.</p>
+      </div></details>
+      <details><summary><b>Q2</b>Construire la matrice de rigidité et le vecteur chargement.</summary><div class="ans">
+        <div class="math-scroll">\[[k]^1 = \frac{3E\cdot 2A}{2L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix} = \frac{EA}{L}\begin{bmatrix}3&-3\\-3&3\end{bmatrix} \qquad [k]^2 = \frac{EA}{L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix}\]</div>
+        <div class="math-scroll">\[[K] = \frac{EA}{L}\begin{bmatrix}3&-3&0\\-3&3+1&-1\\0&-1&1\end{bmatrix} \qquad \{F\} = g\begin{Bmatrix}\rho L\\ \rho L\\ M\end{Bmatrix}\]</div>
+        <p>Le « 3+1 » sur u₂ : c'est le nœud partagé, les deux éléments s'additionnent.</p>
+      </div></details>
+      <details><summary><b>Q3</b>Résoudre le système effectif. Interpréter les déplacements.</summary><div class="ans">
+        <p>On barre la ligne et la colonne de u₁ :</p>
+        <div class="math-scroll">\[\frac{EA}{L}\begin{bmatrix}4&-1\\-1&1\end{bmatrix}\begin{Bmatrix}u_2\\u_3\end{Bmatrix} = g\begin{Bmatrix}\rho L\\ M\end{Bmatrix} \;\Rightarrow\; u_2 = \frac{L(\rho g L + Mg)}{3EA},\quad u_3 = \frac{L(\rho g L + 4Mg)}{3EA}\]</div>
+        <p>A.N. : u₂ = 9,5·10⁻³ mm et u₃ = 2,7·10⁻² mm. Les déplacements nodaux d'un modèle de barres 1D sont <strong>exacts</strong> (cf. A.7) et minuscules : la rigidité est largement suffisante.</p>
+      </div></details>
+      <details><summary><b>Q4</b>Calculer N et σ dans chaque élément. Interpréter.</summary><div class="ans">
+        <div class="math-scroll">\[N^1 = 3E\cdot 2A\,\frac{u_2 - u_1}{2L} = \rho g L + Mg = 15\,696\ \text{N} \qquad N^2 = EA\,\frac{u_3-u_2}{L} = Mg = 9810\ \text{N}\]</div>
+        <p>σ¹ = N¹/2A ≈ 1,0 MPa et σ² = Mg/A ≈ 1,25 MPa (le corrigé arrondit à 1 MPa). Contraintes très faibles : la résistance est vérifiée.</p>
+        <p><strong>Interprétation :</strong> dans le tronçon 1 le vrai N varie linéairement de 2ρgL + Mg (en haut) à Mg (en bas). L'élément donne une valeur constante, <strong>exactement celle du milieu</strong> : ρgL + Mg. Dans le tronçon 2 il n'y a pas de charge répartie, N = Mg est exact.</p>
+      </div></details>
+    </div>
+  </article>
+
+  <!-- ---------------- TD2 ---------------- -->
+  <article class="ex sub" id="ex-td2">
+    <header class="ex-head"><span class="ex-tag">TD 2 · Barres 2D</span><h3>Passerelle en treillis (examen A22)</h3><span class="ex-src">corrigé fourni</span></header>
+    <div class="ex-grid wide">
+      <div class="ex-fig stage">
+        <svg id="fig-td2" viewBox="0 0 680 260" role="img" aria-label="Demi-passerelle en treillis, déformée calculée"></svg>
+      </div>
+      <div class="ex-statement">
+        <p>13 tubes articulés, longueur 8L, hauteur 2L, appuis aux nœuds 1 et 8, force F vers −Y au nœud 4. On modélise la <strong>moitié gauche</strong> (en couleur), l'autre moitié est grisée.</p>
+        <p class="data">L = 1 m · tube Ø 40 × 2 mm, A = 2,3876 cm² · E = 210 GPa · F = 20 000 N</p>
+        <div class="ctl"><label for="fig-td2-amp">Déformée <output id="fig-td2-amp-out"></output></label><input id="fig-td2-amp" type="range" min="0" max="100" step="1" value="70"></div>
+      </div>
+    </div>
+    <div class="readout ex-read" id="fig-td2-read"></div>
+    <div class="ex-qs">
+      <details><summary><b>Q1</b>Modéliser la moitié avec 7 éléments (type d'EF, ddl, sections, longueurs, CL, symétrie, chargement).</summary><div class="ans">
+        <p>1 direction privilégiée ; 7 éléments de <strong>barre 2D</strong> à 2 nœuds (tubes élancés, liaisons articulées, charges aux nœuds) ; 2 ddl par nœud : U, V.</p>
+        <p>Éléments 1 et 4 : E, A, 2L · éléments 2, 5, 6 : E, A, L√5 · élément 3 : E, A, L · <strong>élément 7 : E, A/2, 2L</strong> (il est coupé en deux par l'axe de symétrie, chaque moitié de modèle n'en garde que la moitié).</p>
+        <p>CL : U₁ = V₁ = 0. Symétrie : <strong>U₄ = U₅ = 0</strong> (les nœuds sur l'axe ne bougent pas horizontalement). Chargement : <strong>F/2</strong> au nœud 4 vers −Y.</p>
+      </div></details>
+      <details><summary><b>Q2</b>Matrices de rigidité effectives des éléments 1 et 7 dans le repère global.</summary><div class="ans">
+        <p>Élément 1 (1→2) : horizontal, c = 1, s = 0, longueur 2L. Le nœud 1 est bloqué, il reste U₂, V₂ :</p>
+        <div class="math-scroll">\[[k]^1_{g,\text{eff}} = \frac{EA}{2L}\begin{bmatrix}1&0\\0&0\end{bmatrix} \quad (U_2, V_2)\]</div>
+        <p>Élément 7 (4→5) : vertical vers le haut, c = 0, s = 1 (α = −90° dans la convention du sujet), section A/2, longueur 2L. U₄ et U₅ sont bloqués, il reste V₄, V₅ :</p>
+        <div class="math-scroll">\[[k]^7_g = \frac{EA}{4L}\begin{bmatrix}0&0&0&0\\0&1&0&-1\\0&0&0&0\\0&-1&0&1\end{bmatrix} \;\Rightarrow\; [k]^7_{g,\text{eff}} = \frac{EA}{4L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix}\quad (V_4, V_5)\]</div>
+      </div></details>
+      <details><summary><b>Q3</b>Système effectif : quelle propriété doit avoir [K]<sub>eff</sub> ? Quels mouvements rigides sont supprimés ?</summary><div class="ans">
+        <p>[K]<sub>eff</sub>{U}<sub>eff</sub> = {F}<sub>eff</sub> avec 6 inconnues (U₂, V₂, U₃, V₃, V₄, V₅). [K]<sub>eff</sub> doit être <strong>inversible</strong> : aucun mouvement de corps rigide possible.</p>
+        <p>L'appui au nœud 1 supprime les 2 translations (X et Y). Les conditions de symétrie suppriment la <strong>rotation</strong> dans le plan.</p>
+      </div></details>
+      <details><summary><b>Q4</b>Tracer la déformée avec U₂ = 0 ; U₃ = 1,9 ; V₂ = V₃ = −9,4 ; V₄ = −13,2 ; V₅ = −11,2 (en FL/EA).</summary><div class="ans">
+        <p>Voir la figure ci-dessus : le solveur de la page retrouve exactement ces valeurs. Pour un treillis, seule la membrane est modélisée : <strong>les barres restent droites</strong>, on déplace les nœuds et on les relie.</p>
+      </div></details>
+      <details><summary><b>Q5</b>Effort normal dans l'élément 7, puis contrainte au centre.</summary><div class="ans">
+        <p>Avec c = 0, s = 1 : u₁ = V₄ = −13,2 FL/EA et u₂ = V₅ = −11,2 FL/EA.</p>
+        <div class="math-scroll">\[N = \frac{EA}{2}\cdot\frac{-11{,}2 + 13{,}2}{2L}\cdot\frac{FL}{EA} = \frac F2 \qquad \sigma_{xx} = \frac{N}{A/2} = \frac FA = \frac{20\,000}{238{,}76} = 83{,}8\ \text{MPa}\]</div>
+        <p>σ est constante dans la section et le long de l'élément (traction).</p>
+      </div></details>
+      <details><summary><b>Q6</b>σ = −93,6 MPa dans 2 et 6, nulle dans 1, 3, 4, 5 : rôle des profilés ?</summary><div class="ans">
+        <p>L'élément 7 travaille en <strong>traction</strong>, les éléments 2 et 6 en <strong>compression</strong> (ils forment l'arc qui porte la charge). Les éléments 1, 3, 4, 5 ne transmettent aucun effort pour ce chargement, mais ils sont indispensables à la <strong>stabilité</strong> : sans eux le treillis serait un mécanisme et [K] serait singulière.</p>
+      </div></details>
+    </div>
+  </article>
+
+  <!-- ---------------- TD3 ---------------- -->
+  <article class="ex sub" id="ex-td3">
+    <header class="ex-head"><span class="ex-tag">TD 3 · Poutre 2D</span><h3>Poutre continue A-B-C-D-E</h3><span class="ex-src">corrigé fourni</span></header>
+    <div class="ex-grid wide">
+      <div class="ex-fig stage"><svg id="fig-td3" viewBox="0 0 680 300" role="img" aria-label="Poutre continue, déformée et moment fléchissant"></svg></div>
+      <div class="ex-statement">
+        <p>Poutre de longueur 4L, encastrée en A et E, appuis simples en B et D. Charge répartie f<sub>z</sub> = −f sur toute la longueur et force F = −fL au milieu C.</p>
+        <p class="data">E, I, L, f (f &gt; 0) · section rectangulaire b × h</p>
+        <div class="ctl"><label for="fig-td3-amp">Déformée <output id="fig-td3-amp-out"></output></label><input id="fig-td3-amp" type="range" min="0" max="100" step="1" value="70"></div>
+      </div>
+    </div>
+    <div class="readout ex-read" id="fig-td3-read"></div>
+    <div class="ex-qs">
+      <details><summary><b>Q1</b>Minimum d'éléments : connectivités, ddl, CL, réactions, ddl effectifs.</summary><div class="ans">
+        <p>Poutre droite chargée seulement suivant z : <strong>flexion pure</strong>, élément de poutre à 2 ddl/nœud (W, θ), sans membrane. Problème symétrique : on étudie A → C.</p>
+        <p>Maillage minimal : <strong>2 éléments</strong> (A-B, B-C), 3 nœuds, 6 ddl. CL : W₁ = θ₁ = 0 (encastrement), W₂ = 0 (appui). Symétrie : θ₃ = 0. Réactions possibles : R<sub>W1</sub>, R<sub>θ1</sub>, R<sub>W2</sub>, R<sub>θ3</sub>. <strong>2 ddl effectifs : θ₂ et W₃.</strong></p>
+      </div></details>
+      <details><summary><b>Q2</b>Matrice de rigidité et charges équivalentes de chaque élément.</summary><div class="ans">
+        <p>On retire les lignes/colonnes 1 et 4 (membrane) de la matrice du cours. x = X pour les deux éléments, pas de rotation :</p>
+        <div class="math-scroll">\[[k_1]_g = [k_2]_g = \frac{EI}{L^3}\begin{bmatrix}12&-6L&-12&-6L\\ &4L^2&6L&2L^2\\ &&12&6L\\ \text{sym}&&&4L^2\end{bmatrix} \qquad \langle f_n\rangle = \left\langle -\tfrac{fL}{2}\;\; \tfrac{fL^2}{12}\;\; -\tfrac{fL}{2}\;\; -\tfrac{fL^2}{12}\right\rangle\]</div>
+      </div></details>
+      <details><summary><b>Q3</b>Assembler et réduire au système 2×2.</summary><div class="ans">
+        <div class="math-scroll">\[[K'] = \frac{EI}{L^3}\begin{bmatrix}8L^2 & 6L\\ 6L & 12\end{bmatrix}\begin{matrix}\theta_2\\W_3\end{matrix} \qquad \langle F'\rangle = \langle 0 \;\;\; -fL\rangle\]</div>
+        <p>8L² = 4L² + 4L² (θ₂ partagé). Sur θ₂ les moments fL²/12 des deux éléments s'annulent. Sur W₃ : −fL/2 (élément 2) − fL/2 (moitié de F) = −fL.</p>
+      </div></details>
+      <details><summary><b>Q4</b>Résoudre et tracer la déformée.</summary><div class="ans">
+        <div class="math-scroll">\[\theta_2 = \frac{1}{10}\frac{fL^3}{EI} \qquad W_3 = -\frac{2}{15}\frac{fL^4}{EI}\]</div>
+        <p>θ₂ &gt; 0 (horaire) : la poutre remonte entre A et B puis plonge vers C (voir figure).</p>
+      </div></details>
+      <details><summary><b>Q5</b>Réactions d'appui.</summary><div class="ans">
+        <div class="math-scroll">\[\{R\} = [K]\{U\} - \{F\} \;\Rightarrow\; R_{W1} = -\tfrac{6}{60}fL,\;\; R_{\theta1} = \tfrac{7}{60}fL^2,\;\; R_{W2} = \tfrac{156}{60}fL,\;\; R_{\theta3} = -\tfrac{31}{60}fL^2\]</div>
+        <p>Vérification : −6/60 + 156/60 − 2 − 1/2 = 0 ✓ (charge répartie 2fL + demi-force fL/2).</p>
+      </div></details>
+      <details><summary><b>Q6</b>M et T dans chaque élément.</summary><div class="ans">
+        <p>\(M = -EI\,w_{,xx}\), \(T = M_{,x}\), avec les dérivées secondes des fonctions d'Hermite :</p>
+        <div class="math-scroll">\[\text{élt 1 : } M = \tfrac{fL}{5}(3x - L),\; T = \tfrac35 fL \qquad \text{élt 2 : } M = \tfrac{fL}{5}(2L - 5x),\; T = -fL\]</div>
+        <p>M est linéaire par élément (alors que le vrai M est parabolique sous charge répartie) : c'est une approximation.</p>
+      </div></details>
+      <details><summary><b>Q7</b>Contrainte σ<sub>xx</sub> maximale et sa position.</summary><div class="ans">
+        <p>Flexion pure : \(\sigma_{xx} = z\,M/I = 12zM/(bh^3)\). Maximum là où |M| est maximal (au centre C, |M| = 3fL²/5) et en peau (z = ±h/2) :</p>
+        <div class="math-scroll">\[\sigma_{xx,\max} = \mp\frac{18}{5}\frac{fL^2}{bh^2}\]</div>
+        <p>Compression en peau supérieure, traction en peau inférieure, cohérent avec la déformée.</p>
+      </div></details>
+    </div>
+  </article>
+
+  <!-- ---------------- TD4 ---------------- -->
+  <article class="ex sub" id="ex-td4">
+    <header class="ex-head"><span class="ex-tag">TD 4 · Poutres 2D</span><h3>Passerelle en poutres + château d'eau (examen A22)</h3><span class="ex-src warn">pas de corrigé fourni : éléments de réponse proposés</span></header>
+    <div class="ex-statement prose">
+      <p>Même passerelle que le TD2, mais les liaisons sont <strong>rigides</strong> et la charge est répartie : f<sub>z</sub> = −f sur le bord inférieur 1-8. Valeurs du TD2, f = 2500 N/m, I = 4,3216 cm⁴.</p>
+    </div>
+    <div class="ex-qs">
+      <details><summary><b>Q1</b>Modéliser la moitié avec 7 éléments dans le plan (X, Z).</summary><div class="ans">
+        <p>Même maillage que le TD2, mais <strong>éléments de poutre 2D</strong> (liaisons rigides, charge répartie qui fait fléchir les barres) : 3 ddl par nœud U, W, θ.</p>
+        <p>Éléments 1 et 4 : E, A, I, 2L · 2, 5, 6 : E, A, I, L√5 · 3 : E, A, I, L · <strong>7 : E, A/2, I/2, 2L</strong> (coupé par l'axe).</p>
+        <p>CL : U₁ = W₁ = θ₁ = 0 (encastrement). Symétrie : <strong>U = 0 et θ = 0</strong> aux nœuds 4 et 5. Chargement : f<sub>z</sub> = −f sur les éléments 1 et 4.</p>
+      </div></details>
+      <details><summary><b>Q2</b>Charges équivalentes effectives de l'élément 1, de façon intuitive.</summary><div class="ans">
+        <p>Élément 1 de longueur 2L : charge totale −f·2L, la moitié à chaque nœud, et les moments d'encastrement parfait \(\mp f_z \ell^2/12\) avec ℓ = 2L :</p>
+        <div class="math-scroll">\[\langle f_n\rangle = \left\langle 0\;\; -fL\;\; \tfrac{fL^2}{3}\;\; 0\;\; -fL\;\; -\tfrac{fL^2}{3}\right\rangle \;\Rightarrow\; \langle f_n\rangle_{\text{eff}} = \left\langle 0\;\; -fL\;\; -\tfrac{fL^2}{3}\right\rangle \;(U_2, W_2, \theta_2)\]</div>
+        <p>Le nœud 1 étant encastré, seuls les termes du nœud 2 sont effectifs.</p>
+      </div></details>
+      <details><summary><b>Q3</b>Avec W₂ = −2,8 mm et θ₂ = −0,8·10⁻³ rad, exprimer M sur l'élément 1, M au nœud 1 et σ de flexion.</summary><div class="ans">
+        <p>w₁ = θ₁ = 0, longueur ℓ = 2 m. Avec les dérivées du cours (x en m) :</p>
+        <div class="math-scroll">\[M = -EI\left(N_{3,xx}W_2 + N_{4,xx}\theta_2\right) = -EI\left(\tfrac{6}{\ell^3}(\ell - 2x)W_2 + \tfrac{2}{\ell^2}(\ell - 3x)\theta_2\right) = EI\,(5{,}0 - 5{,}4\,x)\cdot 10^{-3}\]</div>
+        <p>Au nœud 1 : M = 5·10⁻³ EI = 5·10⁻³ × 2,1·10¹¹ × 4,3216·10⁻⁸ ≈ <strong>45 N·m</strong>.</p>
+        <p>σ = ±M·(d/2)/I = ±45,4 × 0,02 / 4,3216·10⁻⁸ ≈ <strong>±21 MPa</strong> : traction en peau supérieure, compression en peau inférieure près de l'encastrement.</p>
+      </div></details>
+      <details><summary><b>Château d'eau</b>Modèle 1D puis modèle 3D du fût (25 m, Ø 5 m, paroi 0,25 m, 1000 t d'eau).</summary><div class="ans">
+        <p><strong>1D :</strong> 1 direction privilégiée (fût élancé chargé suivant son axe). Quelques éléments de <strong>barre 1D</strong> (1 ddl u par nœud), section annulaire A = π(5² − 4,5²)/4 ≈ 3,7 m². CL : u = 0 à la base (fondation). Chargement : Mg = 1000·10³ × 9,81 ≈ 9,8 MN en tête (plus le poids propre du fût, réparti).</p>
+        <p><strong>3D :</strong> maillage volumique de la paroi (hexaèdres ou tétraèdres), 3 ddl par nœud (u, v, w). CL : u = v = w = 0 sur les nœuds de la base. Chargement : Mg réparti sur la couronne supérieure (≈ 2,6 MPa). Avec la symétrie de révolution, on peut ne mailler qu'un quart avec déplacement normal nul sur les plans de coupe.</p>
+      </div></details>
+    </div>
+  </article>
+
+  <!-- ---------------- Médian A24 ---------------- -->
+  <article class="ex sub" id="ex-a24">
+    <header class="ex-head"><span class="ex-tag">Médian A24</span><h3>Treillis bois-alu, poutre antisymétrique, structure portuaire</h3><span class="ex-src">corrigé fourni</span></header>
+
+    <h4 class="pb">Problème I · Treillis de 4 profilés (7 pts)</h4>
+    <div class="ex-grid wide">
+      <div class="ex-fig stage"><svg id="fig-a24" viewBox="0 0 680 280" role="img" aria-label="Treillis de quatre barres, déformée calculée"></svg></div>
+      <div class="ex-statement">
+        <p>Barres 1 et 2 en bois (E, ρ), barres 3 et 4 en aluminium (4E, 3ρ), même aire A. Appuis fixes en 1 et 3, masse m suspendue au nœud 4.</p>
+        <p class="data">L = 1 m · A = 0,000239 m² · E = 17,5·10⁹ Pa · m = 100 kg</p>
+        <div class="ctl"><label for="fig-a24-amp">Déformée <output id="fig-a24-amp-out"></output></label><input id="fig-a24-amp" type="range" min="0" max="100" step="1" value="70"></div>
+      </div>
+    </div>
+    <div class="readout ex-read" id="fig-a24-read"></div>
+    <div class="ex-qs">
+      <details><summary><b>Q1</b>Modèle EF (1,5 pt).</summary><div class="ans">
+        <p>1 direction privilégiée ; 4 segments à 2 nœuds ; <strong>barre 2D</strong>, 2 ddl/nœud U, V. Éléments 1 et 2 : E, A, L√2. Éléments 3 et 4 : 4E, A, L. CL : U₁ = V₁ = U₃ = V₃ = 0. Chargement : F = mg au nœud 4 vers −Y.</p>
+      </div></details>
+      <details><summary><b>Q2</b>Matrices effectives des éléments 3 et 4 (1 pt).</summary><div class="ans">
+        <p>Élément 3 (2→3) vertical vers le haut : c = 0, s = 1. Seuls U₂, V₂ sont libres :</p>
+        <div class="math-scroll">\[[k]^3_{g,\text{eff}} = \frac{4EA}{L}\begin{bmatrix}0&0\\0&1\end{bmatrix} = \frac{EA}{L}\begin{bmatrix}0&0\\0&4\end{bmatrix} \quad (U_2, V_2)\]</div>
+        <p>Élément 4 (3→4) horizontal : c = 1, s = 0. Seuls U₄, V₄ sont libres :</p>
+        <div class="math-scroll">\[[k]^4_{g,\text{eff}} = \frac{EA}{L}\begin{bmatrix}4&0\\0&0\end{bmatrix} \quad (U_4, V_4)\]</div>
+      </div></details>
+      <details><summary><b>Q3</b>Compléter [K]<sub>eff</sub> et former {F}<sub>eff</sub> (1 pt).</summary><div class="ans">
+        <div class="math-scroll">\[[K]_{\text{eff}} = \frac{EA}{L}\begin{bmatrix}\frac{1}{\sqrt2} & 0 & \frac{-1}{2\sqrt2} & \frac{-1}{2\sqrt2}\\ 0 & \frac{1}{\sqrt2}+4 & \frac{-1}{2\sqrt2} & \frac{-1}{2\sqrt2}\\ \frac{-1}{2\sqrt2} & \frac{-1}{2\sqrt2} & \frac{1}{2\sqrt2}+4 & \frac{1}{2\sqrt2}\\ \frac{-1}{2\sqrt2} & \frac{-1}{2\sqrt2} & \frac{1}{2\sqrt2} & \frac{1}{2\sqrt2}\end{bmatrix}\begin{matrix}U_2\\V_2\\U_4\\V_4\end{matrix} \qquad \langle F_{\text{eff}}\rangle = \langle 0\;\;0\;\;0\;\;-mg\rangle\]</div>
+        <p>Les « +4 » viennent des barres alu 3 (sur V₂) et 4 (sur U₄).</p>
+      </div></details>
+      <details><summary><b>Q4</b>Déformée avec U₂ = −0,78 ; V₂ = −0,12 ; U₄ = 0,06 ; V₄ = −1,62 (10⁻³ m).</summary><div class="ans"><p>Voir la figure : le calcul de la page retrouve ces valeurs. Les barres restent droites.</p></div></details>
+      <details><summary><b>Q5</b>N et σ au centre des éléments 1 et 3, distribution dans la section (2,5 pts).</summary><div class="ans">
+        <p>Élément 1 (1→2) : c = √2/2, s = −√2/2. u₁ = 0, u₂ = c U₂ + s V₂ = (√2/2)(U₂ − V₂) = −0,47·10⁻³ m.</p>
+        <div class="math-scroll">\[N^1 = 17{,}5\cdot10^9 \times 0{,}000239 \times \frac{-0{,}47\cdot10^{-3}}{\sqrt2} \approx -1380\ \text{N} \qquad \sigma = N/A \approx -5{,}8\ \text{MPa (compression)}\]</div>
+        <p>Élément 3 (2→3) : u₁ = V₂ = −0,12·10⁻³ m, u₂ = 0 : N³ = 4EA(0 + 0,12·10⁻³)/L ≈ 2008 N, σ ≈ 8,4 MPa (traction).</p>
+        <p>σ est <strong>constante dans la section</strong> et le long de chaque barre.</p>
+        <p class="note">Avec les déplacements non arrondis, le solveur de la page donne N¹ = −mg√2 = −1387 N et N³ = 2mg = 1962 N : l'écart vient de l'arrondi de V₂ dans le sujet.</p>
+      </div></details>
+    </div>
+
+    <h4 class="pb">Problème II · Poutre et antisymétrie (7,5 pts)</h4>
+    <div class="ex-grid wide">
+      <div class="ex-fig stage"><svg id="fig-a24b" viewBox="0 0 680 300" role="img" aria-label="Poutre sur deux appuis chargée de façon antisymétrique, déformée et moment"></svg></div>
+      <div class="ex-statement">
+        <p>Poutre mince de longueur 2L sur deux appuis simples. f<sub>z</sub> = +f sur la première moitié, −f sur la seconde. Section b × h, module E.</p>
+        <div class="ctl"><label for="fig-a24b-amp">Déformée <output id="fig-a24b-amp-out"></output></label><input id="fig-a24b-amp" type="range" min="0" max="100" step="1" value="70"></div>
+      </div>
+    </div>
+    <div class="readout ex-read" id="fig-a24b-read"></div>
+    <div class="ex-qs">
+      <details><summary><b>Q1–Q2</b>Pourquoi la flexion pure ? Pourquoi un seul élément, et quelle condition au nœud 2 ?</summary><div class="ans">
+        <p>Poutre droite selon X, chargée seulement selon Z, aucune charge selon X : <strong>flexion pure</strong>. Le chargement est <strong>antisymétrique</strong> par rapport au milieu : un seul élément (nœuds 1-2) suffit, avec la condition d'antisymétrie <strong>W₂ = 0</strong> (θ₂ reste libre).</p>
+      </div></details>
+      <details><summary><b>Q3–Q4</b>Modèle, charges effectives, [K]<sub>eff</sub> et système (2 pts).</summary><div class="ans">
+        <p>ddl : W₁ = 0 (appui), θ₁ libre, W₂ = 0 (antisymétrie), θ₂ libre. Charges effectives : −fL²/12 sur θ₁ et +fL²/12 sur θ₂.</p>
+        <div class="math-scroll">\[[K]_{\text{eff}} = \frac{EI}{L^3}\begin{bmatrix}4L^2&2L^2\\2L^2&4L^2\end{bmatrix} = \frac{2EI}{L}\begin{bmatrix}2&1\\1&2\end{bmatrix} \qquad \frac{2EI}{L}\begin{bmatrix}2&1\\1&2\end{bmatrix}\begin{Bmatrix}\theta_1\\\theta_2\end{Bmatrix} = \frac{fL^2}{12}\begin{Bmatrix}-1\\1\end{Bmatrix}\]</div>
+      </div></details>
+      <details><summary><b>Q5</b>ddl effectifs et déformée (1 pt).</summary><div class="ans">
+        <div class="math-scroll">\[\theta_1 = -\frac{fL^3}{24EI} \qquad \theta_2 = \frac{fL^3}{24EI}\]</div>
+        <p>La poutre monte sur la moitié chargée vers le haut, descend sur l'autre : une sinusoïde qui passe par 0 au milieu (figure).</p>
+      </div></details>
+      <details><summary><b>Q6</b>M le long de l'élément, puis sur toute la structure (1,5 pt).</summary><div class="ans">
+        <div class="math-scroll">\[M = -EI\left(N_{2,xx}\theta_1 + N_{4,xx}\theta_2\right) = \frac{fL^2}{12}\ \text{(constant)}\]</div>
+        <p>Par antisymétrie, M = −fL²/12 sur la seconde moitié.</p>
+      </div></details>
+      <details><summary><b>Q7–Q8</b>Contrainte le long de la structure ; comparaison avec la RdM (2 pts).</summary><div class="ans">
+        <p>\(\sigma_{xx} = \frac{M}{I}z = \frac{fL^2}{12}\frac zI\) : constante le long de chaque moitié pour un z donné, linéaire dans la section, maximale en z = ±h/2.</p>
+        <p>La RdM donne un M exact en x² (parabolique). Avec 1 élément, M EF est constant par moitié : c'est une approximation grossière. Il faut <strong>raffiner le maillage</strong> pour approcher l'ordre 2 (comme en C.5).</p>
+      </div></details>
+    </div>
+
+    <h4 class="pb">Problème III · Structure portuaire (5 pts)</h4>
+    <div class="ex-statement prose"><p>3 tubes de longueur L = 8 m à section variable (Ø 300 mm aux extrémités, 500 mm au milieu, e = 2 mm), 2 haubans pleins Ø 20 mm, articulés en tête ; les tubes latéraux sont à ±45°. Charge : poids propre des tubes. Symétrie par rapport au tube central.</p></div>
+    <div class="ex-qs">
+      <details><summary><b>Q1</b>Effets (membrane, flexion) dans chaque tube (1 pt).</summary><div class="ans"><p>Poids selon −Z. Le tube vertical est chargé selon son axe : <strong>membrane seulement</strong>. Les tubes à ±45° reçoivent une composante axiale et une composante transverse : <strong>membrane + flexion</strong>.</p></div></details>
+      <details><summary><b>Q2</b>Modèle à 3 éléments dans le plan (X, Z) (1,5 pt).</summary><div class="ans">
+        <p>EF 1 (tube vertical, nœuds 1-2) : <strong>poutre 2D</strong> (U, W, θ), E, A<sub>e</sub>/2, I<sub>e</sub>/2 (sur l'axe de symétrie), longueur L. EF 2 (hauban, nœuds 2-3) : <strong>barre 2D</strong> (U, W), E, A<sub>h</sub>, L<sub>h</sub>. EF 3 (tube à 45°, nœuds 3-4) : poutre 2D, E, A<sub>e</sub>, I<sub>e</sub>, L.</p>
+        <p>CL (articulations) : U₁ = W₁ = U₄ = W₄ = 0. Symétrie : U₁ = θ₁ = U₂ = θ₂ = 0.</p>
+      </div></details>
+      <details><summary><b>Q3</b>Tube à 45° avec 3 éléments (0,5 pt).</summary><div class="ans"><p>3 éléments de longueur L/3 : (E, A<sub>e</sub>, I<sub>e</sub>), (E, A<sub>m</sub>, I<sub>m</sub>), (E, A<sub>e</sub>, I<sub>e</sub>). On approche la section variable par une section constante par morceaux.</p></div></details>
+      <details><summary><b>Q4–Q5</b>Modèle à 2 directions privilégiées du tube vertical ; effets pris en compte (1,5 pt).</summary><div class="ans">
+        <p>Géométrie : surface moyenne du demi-tube. Maillage : quadrangles à 4 nœuds. EF <strong>coque</strong>, épaisseur e, <strong>6 ddl/nœud</strong> : U, V, W, θ<sub>x</sub>, θ<sub>y</sub>, θ<sub>z</sub>. Symétrie sur le plan (Y, Z) : U = θ<sub>y</sub> = θ<sub>z</sub> = 0. CL en Z = 0 : U = V = W = 0.</p>
+        <p>La coque prend en compte membrane <strong>et</strong> flexion.</p>
+      </div></details>
+      <details><summary><b>Q6</b>Pourquoi pas d'élasticité 3D (0,5 pt) ?</summary><div class="ans"><p>Structure mince (e = 2 mm pour D ≈ 300-500 mm et L = 8 m). Un maillage volumique donnerait des éléments très plats ; il faudrait un maillage extrêmement fin pour converger.</p></div></details>
+    </div>
+  </article>
+
+  <!-- ---------------- Médian A25 ---------------- -->
+  <article class="ex sub" id="ex-a25">
+    <header class="ex-head"><span class="ex-tag">Médian A25</span><h3>Treillis sous poids propre, poutre symétrique, fuselage 3D</h3><span class="ex-src">corrigé fourni</span></header>
+
+    <h4 class="pb">Problème I · Treillis sous poids propre (7,5 pts)</h4>
+    <div class="ex-grid wide">
+      <div class="ex-fig stage"><svg id="fig-a25" viewBox="0 0 680 260" role="img" aria-label="Demi-treillis sous poids propre, déformée calculée"></svg></div>
+      <div class="ex-statement">
+        <p>9 tubes acier articulés, appuis fixes en 1 et 6. Le poids propre est modélisé par des forces ponctuelles aux nœuds. On modélise la moitié gauche (5 éléments).</p>
+        <p class="data">L = 1 m · d = 10 mm, e = 1 mm, A = 0,0000597 m² · E = 210 GPa · ρ<sub>V</sub> = 7850 kg/m³</p>
+        <div class="ctl"><label for="fig-a25-amp">Déformée <output id="fig-a25-amp-out"></output></label><input id="fig-a25-amp" type="range" min="0" max="100" step="1" value="70"></div>
+      </div>
+    </div>
+    <div class="readout ex-read" id="fig-a25-read"></div>
+    <div class="ex-qs">
+      <details><summary><b>Q1</b>Trois arguments pour l'élément de barre 2D (1 pt).</summary><div class="ans"><p>Structure plane (X, Y) ; profilés élancés (d ≪ L) ; liaisons articulées ; poids propre ramené à des forces ponctuelles aux nœuds.</p></div></details>
+      <details><summary><b>Q2</b>Modèle de la moitié à 5 éléments (1 pt).</summary><div class="ans">
+        <p>5 segments à 2 nœuds, barre 2D (U, V). Éléments 1 et 3 : E, A, L√2 · élément 2 : E, A, 2L · élément 4 : E, A, L · <strong>élément 5 : E, A/2, L</strong> (sur l'axe). CL : U₁ = V₁ = 0. Symétrie : <strong>U₂ = U₄ = 0</strong>.</p>
+      </div></details>
+      <details><summary><b>Q3</b>Charges équivalentes des éléments 2, 3 et 5 ; charge au nœud 2 (1 pt).</summary><div class="ans">
+        <p>Chaque barre de poids ρ<sub>V</sub>Ag·ℓ en donne la moitié à chacun de ses nœuds : élément 2 (2L) → −ρ<sub>V</sub>AgL par nœud ; éléments 1 et 3 (L√2) → −ρ<sub>V</sub>AgL√2/2 ; élément 4 (L) → −ρ<sub>V</sub>AgL/2 ; élément 5 (A/2, L) → −ρ<sub>V</sub>AgL/4.</p>
+        <div class="math-scroll">\[\{F_{\text{eff}}\} = -\frac{\rho_V A g L}{4}\begin{Bmatrix}5+2\sqrt2\\0\\2+4\sqrt2\\3\end{Bmatrix}\begin{matrix}V_2\\U_3\\V_3\\V_4\end{matrix}\]</div>
+      </div></details>
+      <details><summary><b>Q4–Q5</b>Matrices effectives des éléments 2, 4, 5 ; assemblage (1,5 pt).</summary><div class="ans">
+        <p>Élément 2 (1→2) horizontal : seul V₂ est libre et il n'a pas de rigidité selon V : [k]<sub>eff</sub> = 0. Élément 4 (3→4) horizontal : (EA/L)·1 sur U₃. Élément 5 (2→4) vertical, A/2 : (EA/2L)[1 −1 ; −1 1] sur (V₂, V₄).</p>
+        <div class="math-scroll">\[\frac{EA}{4L}\begin{bmatrix}\sqrt2+2&-\sqrt2&-\sqrt2&-2\\-\sqrt2&2\sqrt2+4&0&0\\-\sqrt2&0&2\sqrt2&0\\-2&0&0&2\end{bmatrix}\begin{Bmatrix}V_2\\U_3\\V_3\\V_4\end{Bmatrix} = -\frac{\rho_VAgL}{4}\begin{Bmatrix}5+2\sqrt2\\0\\2+4\sqrt2\\3\end{Bmatrix}\]</div>
+        <p>Solution : V₂ = −35,4a, U₃ = −7,3a, V₃ = −20,4a, V₄ = −36,9a avec a = ρ<sub>V</sub>gL²/E.</p>
+      </div></details>
+      <details><summary><b>Q6</b>Déformée (0,5 pt).</summary><div class="ans"><p>Voir la figure, recalculée avec ces valeurs.</p></div></details>
+      <details><summary><b>Q7–Q8</b>N et σ dans les éléments 2, 4 et 5 (2,5 pts).</summary><div class="ans">
+        <p>Élément 2 : U₁ = U₂ = 0 donc <strong>N = 0</strong>, σ = 0 (la barre ne porte rien).</p>
+        <p>Élément 4 : u₁ = U₃ = −7,3a, u₂ = U₄ = 0 : N = EA(0 + 7,3a)/L = 7,3ρ<sub>V</sub>AgL (traction), σ = 7,3ρ<sub>V</sub>gL ≈ 0,56 MPa.</p>
+        <p>Élément 5 (2→4, vers le bas) : u₁ = −V₂, u₂ = −V₄ : N = (EA/2)(−V₄ + V₂)/L = 3ρ<sub>V</sub>AgL/4 (traction), σ = N/(A/2) ≈ 0,12 MPa, constante dans la section.</p>
+      </div></details>
+    </div>
+
+    <h4 class="pb">Problème II · Poutre 4L et symétrie (7,5 pts)</h4>
+    <div class="ex-grid wide">
+      <div class="ex-fig stage"><svg id="fig-a25b" viewBox="0 0 680 300" role="img" aria-label="Poutre bi-encastrée sur appui central, déformée et moment"></svg></div>
+      <div class="ex-statement">
+        <p>Poutre mince de longueur 4L encastrée aux deux bouts, appui simple au centre. f<sub>z</sub> = +f sur la moitié centrale [L, 3L]. Section circulaire Ø d.</p>
+        <div class="ctl"><label for="fig-a25b-amp">Déformée <output id="fig-a25b-amp-out"></output></label><input id="fig-a25b-amp" type="range" min="0" max="100" step="1" value="70"></div>
+      </div>
+    </div>
+    <div class="readout ex-read" id="fig-a25b-read"></div>
+    <div class="ex-qs">
+      <details><summary><b>Q1–Q2</b>Deux éléments de flexion pure ? B21 ou B23 ?</summary><div class="ans">
+        <p>Poutre droite chargée selon Z seulement : flexion pure. Géométrie, matériau, liaisons et chargement symétriques en X = 2L : on garde la moitié, 2 éléments.</p>
+        <p>L'élément du cours a 4 variables nodales et des fonctions d'interpolation cubiques (base ⟨1 x x² x³⟩) : c'est l'équivalent de <strong>B23</strong> (interpolation cubique) dans Abaqus, pas de B21 (linéaire).</p>
+      </div></details>
+      <details><summary><b>Q3–Q4</b>Modèle, charges effectives, système (2 pts).</summary><div class="ans">
+        <p>W₁ = θ₁ = 0 (encastrement), W₃ = 0 (appui) et θ₃ = 0 (symétrie). Libres : W₂, θ₂. Seul l'élément 2 est chargé : f L/2 sur W₂ et −fL²/12 sur θ₂.</p>
+        <div class="math-scroll">\[\frac{EI}{L^3}\begin{bmatrix}24&0\\0&8L^2\end{bmatrix}\begin{Bmatrix}W_2\\\theta_2\end{Bmatrix} = \begin{Bmatrix}fL/2\\-fL^2/12\end{Bmatrix}\]</div>
+        <p>Les termes croisés −6L + 6L s'annulent : la matrice est diagonale.</p>
+      </div></details>
+      <details><summary><b>Q5</b>ddl effectifs et déformée (1 pt).</summary><div class="ans">
+        <div class="math-scroll">\[W_2 = \frac{fL^4}{48EI} \qquad \theta_2 = -\frac{fL^3}{96EI}\]</div>
+      </div></details>
+      <details><summary><b>Q6</b>Réactions R<sub>1Z</sub> et R<sub>3Z</sub> (1 pt).</summary><div class="ans">
+        <div class="math-scroll">\[R_{1Z} = \frac{EI}{L^3}\left(-12W_2 - 6L\theta_2\right) = -\frac{3fL}{16} \qquad R_{3Z} = -\frac{fL}{2} - R_{1Z} = -\frac{5fL}{16}\]</div>
+        <p>La somme des charges sur la demi-structure vaut fL/2 ; les réactions doivent faire −fL/2.</p>
+      </div></details>
+      <details><summary><b>Q7–Q8</b>M le long des éléments, σ en x = L de l'élément 2 (2 pts).</summary><div class="ans">
+        <div class="math-scroll">\[\text{élt 1 : } M = \frac{fL}{48}(9x - 5L) \qquad \text{élt 2 : } M = \frac{fL}{48}(8L - 15x)\]</div>
+        <p>Au milieu de la structure (x = L de l'élément 2) : M = −7fL²/48, σ = Mz/I linéaire dans la section, maximale en z = ±d/2 :</p>
+        <div class="math-scroll">\[\sigma^{\max}_{xx} = \mp\frac{7fL^2}{48}\frac{d}{2I} = \mp\frac{14fL^2}{3\pi d^3} \qquad I = \frac{\pi d^4}{64}\]</div>
+      </div></details>
+    </div>
+
+    <h4 class="pb">Problème III · Fuselage en treillis 3D (3 + 1,5 pts)</h4>
+    <div class="ex-statement prose"><p>73 tubes, 28 nœuds, barres 3D. Encastrement des 4 nœuds de l'extrémité étroite, 1000 N sur chacun des 4 nœuds de l'extrémité large. La zone du poste de pilotage n'est pas triangulée.</p></div>
+    <div class="ex-qs">
+      <details><summary><b>Q1</b>La matrice est singulière : pourquoi (1 pt) ?</summary><div class="ans"><p>Bloquer les 3 déplacements de 4 nœuds supprime les 6 mouvements de corps rigide. La singularité vient donc d'un <strong>mécanisme interne</strong> : la zone du poste de pilotage n'est pas triangulée, avec des liaisons articulées un rectangle peut se déformer sans allonger de barre (comme dans le labo B.3).</p></div></details>
+      <details><summary><b>Q2</b>Nombre de ddl effectifs après correction (0,5 pt).</summary><div class="ans"><p>28 nœuds dont 4 encastrés : 24 nœuds libres × 3 ddl (u, v, w) = <strong>72 ddl effectifs</strong>.</p></div></details>
+      <details><summary><b>Q3</b>Un autre élément de barre sans raffiner (1,5 pt).</summary><div class="ans"><p>La <strong>barre à 3 nœuds</strong> : u(x) = N₁u₁ + N₂u₂ + N₃u₃, base ⟨1 x x²⟩, fonctions d'interpolation <strong>quadratiques</strong>. Elle approche mieux le déplacement que la barre à 2 nœuds (linéaire).</p></div></details>
+      <details><summary><b>III-bis</b>Modéliser la peau en aluminium de 2 mm (1,5 pt).</summary><div class="ans">
+        <p>4,5 m × 1 m × 2 mm : épaisseur très petite devant les deux autres dimensions, donc <strong>2 directions privilégiées</strong>. Géométrie : surface moyenne. Maillage : quadrangles à 4 nœuds (quelques triangles à 3 nœuds dans les zones complexes). EF <strong>coque</strong> à 6 ddl par nœud (u, v, w, θ<sub>x</sub>, θ<sub>y</sub>, θ<sub>z</sub>).</p>
+        <p>Structure mince : on néglige le cisaillement transverse, le tenseur des contraintes est plan : \([\sigma] = \begin{bmatrix}\sigma_{xx}&\sigma_{xy}\\\sigma_{yx}&\sigma_{yy}\end{bmatrix}\).</p>
+      </div></details>
+    </div>
+  </article>
+
+  <div class="sub" id="e-reflexes">
+    <h3><span class="sid">E.7</span>Les réflexes qui reviennent dans les corrigés</h3>
+    <ul class="traps">
+      <li><b>Élément sur l'axe de symétrie</b>Il est coupé en deux : A/2 (et I/2 pour une poutre). TD2 élément 7, A25 élément 5, A24 PbIII tube central.</li>
+      <li><b>Conditions de symétrie</b>Barre : U = 0 sur l'axe. Poutre : U = 0 et θ = 0. Antisymétrie : W = 0, θ libre. Et la moitié de la charge appliquée sur l'axe.</li>
+      <li><b>Charges « intuitives »</b>Moitié de la charge totale de l'élément à chaque nœud ; pour une poutre, ajouter les moments ∓f<sub>z</sub>ℓ²/12. Attention à ℓ (2L, L√2…).</li>
+      <li><b>Matrices effectives</b>Calculer [P] avec c et s, puis garder seulement les lignes/colonnes des ddl libres. C'est plus rapide que de tout assembler puis barrer.</li>
+      <li><b>Barres à effort nul</b>Elles ne portent rien pour ce chargement, mais elles empêchent le mécanisme. Sans elles [K] est singulière.</li>
+      <li><b>Compter les ddl</b>nœuds × ddl par nœud − ddl bloqués (CL + symétrie). Le corrigé le demande souvent.</li>
+      <li><b>Choisir le type d'élément</b>Barre : élancé + articulé + charges aux nœuds. Poutre : liaisons rigides ou charge transverse. Coque : mince (2 directions). Volumique 3D : massif seulement.</li>
+      <li><b>Exact ou approché ?</b>Déplacements nodaux souvent exacts ; N et M dans l'élément approchés dès qu'il y a une charge répartie. Le remède est toujours le même : raffiner.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  Construit à partir des supports AM11 : C2 (barre 1D), C3 (barres 2D/3D), C4-C5 (poutre 2D), des TD 1 à 4 et des médians A24 et A25. Les solveurs de la page reproduisent les résultats du cours : U<sub>max</sub> = 2,4 mm pour le pont, W₃ = −3,58 mm pour le portique (−3,56 mm avec Abaqus).
+</footer>
+</main>
+<script>
+(function () {
+'use strict';
+
+/* =========================================================================
+   Outils
+   ========================================================================= */
+const NS = 'http://www.w3.org/2000/svg';
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (id) => document.getElementById(id);
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) {
+    if (k === 'text') e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]);
+  }
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+function fr(v, d = 2) {
+  if (!isFinite(v)) return '—';
+  if (Math.abs(v) < 0.5 * Math.pow(10, -d)) v = 0;
+  return v.toFixed(d).replace('.', ',').replace('-', '−');
+}
+const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+function sci(v, d = 2) {
+  if (v === 0 || !isFinite(v)) return fr(v, d);
+  let e = Math.floor(Math.log10(Math.abs(v)));
+  let m = v / Math.pow(10, e);
+  if (Math.abs(+m.toFixed(d)) >= 10) { m /= 10; e += 1; }
+  return fr(m, d) + '·10' + String(e).split('').map((c) => SUP[c]).join('');
+}
+function arrow(g, x1, y1, x2, y2, cls, head = 9) {
+  const L = Math.hypot(x2 - x1, y2 - y1);
+  if (L < 2) return;
+  const ux = (x2 - x1) / L, uy = (y2 - y1) / L;
+  const h = Math.min(head, L * 0.7);
+  const bx = x2 - ux * h, by = y2 - uy * h;
+  el('line', { x1, y1, x2: bx, y2: by, class: cls }, g);
+  el('polygon', { points: `${x2},${y2} ${bx - uy * h * 0.5},${by + ux * h * 0.5} ${bx + uy * h * 0.5},${by - ux * h * 0.5}`, class: cls + ' head' }, g);
+}
+/* Arc de moment : cw = sens horaire à l'écran (positif dans la convention du cours) */
+function momentArc(g, cx, cy, r, cw, cls) {
+  const sweep = Math.PI * 1.35;
+  const a0 = cw ? -Math.PI * 0.92 : -Math.PI * 0.08;
+  const a1 = cw ? a0 + sweep : a0 - sweep;
+  const p0 = [cx + r * Math.cos(a0), cy + r * Math.sin(a0)];
+  const p1 = [cx + r * Math.cos(a1), cy + r * Math.sin(a1)];
+  el('path', { d: `M${p0[0]},${p0[1]} A${r},${r} 0 1 ${cw ? 1 : 0} ${p1[0]},${p1[1]}`, class: cls }, g);
+  const tx = cw ? -Math.sin(a1) : Math.sin(a1), ty = cw ? Math.cos(a1) : -Math.cos(a1);
+  const nx = -ty, ny = tx;
+  const tip = [p1[0] + tx * 6, p1[1] + ty * 6], base = [p1[0] - tx * 4, p1[1] - ty * 4];
+  el('polygon', { points: `${tip[0]},${tip[1]} ${base[0] + nx * 5},${base[1] + ny * 5} ${base[0] - nx * 5},${base[1] - ny * 5}`, class: cls + ' head' }, g);
+}
+function wallV(g, x, y1, y2, side) { // mur hachuré vertical ; side = -1 à gauche de x
+  const w = 14;
+  el('rect', { x: side < 0 ? x - w : x, y: y1, width: w, height: y2 - y1, class: 'wall' }, g);
+}
+function ground(g, x, y, w) {
+  el('rect', { x: x - w / 2, y, width: w, height: 8, class: 'wall' }, g);
+}
+function pinSupport(g, x, y, roller) {
+  el('polygon', { points: `${x},${y + 5} ${x - 11},${y + 23} ${x + 11},${y + 23}`, class: 'support' }, g);
+  if (roller) {
+    el('circle', { cx: x - 6, cy: y + 28, r: 4.5, class: 'support' }, g);
+    el('circle', { cx: x + 6, cy: y + 28, r: 4.5, class: 'support' }, g);
+    ground(g, x, y + 33, 34);
+  } else ground(g, x, y + 23, 34);
+}
+function bindRange(id, fmt, onInput) {
+  const inp = $(id), out = $(id + '-out');
+  const upd = () => { if (out) out.textContent = fmt(+inp.value); onInput(+inp.value); };
+  inp.addEventListener('input', upd);
+  return { inp, upd, set(v) { inp.value = v; upd(); } };
+}
+function setPressed(btns, on) { btns.forEach((b) => b.setAttribute('aria-pressed', b === on ? 'true' : 'false')); }
+
+/* =========================================================================
+   Solveur linéaire (Gauss avec pivot) : renvoie null si [K'] est singulière
+   ========================================================================= */
+function solve(K, F) {
+  const n = F.length;
+  if (n === 0) return [];
+  let scale = 0;
+  for (let i = 0; i < n; i++) scale = Math.max(scale, Math.abs(K[i][i]));
+  const A = K.map((r, i) => [...r, F[i]]);
+  for (let c = 0; c < n; c++) {
+    let p = c;
+    for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    if (Math.abs(A[p][c]) < 1e-9 * (scale || 1)) return null;
+    [A[c], A[p]] = [A[p], A[c]];
+    for (let r = 0; r < n; r++) if (r !== c) {
+      const f = A[r][c] / A[c][c];
+      if (f !== 0) for (let k = c; k <= n; k++) A[r][k] -= f * A[c][k];
+    }
+  }
+  return A.map((r, i) => r[n] / r[i]);
+}
+function reduceSolve(K, F, fixed) {
+  const nd = F.length;
+  const free = [];
+  for (let d = 0; d < nd; d++) if (!fixed.includes(d)) free.push(d);
+  const u = solve(free.map((i) => free.map((j) => K[i][j])), free.map((i) => F[i]));
+  if (!u) return null;
+  const U = new Array(nd).fill(0);
+  free.forEach((d, i) => { U[d] = u[i]; });
+  const R = K.map((row, i) => row.reduce((s, v, j) => s + v * U[j], 0) - F[i]);
+  return { U, R };
+}
+
+/* =========================================================================
+   Treillis du pont (C3) : barres 2D
+   ========================================================================= */
+const TR = {
+  E: 210000, A: 2280,
+  nodes: [[0, 0], [3000, 0], [6000, 0], [9000, 0], [12000, 0], [3000, 3000], [6000, 3000], [9000, 3000]],
+  bars: [[0, 1], [1, 2], [2, 3], [3, 4], [5, 6], [6, 7], [1, 5], [2, 6], [3, 7], [0, 5], [5, 2], [2, 7], [7, 4]],
+  loaded: [1, 2, 3]
+};
+function trussSolve(removed, leftRoll, F) {
+  const nd = TR.nodes.length * 2;
+  const K = Array.from({ length: nd }, () => new Array(nd).fill(0));
+  TR.bars.forEach(([a, b], i) => {
+    if (removed.has(i)) return;
+    const dx = TR.nodes[b][0] - TR.nodes[a][0], dy = TR.nodes[b][1] - TR.nodes[a][1];
+    const L = Math.hypot(dx, dy), c = dx / L, s = dy / L, k = TR.E * TR.A / L;
+    const P = [[c * c, c * s], [c * s, s * s]];
+    const id = [2 * a, 2 * a + 1, 2 * b, 2 * b + 1];
+    for (let p = 0; p < 4; p++) for (let q = 0; q < 4; q++) {
+      const sg = ((p < 2) === (q < 2)) ? 1 : -1;
+      K[id[p]][id[q]] += sg * k * P[p % 2][q % 2];
+    }
+  });
+  const Fv = new Array(nd).fill(0);
+  TR.loaded.forEach((n) => { Fv[2 * n + 1] = -F; });
+  const fixed = leftRoll ? [1, 9] : [0, 1, 9];
+  const res = reduceSolve(K, Fv, fixed);
+  if (!res) return { ok: false, fixed };
+  const N = TR.bars.map(([a, b], i) => {
+    if (removed.has(i)) return 0;
+    const dx = TR.nodes[b][0] - TR.nodes[a][0], dy = TR.nodes[b][1] - TR.nodes[a][1];
+    const L = Math.hypot(dx, dy), c = dx / L, s = dy / L;
+    return TR.E * TR.A / L * ((res.U[2 * b] - res.U[2 * a]) * c + (res.U[2 * b + 1] - res.U[2 * a + 1]) * s);
+  });
+  return { ok: true, U: res.U, R: res.R, N, fixed };
+}
+function drawTruss(svg, o) {
+  clear(svg);
+  const { sc, x0, y0, amp, res, removed, leftRoll, F } = o;
+  const P = (i, def) => {
+    const [X, Y] = TR.nodes[i];
+    const ux = def && res.ok ? res.U[2 * i] * amp : 0, uy = def && res.ok ? res.U[2 * i + 1] * amp : 0;
+    return [x0 + (X + ux) * sc, y0 - (Y + uy) * sc];
+  };
+  const g0 = el('g', null, svg);
+  // supports
+  const [sx0, sy0] = P(0, false), [sx4, sy4] = P(4, false);
+  pinSupport(g0, sx0, sy0 + 4, leftRoll);
+  pinSupport(g0, sx4, sy4 + 4, true);
+  // fantôme
+  TR.bars.forEach(([a, b]) => {
+    const [x1, y1] = P(a, false), [x2, y2] = P(b, false);
+    el('line', { x1, y1, x2, y2, class: 'ghost', 'stroke-width': 1.2 }, g0);
+  });
+  let Nmax = 0;
+  if (res.ok) res.N.forEach((n) => { Nmax = Math.max(Nmax, Math.abs(n)); });
+  const gb = el('g', null, svg);
+  TR.bars.forEach(([a, b], i) => {
+    const [x1, y1] = P(a, true), [x2, y2] = P(b, true);
+    const off = removed.has(i);
+    let color = 'var(--ink)', w = 4;
+    if (!off && res.ok && Nmax > 0) {
+      const n = res.N[i], r = Math.abs(n) / Nmax;
+      color = r < 0.02 ? 'var(--muted)' : (n > 0 ? 'var(--tens)' : 'var(--comp)');
+      w = 2.5 + 6 * r;
+    }
+    const line = el('line', { x1, y1, x2, y2, class: 'tbar' + (off ? ' off' : ''), stroke: off ? 'var(--muted)' : color, 'stroke-width': off ? 3 : w }, gb);
+    if (o.interactive) {
+      const hit = el('line', { x1, y1, x2, y2, class: 'tbar-hit', tabindex: 0, role: 'button', 'aria-label': `Barre ${i + 1}, ${off ? 'retirée' : 'en place'}` }, gb);
+      hit.addEventListener('click', () => o.onToggle(i));
+      hit.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); o.onToggle(i); } });
+      hit.addEventListener('pointerenter', () => o.onHover(i));
+      hit.addEventListener('focus', () => o.onHover(i));
+      line.dataset.i = i;
+    }
+  });
+  // charges
+  const gl = el('g', null, svg);
+  if (F > 0) TR.loaded.forEach((n) => {
+    const [x, y] = P(n, true);
+    const len = 18 + 9 * F / 29430 * 3;
+    arrow(gl, x, y + 7, x, y + 7 + len, 'arr', 9);
+  });
+  // nœuds
+  TR.nodes.forEach((_, i) => { const [x, y] = P(i, true); el('circle', { cx: x, cy: y, r: 6, class: 'node' }, gl); });
+}
+
+/* ---------- En-tête : pont animé ---------- */
+(function hero() {
+  const svg = $('hero-svg');
+  const res = trussSolve(new Set(), false, 29430);
+  let t0 = null, running = true, visible = true;
+  const frame = (ts) => {
+    if (t0 === null) t0 = ts;
+    const ph = ((ts - t0) / 3400) % 1;
+    const amp = 420 * (0.5 - 0.5 * Math.cos(ph * 2 * Math.PI));
+    drawTruss(svg, { sc: 0.045, x0: 50, y0: 185, amp, res, removed: new Set(), leftRoll: false, F: 29430 });
+    if (running && visible) requestAnimationFrame(frame);
+  };
+  if (reduceMotion) {
+    drawTruss(svg, { sc: 0.045, x0: 50, y0: 185, amp: 380, res, removed: new Set(), leftRoll: false, F: 29430 });
+    return;
+  }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((ents) => {
+      const was = visible; visible = ents[0].isIntersecting;
+      if (visible && !was) requestAnimationFrame(frame);
+    }).observe(svg);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ---------- B.3 : labo du pont ---------- */
+(function trussLab() {
+  const svg = $('tr-svg');
+  const st = { removed: new Set(), leftRoll: false, F: 29430, amp: 250, hover: null };
+  const bFix = $('tr-fix'), bRoll = $('tr-roll');
+  let res;
+  function render() {
+    res = trussSolve(st.removed, st.leftRoll, st.F);
+    drawTruss(svg, {
+      sc: 560 / 12000, x0: 60, y0: 200, amp: st.amp, res, removed: st.removed, leftRoll: st.leftRoll, F: st.F,
+      interactive: true,
+      onToggle: (i) => { if (st.removed.has(i)) st.removed.delete(i); else st.removed.add(i); render(); },
+      onHover: (i) => { st.hover = i; info(); }
+    });
+    // étiquettes
+    el('text', { x: 60, y: 285, class: 'lbl-m', text: st.leftRoll ? 'rouleau' : 'appui fixe' }, svg);
+    el('text', { x: 620, y: 285, class: 'lbl-m end', text: 'rouleau' }, svg);
+    el('text', { x: 340, y: 28, class: 'lbl-m mid', text: '4 travées de 3 m · hauteur 3 m' }, svg);
+    const fixedN = res.fixed.length;
+    const nb = TR.bars.length - st.removed.size;
+    let umax = 0, smax = 0;
+    if (res.ok) {
+      for (let i = 0; i < TR.nodes.length; i++) umax = Math.max(umax, Math.hypot(res.U[2 * i], res.U[2 * i + 1]));
+      res.N.forEach((n) => { smax = Math.max(smax, Math.abs(n) / TR.A); });
+    }
+    $('tr-read').innerHTML =
+      `<div><span>Barres</span><b>${nb}</b></div>` +
+      `<div><span>ddl</span><b>16 − ${fixedN} = ${16 - fixedN} inconnues</b></div>` +
+      `<div><span>U max</span><b>${res.ok ? fr(umax, 2) + ' mm' : '∞'}</b></div>` +
+      `<div><span>σ max</span><b>${res.ok ? fr(smax, 1) + ' MPa' : '—'}</b></div>`;
+    info();
+  }
+  function info() {
+    const s = $('tr-status');
+    if (!res.ok) {
+      s.className = 'status bad';
+      s.textContent = st.leftRoll
+        ? "Pas de solution : [K′] est singulière. Avec deux rouleaux, rien n'empêche le pont de glisser horizontalement (mode rigide, structure hypostatique extérieurement)."
+        : "Pas de solution : [K′] est singulière. Sans cette barre, un panneau peut se déformer sans allonger aucune barre : c'est un mécanisme (hypostatique intérieurement).";
+      return;
+    }
+    s.className = 'status good';
+    if (st.hover !== null && !st.removed.has(st.hover)) {
+      const n = res.N[st.hover];
+      const kind = Math.abs(n) < 1 ? 'barre non chargée' : (n > 0 ? 'traction' : 'compression');
+      s.textContent = `Barre ${st.hover + 1} : N = ${fr(n / 1000, 1)} kN (${kind}), σ = N/A = ${fr(n / TR.A, 1)} MPa.`;
+    } else if (st.removed.size) {
+      s.textContent = 'La structure tient encore : elle est hyperstatique ou isostatique sans les barres retirées. Les efforts se redistribuent.';
+    } else {
+      s.textContent = 'Survole ou touche une barre pour lire son effort normal. Avec 3 t par nœud tu retrouves U max ≈ 2,4 mm et σ ≈ 27 MPa, comme le calcul Abaqus du cours.';
+    }
+  }
+  bindRange('tr-load', (v) => fr(v, 1) + ' t', (v) => { st.F = v * 1000 * 9.81; render(); });
+  bindRange('tr-amp', (v) => '×' + v, (v) => { st.amp = v; render(); });
+  bFix.addEventListener('click', () => { st.leftRoll = false; setPressed([bFix, bRoll], bFix); render(); });
+  bRoll.addEventListener('click', () => { st.leftRoll = true; setPressed([bFix, bRoll], bRoll); render(); });
+  $('tr-reset').addEventListener('click', () => { st.removed.clear(); render(); });
+  $('tr-load-out').textContent = '3,0 t'; $('tr-amp-out').textContent = '×250';
+  render();
+})();
+
+/* =========================================================================
+   A.2 PMEPT : masse + ressort
+   ========================================================================= */
+(function pmept() {
+  const svg = $('pm-svg');
+  const k = 10, F = 40, ustar = F / k;
+  let u = 1, anim = null;
+  const px = (uu) => 250 + uu / 6 * 400;
+  const py = (P) => 270 - (P + 250) / 440 * 245;
+  const Pi = (uu) => 0.5 * k * uu * uu - F * uu;
+  function path(fn) {
+    let d = '';
+    for (let i = 0; i <= 60; i++) { const uu = i / 10; d += (i ? 'L' : 'M') + px(uu).toFixed(1) + ',' + py(fn(uu)).toFixed(1); }
+    return d;
+  }
+  function render() {
+    clear(svg);
+    // plafond + ressort + masse
+    const g = el('g', null, svg);
+    el('rect', { x: 50, y: 14, width: 120, height: 10, class: 'wall' }, g);
+    const top = 24, mTop = 92 + u * 26;
+    let d = `M110,${top} L110,${top + 10}`;
+    const n = 12, y1 = top + 10, y2 = mTop - 8;
+    for (let i = 1; i <= n; i++) d += ` L${110 + (i % 2 ? 15 : -15)},${y1 + (y2 - y1) * (i - 0.5) / n}`;
+    d += ` L110,${y2} L110,${mTop}`;
+    el('path', { d, class: 'spring' }, g);
+    el('rect', { x: 84, y: mTop, width: 52, height: 34, rx: 3, class: 'mass' }, g);
+    el('text', { x: 110, y: mTop + 22, class: 'mid', text: 'm' }, g);
+    arrow(g, 110, mTop + 36, 110, mTop + 66, 'arr', 9);
+    el('text', { x: 120, y: mTop + 62, class: 'lbl-l', text: 'F' }, g);
+    el('line', { x1: 40, y1: 92, x2: 180, y2: 92, class: 'ghost', 'stroke-width': 1.2 }, g);
+    el('text', { x: 186, y: 96, class: 'lbl-m', text: 'u = 0' }, g);
+    if (u > 0.15) arrow(g, 170, 92, 170, mTop, 'arr-n', 8);
+    el('text', { x: 176, y: (92 + mTop) / 2 + 4, class: 'lbl-n', text: 'u' }, g);
+    // graphe
+    const gp = el('g', null, svg);
+    el('line', { x1: 250, y1: py(0), x2: 660, y2: py(0), class: 'ax' }, gp);
+    el('line', { x1: 250, y1: 22, x2: 250, y2: 278, class: 'ax' }, gp);
+    el('text', { x: 660, y: py(0) - 8, class: 'lbl-m end', text: 'u (mm)' }, gp);
+    for (let i = 1; i <= 6; i++) { el('line', { x1: px(i), y1: py(0) - 3, x2: px(i), y2: py(0) + 3, class: 'ax' }, gp); el('text', { x: px(i), y: py(0) + 16, class: 'lbl-m mid', text: String(i) }, gp); }
+    el('text', { x: 258, y: 32, class: 'lbl-m', text: 'énergie (N·mm)' }, gp);
+    el('path', { d: path((x) => 0.5 * k * x * x), class: 'curve-m' }, gp);
+    el('path', { d: path((x) => -F * x), class: 'curve-m' }, gp);
+    el('path', { d: path(Pi), class: 'curve-n' }, gp);
+    el('text', { x: px(5.6), y: py(0.5 * k * 5.6 * 5.6) + 18, class: 'lbl-m end', text: '½ku² (ressort)' }, gp);
+    el('text', { x: px(5.7), y: py(-F * 5.7) - 8, class: 'lbl-m end', text: '−Fu (poids)' }, gp);
+    el('text', { x: px(5.95), y: py(Pi(5.95)) - 10, class: 'lbl-n end', text: 'Π = ½ku² − Fu' }, gp);
+    el('line', { x1: px(ustar), y1: py(0), x2: px(ustar), y2: py(Pi(ustar)), class: 'ghost', 'stroke-width': 1.2 }, gp);
+    el('text', { x: px(ustar) + 6, y: py(Pi(ustar)) + 26, class: 'lbl-m', text: 'u* = F/k = 4 mm' }, gp);
+    el('circle', { cx: px(u), cy: py(Pi(u)) - 9, r: 9, class: 'ball' }, gp);
+    $('pm-u-out').textContent = fr(u, 2) + ' mm';
+    const slope = k * u - F;
+    $('pm-read').innerHTML =
+      `<div><span>½ku²</span><b>${fr(0.5 * k * u * u, 1)}</b></div>` +
+      `<div><span>−Fu</span><b>${fr(-F * u, 1)}</b></div>` +
+      `<div><span>Π</span><b>${fr(Pi(u), 1)} N·mm</b></div>` +
+      `<div><span>pente dΠ/du = ku − F</span><b>${fr(slope, 1)} N${Math.abs(slope) < 0.6 ? '  → équilibre' : ''}</b></div>`;
+  }
+  const slider = $('pm-u');
+  slider.addEventListener('input', () => { if (anim) { cancelAnimationFrame(anim); anim = null; } u = +slider.value; render(); });
+  $('pm-go').addEventListener('click', () => {
+    if (anim) cancelAnimationFrame(anim);
+    if (reduceMotion) { u = ustar; slider.value = u; render(); return; }
+    let v = 0;
+    const step = () => {
+      for (let i = 0; i < 2; i++) { const a = (F - k * u) - 1.0 * v; v += a * 0.014; u += v * 0.014; }
+      u = Math.max(0, Math.min(6, u));
+      slider.value = u; render();
+      if (Math.abs(v) < 0.01 && Math.abs(u - ustar) < 0.01) { u = ustar; slider.value = u; render(); anim = null; return; }
+      anim = requestAnimationFrame(step);
+    };
+    anim = requestAnimationFrame(step);
+  });
+  render();
+})();
+
+/* =========================================================================
+   A.3 Fonctions de forme linéaires
+   ========================================================================= */
+(function shapeFns() {
+  const svg = $('sf-svg');
+  const st = { u1: 0.5, u2: -0.3, x: 0.3 };
+  const X0 = 100, X1 = 580;
+  function render() {
+    clear(svg);
+    const xc = X0 + st.x * (X1 - X0);
+    const N1 = 1 - st.x, N2 = st.x;
+    // graphe des N
+    const yN = (v) => 120 - v * 80;
+    el('text', { x: 20, y: 46, class: 'lbl-m', text: 'N(x)' }, svg);
+    el('line', { x1: X0, y1: yN(0), x2: X1, y2: yN(0), class: 'ax' }, svg);
+    el('line', { x1: X0, y1: yN(1), x2: X1, y2: yN(1), class: 'gridl' }, svg);
+    el('text', { x: X0 - 10, y: yN(1) + 4, class: 'lbl-m end', text: '1' }, svg);
+    el('text', { x: X0 - 10, y: yN(0) + 4, class: 'lbl-m end', text: '0' }, svg);
+    el('line', { x1: X0, y1: yN(1), x2: X1, y2: yN(0), stroke: 'var(--e1)', 'stroke-width': 2.6 }, svg);
+    el('line', { x1: X0, y1: yN(0), x2: X1, y2: yN(1), stroke: 'var(--e2)', 'stroke-width': 2.6 }, svg);
+    el('text', { x: X0 + 30, y: yN(1) - 8, fill: 'var(--e1)', text: 'N₁ = 1 − x/L' }, svg);
+    el('text', { x: X1 - 30, y: yN(1) - 8, fill: 'var(--e2)', class: 'end', text: 'N₂ = x/L' }, svg);
+    // curseur
+    el('line', { x1: xc, y1: 28, x2: xc, y2: 285, class: 'ghost', 'stroke-width': 1.2 }, svg);
+    el('circle', { cx: xc, cy: yN(N1), r: 5.5, fill: 'var(--e1)' }, svg);
+    el('circle', { cx: xc, cy: yN(N2), r: 5.5, fill: 'var(--e2)' }, svg);
+    el('text', { x: xc + 8, y: yN(N1) + (N1 > N2 ? -6 : 14), fill: 'var(--e1)', text: fr(N1, 2) }, svg);
+    el('text', { x: xc + 8, y: yN(N2) + (N2 >= N1 ? -6 : 14), fill: 'var(--e2)', text: fr(N2, 2) }, svg);
+    // u(x)
+    const yU = (v) => 215 - v * 55;
+    el('text', { x: 20, y: 168, class: 'lbl-m', text: 'u(x)' }, svg);
+    el('line', { x1: X0, y1: yU(0), x2: X1, y2: yU(0), class: 'barl', 'stroke-width': 4, opacity: 0.35 }, svg);
+    const g = el('g', null, svg);
+    arrow(g, X0, yU(0), X0, yU(st.u1), 'arr-n', 8);
+    arrow(g, X1, yU(0), X1, yU(st.u2), 'arr-n', 8);
+    el('line', { x1: X0, y1: yU(st.u1), x2: X1, y2: yU(st.u2), class: 'curve-f' }, g);
+    const uc = N1 * st.u1 + N2 * st.u2;
+    arrow(g, xc, yU(0), xc, yU(uc), 'arr-f', 8);
+    el('circle', { cx: xc, cy: yU(uc), r: 5.5, class: 'dot-f' }, g);
+    el('circle', { cx: X0, cy: yU(0), r: 7, class: 'node' }, g);
+    el('circle', { cx: X1, cy: yU(0), r: 7, class: 'node' }, g);
+    el('text', { x: X0 - 14, y: yU(st.u1) + 4, class: 'lbl-n end', text: 'u₁' }, g);
+    el('text', { x: X1 + 14, y: yU(st.u2) + 4, class: 'lbl-n', text: 'u₂' }, g);
+    el('text', { x: X0, y: 292, class: 'lbl-n mid', text: 'nœud 1' }, g);
+    el('text', { x: X1, y: 292, class: 'lbl-n mid', text: 'nœud 2' }, g);
+    el('text', { x: xc, y: yU(uc) + (uc >= 0 ? -12 : 20), class: 'lbl-f mid', text: 'u(x)' }, g);
+    $('sf-read').innerHTML = `N₁(x) = <b>${fr(N1)}</b> et N₂(x) = <b>${fr(N2)}</b> → u(x) = ${fr(N1)} × ${fr(st.u1)} + ${fr(N2)} × ${fr(st.u2)} = <b>${fr(uc)}</b>. ` +
+      `Aux nœuds, une des deux fonctions vaut 1 et l'autre 0 : u(0) = u₁ et u(L) = u₂.`;
+  }
+  bindRange('sf-u1', (v) => fr(v), (v) => { st.u1 = v; render(); }).upd();
+  bindRange('sf-u2', (v) => fr(v), (v) => { st.u2 = v; render(); }).upd();
+  bindRange('sf-x', (v) => fr(v), (v) => { st.x = v; render(); }).upd();
+})();
+
+/* =========================================================================
+   A.4 Sens de [k] barre
+   ========================================================================= */
+(function kBar() {
+  const svg = $('k1-svg');
+  const st = { u1: 0, u2: 1 };
+  const XA = 200, XB = 480, Y = 115, S = 70;
+  function forceArrow(g, x, F, side) {
+    // side = -1 : à gauche du nœud ; +1 : à droite
+    const len = Math.min(110, 55 * Math.abs(F));
+    if (len < 4) return;
+    if ((F > 0) === (side < 0)) arrow(g, x + side * (10 + len), Y, x + side * 10, Y, 'arr', 10); // pousse vers le nœud
+    else arrow(g, x + side * 10, Y, x + side * (10 + len), Y, 'arr', 10); // tire
+  }
+  function render() {
+    clear(svg);
+    const x1 = XA + S * st.u1, x2 = XB + S * st.u2;
+    const F1 = st.u1 - st.u2, F2 = st.u2 - st.u1;
+    const N = st.u2 - st.u1;
+    el('line', { x1: XA, y1: 60, x2: XB, y2: 60, class: 'ghost' }, svg);
+    el('circle', { cx: XA, cy: 60, r: 4, fill: 'var(--muted)' }, svg);
+    el('circle', { cx: XB, cy: 60, r: 4, fill: 'var(--muted)' }, svg);
+    el('text', { x: (XA + XB) / 2, y: 48, class: 'lbl-m mid', text: 'position initiale (longueur L)' }, svg);
+    const col = Math.abs(N) < 0.01 ? 'var(--ink)' : (N > 0 ? 'var(--tens)' : 'var(--comp)');
+    el('line', { x1, y1: Y, x2, y2: Y, class: 'barl', stroke: col }, svg);
+    const g = el('g', null, svg);
+    forceArrow(g, x1, F1, -1); forceArrow(g, x2, F2, +1);
+    el('circle', { cx: x1, cy: Y, r: 8, class: 'node' }, g);
+    el('circle', { cx: x2, cy: Y, r: 8, class: 'node' }, g);
+    el('text', { x: x1, y: Y + 30, class: 'lbl-n mid', text: 'u₁ = ' + fr(st.u1) }, g);
+    el('text', { x: x2, y: Y + 30, class: 'lbl-n mid', text: 'u₂ = ' + fr(st.u2) }, g);
+    if (Math.abs(F1) > 0.01) {
+      el('text', { x: 18, y: Y - 14, class: 'lbl-l', text: 'F₁ = ' + fr(F1) + ' EA/L' }, g);
+      el('text', { x: 662, y: Y - 14, class: 'lbl-l end', text: 'F₂ = ' + fr(F2) + ' EA/L' }, g);
+    }
+    $('k1-eq').innerHTML =
+      `<span>EA/L</span><span class="bmat"><span>1</span><span>−1</span><span>−1</span><span>1</span></span>` +
+      `<span class="vec"><span>${fr(st.u1)}</span><span>${fr(st.u2)}</span></span><span>=</span>` +
+      `<span>EA/L</span><span class="vec"><span>${fr(F1)}</span><span>${fr(F2)}</span></span>`;
+    let msg;
+    if (Math.abs(N) < 0.01 && Math.abs(st.u1) > 0.01) msg = 'Translation rigide : la barre glisse sans changer de longueur. Aucune force n\'est nécessaire, N = 0. C\'est pour ça que [k] n\'est pas inversible tant qu\'aucun nœud n\'est bloqué.';
+    else if (Math.abs(N) < 0.01) msg = 'Rien ne bouge, aucune force.';
+    else msg = `${N > 0 ? 'Traction' : 'Compression'} : N = EA/L·(u₂ − u₁) = ${fr(N)} EA/L. Les deux forces sont égales et opposées : l'élément est en équilibre.`;
+    if (Math.abs(st.u1) < 0.01 && Math.abs(st.u2 - 1) < 0.01) msg += ' Ici u₂ = 1 et u₁ = 0 : les forces valent exactement la 2ᵉ colonne de [k], (−1 ; 1)·EA/L.';
+    if (Math.abs(st.u2) < 0.01 && Math.abs(st.u1 - 1) < 0.01) msg += ' Ici u₁ = 1 et u₂ = 0 : les forces valent la 1ʳᵉ colonne de [k], (1 ; −1)·EA/L.';
+    $('k1-read').textContent = msg;
+  }
+  const r1 = bindRange('k1-u1', (v) => fr(v), (v) => { st.u1 = v; render(); });
+  const r2 = bindRange('k1-u2', (v) => fr(v), (v) => { st.u2 = v; render(); });
+  document.querySelectorAll('[data-k1]').forEach((b) => b.addEventListener('click', () => {
+    const [a, c] = b.dataset.k1.split(',').map(Number);
+    r1.inp.value = a; r2.inp.value = c; r1.upd(); r2.upd();
+  }));
+  r1.upd(); r2.upd();
+})();
+
+/* =========================================================================
+   A.5 / C.4 Charges équivalentes
+   ========================================================================= */
+function chargesWidget(svgId, btnId, beam) {
+  const svg = $(svgId), btn = $(btnId);
+  const XA = beam ? 170 : 150, XB = beam ? 510 : 530, Y = beam ? 125 : 100;
+  el('line', { x1: XA, y1: Y, x2: XB, y2: Y, class: 'barl' }, svg);
+  const small = [];
+  const n = 8, dx = (XB - XA) / n;
+  for (let i = 0; i < n; i++) {
+    const x = XA + (i + 0.5) * dx;
+    const g = el('g', { class: 'slide-arrow' }, svg);
+    if (beam) arrow(g, x, Y - 10, x, Y - 52, 'arr', 8);
+    else arrow(g, x - 16, Y - 26, x + 16, Y - 26, 'arr', 8);
+    g.dataset.dx = (i < n / 2 ? XA : XB) - x;
+    small.push(g);
+  }
+  const lblD = el('text', { x: (XA + XB) / 2, y: beam ? Y - 66 : Y - 46, class: 'lbl-l mid big', text: beam ? 'fz (N/m), charge totale fz·L' : 'fx (N/m), charge totale fx·L' }, svg);
+  lblD.classList.add('slide-arrow');
+  const nodal = el('g', { class: 'slide-arrow', opacity: 0 }, svg);
+  if (beam) {
+    arrow(nodal, XA, Y - 10, XA, Y - 70, 'arr', 10); arrow(nodal, XB, Y - 10, XB, Y - 70, 'arr', 10);
+    el('text', { x: XA + 10, y: Y - 64, class: 'lbl-l', text: 'fz L/2' }, nodal);
+    el('text', { x: XB - 10, y: Y - 64, class: 'lbl-l end', text: 'fz L/2' }, nodal);
+    momentArc(nodal, XA, Y, 24, false, 'arr');
+    momentArc(nodal, XB, Y, 24, true, 'arr');
+    el('text', { x: XA - 30, y: Y + 46, class: 'lbl-l mid', text: '−fz L²/12' }, nodal);
+    el('text', { x: XB + 30, y: Y + 46, class: 'lbl-l mid', text: '+fz L²/12' }, nodal);
+    el('text', { x: (XA + XB) / 2, y: Y + 46, class: 'lbl-m mid', text: '(θ positif = sens horaire)' }, nodal);
+  } else {
+    arrow(nodal, XA + 10, Y - 26, XA + 80, Y - 26, 'arr', 10);
+    arrow(nodal, XB + 10, Y - 26, XB + 80, Y - 26, 'arr', 10);
+    el('text', { x: XA + 45, y: Y - 40, class: 'lbl-l mid', text: 'fx L/2' }, nodal);
+    el('text', { x: XB + 45, y: Y - 40, class: 'lbl-l mid', text: 'fx L/2' }, nodal);
+  }
+  el('circle', { cx: XA, cy: Y, r: 8, class: 'node' }, svg);
+  el('circle', { cx: XB, cy: Y, r: 8, class: 'node' }, svg);
+  el('text', { x: XA, y: Y + 26, class: 'lbl-n mid', text: '1' }, svg);
+  el('text', { x: XB, y: Y + 26, class: 'lbl-n mid', text: '2' }, svg);
+  let on = false;
+  btn.addEventListener('click', () => {
+    on = !on;
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.textContent = on ? 'Revenir à la charge répartie' : 'Concentrer aux nœuds';
+    small.forEach((g) => { g.style.transform = on ? `translate(${g.dataset.dx}px, 0px)` : 'translate(0px, 0px)'; g.style.opacity = on ? 0 : 1; });
+    lblD.style.opacity = on ? 0 : 1;
+    nodal.style.transitionDelay = on ? '.55s' : '0s';
+    nodal.setAttribute('opacity', 1);
+    nodal.style.opacity = on ? 1 : 0;
+  });
+  nodal.style.opacity = 0;
+}
+chargesWidget('ch1-svg', 'ch1-go', false);
+chargesWidget('ch2-svg', 'ch2-go', true);
+
+/* =========================================================================
+   Lecteur d'assemblage générique
+   ========================================================================= */
+function assemblyPlayer(root, cfg) {
+  const n = cfg.dofs.length;
+  root.innerHTML =
+    `<div class="asm"><div class="struct stage"><svg viewBox="${cfg.vb}" role="img" aria-label="Structure en cours d'assemblage"></svg></div>` +
+    `<div class="mgrid-wrap"><div class="mgrid ${n > 6 ? 'big' : ''}"></div></div></div>` +
+    `<div class="asm-foot"><p class="asm-cap" aria-live="polite"></p><div class="asm-nav">` +
+    `<button class="btn" type="button" data-a="prev">◀ Précédent</button>` +
+    `<button class="btn primary" type="button" data-a="next">Étape suivante ▶</button>` +
+    `<button class="btn" type="button" data-a="play">Lecture auto</button>` +
+    `<div class="dots"></div></div></div>`;
+  const svg = root.querySelector('svg'), grid = root.querySelector('.mgrid'), cap = root.querySelector('.asm-cap');
+  const dots = root.querySelector('.dots');
+  grid.style.gridTemplateColumns = `auto repeat(${n}, minmax(${n > 6 ? 32 : 40}px, 1fr))`;
+  const cells = [], heads = [];
+  grid.appendChild(document.createElement('div'));
+  for (let j = 0; j < n; j++) { const h = document.createElement('div'); h.className = 'h'; h.textContent = cfg.dofs[j]; grid.appendChild(h); heads.push(h); }
+  for (let i = 0; i < n; i++) {
+    const h = document.createElement('div'); h.className = 'h'; h.textContent = cfg.dofs[i]; grid.appendChild(h); heads.push(h);
+    cells.push([]);
+    for (let j = 0; j < n; j++) { const c = document.createElement('div'); c.className = 'c'; grid.appendChild(c); cells[i].push(c); }
+  }
+  cfg.steps.forEach((s, k) => {
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Étape ' + (k + 1));
+    b.addEventListener('click', () => go(k)); dots.appendChild(b);
+  });
+  let cur = 0, timer = null;
+  const prevContrib = cells.map((r) => r.map(() => ''));
+  function state(s) {
+    const added = [], fixed = new Set(); let reduced = false, current = null;
+    for (let k = 0; k <= s; k++) {
+      const st = cfg.steps[k];
+      if (st.kind === 'elem') { added.push(st.e); if (k === s) current = st.e; }
+      if (st.kind === 'bc') st.fix.forEach((d) => fixed.add(d));
+      if (st.kind === 'reduced') reduced = true;
+    }
+    return { added, fixed, reduced, current, all: added.length === cfg.elems.length, step: s };
+  }
+  function go(s) {
+    cur = Math.max(0, Math.min(cfg.steps.length - 1, s));
+    const S = state(cur);
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const c = cells[i][j];
+      const contrib = S.added.filter((e) => cfg.elems[e].dofs.includes(i) && cfg.elems[e].dofs.includes(j));
+      const key = contrib.join(',');
+      const cols = contrib.map((e) => `color-mix(in srgb, ${cfg.elems[e].color} 38%, var(--sheet))`);
+      if (cols.length === 0) c.style.background = '';
+      else if (cols.length === 1) c.style.background = cols[0];
+      else {
+        const st = cols.map((col, k) => `${col} ${(k / cols.length * 100).toFixed(0)}% ${((k + 1) / cols.length * 100).toFixed(0)}%`).join(', ');
+        c.style.background = `linear-gradient(135deg, ${st})`;
+      }
+      c.textContent = cfg.cellText ? cfg.cellText(contrib, i, j, S) : contrib.map((e) => cfg.elems[e].label).join('+');
+      const isFixed = S.fixed.has(i) || S.fixed.has(j);
+      c.classList.toggle('struck', isFixed && !S.reduced);
+      c.classList.toggle('col', isFixed && !S.fixed.has(i));
+      c.classList.toggle('gone', isFixed && S.reduced);
+      c.classList.toggle('keep', !isFixed && S.reduced);
+      if (key !== prevContrib[i][j] && S.current !== null && contrib.includes(S.current) && !reduceMotion) {
+        c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+      }
+      prevContrib[i][j] = key;
+    }
+    heads.forEach((h, k) => h.classList.toggle('fx', S.fixed.has(k % n)));
+    clear(svg);
+    cfg.draw(svg, S);
+    cap.innerHTML = cfg.steps[cur].text;
+    [...dots.children].forEach((d, k) => d.classList.toggle('on', k === cur));
+    root.querySelector('[data-a="prev"]').disabled = cur === 0;
+    root.querySelector('[data-a="next"]').disabled = cur === cfg.steps.length - 1;
+  }
+  function stop() { if (timer) { clearInterval(timer); timer = null; root.querySelector('[data-a="play"]').textContent = 'Lecture auto'; } }
+  root.querySelector('[data-a="prev"]').addEventListener('click', () => { stop(); go(cur - 1); });
+  root.querySelector('[data-a="next"]').addEventListener('click', () => { stop(); go(cur + 1); });
+  root.querySelector('[data-a="play"]').addEventListener('click', (ev) => {
+    if (timer) { stop(); return; }
+    if (cur === cfg.steps.length - 1) go(0);
+    ev.target.textContent = 'Pause';
+    timer = setInterval(() => { if (cur >= cfg.steps.length - 1) { stop(); return; } go(cur + 1); }, 2600);
+  });
+  go(0);
+}
+function elemLine(svg, S, e, x1, y1, x2, y2, color, label, lx, ly) {
+  const added = S.added.includes(e), current = S.current === e;
+  el('line', { x1, y1, x2, y2, class: 'elem-hl', stroke: added ? color : 'var(--muted)', 'stroke-width': current ? 9 : (added ? 6 : 3), 'stroke-dasharray': added ? 'none' : '5 5', opacity: added ? 1 : 0.6 }, svg);
+  el('circle', { cx: lx, cy: ly, r: 11, fill: 'var(--sheet)', stroke: added ? color : 'var(--muted)', 'stroke-width': 1.6 }, svg);
+  el('text', { x: lx, y: ly + 4.5, class: 'mid', text: label, 'font-size': 12 }, svg);
+}
+
+/* ---------- A.6 : barre 1D, 3 éléments ---------- */
+assemblyPlayer($('asm1'), {
+  vb: '0 0 320 160',
+  dofs: ['u₁', 'u₂', 'u₃', 'u₄'],
+  elems: [
+    { dofs: [0, 1], color: 'var(--e1)', label: '1', sym: 'k₁' },
+    { dofs: [1, 2], color: 'var(--e2)', label: '2', sym: 'k₂' },
+    { dofs: [2, 3], color: 'var(--e3)', label: '3', sym: 'k₃' }
+  ],
+  cellText(contrib, i, j, S) {
+    if (!contrib.length) return S.all ? '0' : '';
+    return contrib.map((e, k) => {
+      const d = this.elems[e].dofs, neg = d.indexOf(i) !== d.indexOf(j);
+      return (neg ? '−' : (k ? '+' : '')) + this.elems[e].sym;
+    }).join('');
+  },
+  draw(svg, S) {
+    const xs = [45, 120, 195, 270], y = 85;
+    if (S.fixed.has(0)) wallV(svg, 34, 60, 110, -1);
+    [['1', 0], ['2', 1], ['3', 2]].forEach(([lbl, e]) => elemLine(svg, S, e, xs[e], y, xs[e + 1], y, this.elems[e].color, lbl, (xs[e] + xs[e + 1]) / 2, y - 30));
+    xs.forEach((x, i) => {
+      el('circle', { cx: x, cy: y, r: 7, class: 'node' }, svg);
+      el('text', { x, y: y + 28, class: 'lbl-n mid', text: 'u' + '₁₂₃₄'[i] }, svg);
+    });
+    if (S.fixed.has(0)) el('text', { x: 45, y: 140, class: 'lbl-l mid', text: 'u₁ = 0' }, svg);
+  },
+  steps: [
+    { kind: 'empty', text: '[K] a une ligne et une colonne par ddl : u₁ à u₄, donc 4×4. Au départ, tout est vide.' },
+    { kind: 'elem', e: 0, text: 'Élément 1 (nœuds 1 et 2) : sa matrice k₁·[1 −1 ; −1 1] va aux lignes et colonnes de <b>u₁ et u₂</b>. Ici k₁ = EA/L₁.' },
+    { kind: 'elem', e: 1, text: 'Élément 2 (nœuds 2 et 3) : il partage le nœud 2 avec l\'élément 1. Sur la case (u₂, u₂), les deux termes s\'ajoutent : <b>k₁ + k₂</b>.' },
+    { kind: 'elem', e: 2, text: 'Élément 3 (nœuds 3 et 4) : même chose sur u₃. La matrice est <b>symétrique et en bande</b> : un nœud n\'est couplé qu\'à ses voisins, d\'où les zéros dans les coins.' },
+    { kind: 'bc', fix: [0], text: 'Condition aux limites : encastrement au nœud 1, <b>u₁ = 0</b>. On barre la ligne et la colonne de u₁ (la colonne multiplie u₁ = 0, la ligne contient la réaction inconnue).' },
+    { kind: 'reduced', text: 'Il reste un système 3×3 inversible [K′]{U′} = {F′}. On le résout, puis on réutilise la ligne barrée pour la réaction : R₁ = −k₁·u₂ − F₁.' }
+  ]
+});
+
+/* ---------- B.2 : triangle ---------- */
+assemblyPlayer($('asm2'), {
+  vb: '0 0 320 190',
+  dofs: ['U₁', 'V₁', 'U₂', 'V₂', 'U₃', 'V₃'],
+  elems: [
+    { dofs: [0, 1, 2, 3], color: 'var(--e3)', label: '1' },
+    { dofs: [2, 3, 4, 5], color: 'var(--e2)', label: '2' },
+    { dofs: [4, 5, 0, 1], color: 'var(--e1)', label: '3' }
+  ],
+  draw(svg, S) {
+    const P = [[55, 140], [265, 140], [160, 35]];
+    elemLine(svg, S, 0, ...P[0], ...P[1], this.elems[0].color, '1', 160, 162);
+    elemLine(svg, S, 1, ...P[1], ...P[2], this.elems[1].color, '2', 230, 78);
+    elemLine(svg, S, 2, ...P[2], ...P[0], this.elems[2].color, '3', 90, 78);
+    if (S.fixed.has(0)) pinSupport(svg, P[0][0], P[0][1] + 3, false);
+    if (S.fixed.has(3)) pinSupport(svg, P[1][0], P[1][1] + 3, true);
+    arrow(svg, P[2][0] + 8, P[2][1], P[2][0] + 60, P[2][1], 'arr', 10);
+    el('text', { x: P[2][0] + 64, y: P[2][1] + 5, class: 'lbl-l', text: 'F' }, svg);
+    P.forEach(([x, y], i) => {
+      el('circle', { cx: x, cy: y, r: 7, class: 'node' }, svg);
+      el('text', { x: x + (i === 0 ? -16 : i === 1 ? 16 : 0), y: y + (i === 2 ? -14 : 5), class: 'lbl-n mid', text: String(i + 1) }, svg);
+    });
+  },
+  steps: [
+    { kind: 'empty', text: '3 nœuds × 2 ddl (U, V) = matrice 6×6.' },
+    { kind: 'elem', e: 0, text: 'Barre 1 (nœuds 1-2) : sa [k]<sub>g</sub> 4×4 remplit le bloc U₁ V₁ U₂ V₂.' },
+    { kind: 'elem', e: 1, text: 'Barre 2 (nœuds 2-3) : bloc U₂ V₂ U₃ V₃. Le nœud 2 est partagé : sur le bloc 2×2 commun, les termes des deux barres s\'additionnent (demi-carrés).' },
+    { kind: 'elem', e: 2, text: 'Barre 3 (nœuds 3-1) : elle relie les coins U₃V₃ ↔ U₁V₁. La matrice est maintenant pleine (chaque nœud est relié aux deux autres).' },
+    { kind: 'bc', fix: [0, 1], text: 'Nœud 1 en appui fixe : <b>U₁ = V₁ = 0</b>. On barre 2 lignes et 2 colonnes. Problème : le triangle peut encore <b>pivoter autour du nœud 1</b>, sans déformer aucune barre. [K′] serait singulière : ce sont les « ?? » du cours.' },
+    { kind: 'bc', fix: [3], text: 'On ajoute un appui vertical au nœud 2 : <b>V₂ = 0</b>. Plus aucun mouvement de corps rigide n\'est possible.' },
+    { kind: 'reduced', text: 'Il reste 3 inconnues (U₂, U₃, V₃) et un système 3×3 inversible. Ensuite : {R} = [K]{U} − {F}, puis N = (EA/L)(u₂ₗ − u₁ₗ) dans chaque barre et σ = N/A.' }
+  ]
+});
+
+/* ---------- C.7 : portique (assemblage) ---------- */
+assemblyPlayer($('asm3'), {
+  vb: '0 0 320 270',
+  dofs: ['U₁', 'W₁', 'θ₁', 'U₂', 'W₂', 'θ₂', 'U₃', 'W₃', 'θ₃'],
+  elems: [
+    { dofs: [0, 1, 2, 3, 4, 5], color: 'var(--e3)', label: '1' },
+    { dofs: [3, 4, 5, 6, 7, 8], color: 'var(--e2)', label: '2' }
+  ],
+  draw(svg, S) {
+    const P = [[80, 235], [80, 45], [260, 45]];
+    if (S.fixed.has(0)) el('rect', { x: 55, y: 238, width: 50, height: 12, class: 'wall' }, svg);
+    if (S.fixed.has(6)) {
+      el('line', { x1: 260, y1: 15, x2: 260, y2: 120, class: 'ghost', 'stroke-width': 1.5 }, svg);
+      el('text', { x: 266, y: 112, class: 'lbl-m', text: 'symétrie' }, svg);
+      el('text', { x: 266, y: 127, class: 'lbl-l', text: 'U₃ = θ₃ = 0' }, svg);
+    }
+    elemLine(svg, S, 0, ...P[0], ...P[1], this.elems[0].color, '1', 56, 140);
+    elemLine(svg, S, 1, ...P[1], ...P[2], this.elems[1].color, '2', 170, 70);
+    arrow(svg, 260, 0, 260, 37, 'arr', 10);
+    el('text', { x: 246, y: 18, class: 'lbl-l end', text: 'F/2' }, svg);
+    P.forEach(([x, y], i) => {
+      el('circle', { cx: x, cy: y, r: 7, class: 'node' }, svg);
+      el('text', { x: x + (i === 2 ? 0 : 18), y: y + (i === 2 ? 26 : 5), class: 'lbl-n', text: String(i + 1) }, svg);
+    });
+    if (S.fixed.has(0)) el('text', { x: 112, y: 232, class: 'lbl-l', text: 'U₁ = W₁ = θ₁ = 0' }, svg);
+  },
+  steps: [
+    { kind: 'empty', text: '3 nœuds × 3 ddl (U, W, θ) = matrice 9×9.' },
+    { kind: 'elem', e: 0, text: 'Élément 1 (poteau) : vertical, α = 90°. On calcule [k]<sub>l</sub> puis [k]<sub>g</sub> = [T]ᵀ[k]<sub>l</sub>[T] : les termes EA/L passent sur W et les termes 12EI/L³ sur U. Il remplit U₁ … θ₂.' },
+    { kind: 'elem', e: 1, text: 'Élément 2 (demi-traverse) : horizontal, donc repère local = repère global, pas de rotation. Il remplit U₂ … θ₃. Le nœud 2 est partagé : bloc 3×3 additionné.' },
+    { kind: 'bc', fix: [0, 1, 2], text: 'Pied du poteau encastré : <b>U₁ = W₁ = θ₁ = 0</b>.' },
+    { kind: 'bc', fix: [6, 8], text: 'Coupe sur l\'axe de symétrie : le milieu de la traverse ne bouge pas horizontalement et ne tourne pas, <b>U₃ = θ₃ = 0</b>. On applique la moitié de la charge, F/2.' },
+    { kind: 'reduced', text: 'Il reste <b>4 ddl effectifs</b> : U₂, W₂, θ₂, W₃. Le calcul est fait juste en dessous, en direct.' }
+  ]
+});
+
+/* =========================================================================
+   A.7 Convergence, barre pendue
+   ========================================================================= */
+(function convergence() {
+  const svg = $('cv-svg');
+  const L = 1000, A = 1256.64, E = 210000, gam = 7800 * 9.81 * 1e-9; // N/mm3
+  const uEx = (x) => gam / E * (L * x - x * x / 2);
+  const sEx = (x) => gam * (L - x);
+  function fe(n) {
+    const h = L / n, k = E * A / h, f = gam * A * h / 2, nd = n + 1;
+    const K = Array.from({ length: nd }, () => new Array(nd).fill(0)), F = new Array(nd).fill(0);
+    for (let e = 0; e < n; e++) { K[e][e] += k; K[e + 1][e + 1] += k; K[e][e + 1] -= k; K[e + 1][e] -= k; F[e] += f; F[e + 1] += f; }
+    const r = reduceSolve(K, F, [0]);
+    const sig = []; for (let e = 0; e < n; e++) sig.push(E * (r.U[e + 1] - r.U[e]) / h);
+    return { U: r.U, sig, R: r.R[0], h };
+  }
+  const umax = uEx(L), smaxE = sEx(0);
+  const Y0 = 45, Y1 = 305;
+  const yx = (x) => Y0 + x / L * (Y1 - Y0);
+  function render(n) {
+    clear(svg);
+    const r = fe(n);
+    // barre
+    el('rect', { x: 45, y: 26, width: 70, height: 12, class: 'wall' }, svg);
+    el('line', { x1: 80, y1: Y0, x2: 80, y2: Y1, class: 'barl', 'stroke-width': 7 }, svg);
+    for (let i = 0; i < 6; i++) arrow(svg, 98, yx((i + 0.2) / 6 * L), 98, yx((i + 0.8) / 6 * L), 'arr', 7);
+    el('text', { x: 106, y: yx(L / 2), class: 'lbl-l', text: 'ρg' }, svg);
+    for (let i = 0; i <= n; i++) el('circle', { cx: 80, cy: yx(i * r.h), r: 6, class: 'node' }, svg);
+    el('text', { x: 30, y: Y1 + 18, class: 'lbl-m', text: 'x ↓' }, svg);
+    // u
+    const ux = (u) => 200 + u / (umax * 1.1) * 210;
+    el('text', { x: 200, y: 24, class: 'lbl-m', text: 'Déplacement u (mm)' }, svg);
+    el('line', { x1: 200, y1: Y0, x2: 200, y2: Y1 + 6, class: 'ax' }, svg);
+    el('line', { x1: 200, y1: Y0, x2: 420, y2: Y0, class: 'ax' }, svg);
+    let d = '';
+    for (let i = 0; i <= 50; i++) { const x = i / 50 * L; d += (i ? 'L' : 'M') + ux(uEx(x)).toFixed(1) + ',' + yx(x).toFixed(1); }
+    el('path', { d, class: 'curve-e' }, svg);
+    el('polyline', { points: r.U.map((u, i) => `${ux(u)},${yx(i * r.h)}`).join(' '), class: 'curve-f' }, svg);
+    r.U.forEach((u, i) => el('circle', { cx: ux(u), cy: yx(i * r.h), r: 4.5, class: 'dot-f' }, svg));
+    el('text', { x: ux(umax) - 6, y: Y1 + 20, class: 'lbl-f end', text: 'u(L) = ' + sci(r.U[n], 2) }, svg);
+    // sigma
+    const sx = (s) => 470 + s / (smaxE * 1.05) * 185;
+    el('text', { x: 470, y: 24, class: 'lbl-m', text: 'Contrainte σ (MPa)' }, svg);
+    el('line', { x1: 470, y1: Y0, x2: 470, y2: Y1 + 6, class: 'ax' }, svg);
+    el('line', { x1: 470, y1: Y0, x2: 665, y2: Y0, class: 'ax' }, svg);
+    el('line', { x1: sx(smaxE), y1: Y0, x2: sx(0), y2: Y1, class: 'curve-e' }, svg);
+    let p = '';
+    r.sig.forEach((s, e) => { p += (e ? 'L' : 'M') + sx(s) + ',' + yx(e * r.h) + 'L' + sx(s) + ',' + yx((e + 1) * r.h); });
+    el('path', { d: p, class: 'curve-f' }, svg);
+    el('text', { x: sx(r.sig[0]) + 6, y: Y0 + 16, class: 'lbl-f', text: sci(r.sig[0], 2) }, svg);
+    // lecture
+    const prev = n > 1 ? fe(n - 1).sig[0] : null;
+    $('cv-n-out').textContent = n + (n > 1 ? ' éléments' : ' élément');
+    $('cv-read').innerHTML =
+      `<div><span>ddl</span><b>${n + 1} (dont 1 bloqué)</b></div>` +
+      `<div><span>u(L) EF / exact</span><b>${sci(r.U[n], 3)} / ${sci(umax, 3)} mm</b></div>` +
+      `<div><span>σ max EF</span><b>${sci(r.sig[0], 2)} MPa</b></div>` +
+      `<div><span>écart / maillage précédent</span><b>${prev === null ? '—' : fr(100 * (r.sig[0] - prev) / r.sig[0], 0) + ' %'}</b></div>` +
+      `<div><span>erreur / exact (${sci(smaxE, 2)})</span><b>${fr(100 * (smaxE - r.sig[0]) / smaxE, 0)} %</b></div>` +
+      `<div><span>réaction R₁</span><b>${fr(r.R, 2)} N</b></div>`;
+  }
+  bindRange('cv-n', () => '', (v) => render(v));
+  render(1);
+})();
+
+/* =========================================================================
+   B.1 Repère local / global
+   ========================================================================= */
+(function repere() {
+  const svg = $('rp-svg');
+  const st = { a: 30, U: 0.8, V: 0.3 };
+  const O = [150, 205], Lb = 165, S = 70;
+  function render() {
+    clear(svg);
+    const a = st.a * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+    // axes globaux
+    arrow(svg, 30, 300, 100, 300, 'arr-m', 8); arrow(svg, 30, 300, 30, 230, 'arr-m', 8);
+    el('text', { x: 104, y: 304, class: 'lbl-m', text: 'X, U' }, svg);
+    el('text', { x: 36, y: 228, class: 'lbl-m', text: 'Y, V' }, svg);
+    // axe local
+    el('line', { x1: O[0] - 60 * c, y1: O[1] + 60 * s, x2: O[0] + 260 * c, y2: O[1] - 260 * s, class: 'ghost', 'stroke-width': 1.2 }, svg);
+    el('text', { x: O[0] + 248 * c + 6, y: O[1] - 248 * s - 6, class: 'lbl-m', text: 'x local' }, svg);
+    el('line', { x1: O[0], y1: O[1], x2: O[0] + 70, y2: O[1], class: 'ax' }, svg);
+    if (Math.abs(st.a) > 3) {
+      const r = 38, sw = st.a > 0 ? 0 : 1, large = Math.abs(st.a) > 180 ? 1 : 0;
+      el('path', { d: `M${O[0] + r},${O[1]} A${r},${r} 0 ${large} ${sw} ${O[0] + r * c},${O[1] - r * s}`, class: 'arr-m', fill: 'none' }, svg);
+      el('text', { x: O[0] + 46 * Math.cos(a / 2), y: O[1] - 46 * Math.sin(a / 2) + 4, class: 'lbl-m', text: 'α' }, svg);
+    }
+    const N2 = [O[0] + Lb * c, O[1] - Lb * s];
+    el('line', { x1: O[0], y1: O[1], x2: N2[0], y2: N2[1], class: 'barl' }, svg);
+    el('circle', { cx: O[0], cy: O[1], r: 7, class: 'node' }, svg);
+    el('text', { x: O[0] - 14, y: O[1] + 20, class: 'lbl-n', text: '1' }, svg);
+    // déplacement
+    const tip = [N2[0] + S * st.U, N2[1] - S * st.V];
+    const ul = c * st.U + s * st.V;
+    const foot = [N2[0] + S * ul * c, N2[1] - S * ul * s];
+    el('line', { x1: tip[0], y1: tip[1], x2: foot[0], y2: foot[1], class: 'ghost', 'stroke-width': 1.3 }, svg);
+    arrow(svg, N2[0], N2[1], tip[0], tip[1], 'arr-n', 9);
+    arrow(svg, N2[0], N2[1], foot[0], foot[1], 'arr-f', 10);
+    el('text', { x: tip[0] + 6, y: tip[1] - 6, class: 'lbl-n', text: '(U, V)' }, svg);
+    el('text', { x: foot[0] + 8, y: foot[1] + 16, class: 'lbl-f', text: 'u_l = ' + fr(ul) }, svg);
+    const n2 = el('circle', { cx: N2[0], cy: N2[1], r: 10, class: 'node drag', tabindex: 0, role: 'slider', 'aria-label': 'Nœud 2, angle de la barre', 'aria-valuenow': st.a }, svg);
+    el('circle', { cx: N2[0], cy: N2[1], r: 16, class: 'node-ring' }, svg);
+    el('text', { x: N2[0] - 22, y: N2[1] - 14, class: 'lbl-n', text: '2' }, svg);
+    n2.addEventListener('pointerdown', (ev) => { dragging = true; n2.setPointerCapture(ev.pointerId); });
+    n2.addEventListener('keydown', (ev) => { if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') ang.set(Math.max(-180, st.a - 5)); if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') ang.set(Math.min(180, st.a + 5)); });
+    // matrice
+    const P = [[c * c, c * s], [c * s, s * s]];
+    const lab = ['U₁', 'V₁', 'U₂', 'V₂'];
+    let h = '<tr><th></th>' + lab.map((l) => `<th>${l}</th>`).join('') + '</tr>';
+    for (let i = 0; i < 4; i++) {
+      h += `<tr><th>${lab[i]}</th>`;
+      for (let j = 0; j < 4; j++) {
+        const v = ((i < 2) === (j < 2) ? 1 : -1) * P[i % 2][j % 2];
+        const cls = Math.abs(v) < 0.005 ? 'zero' : (v < 0 ? 'neg' : '');
+        h += `<td class="${cls}">${fr(v)}</td>`;
+      }
+      h += '</tr>';
+    }
+    $('rp-mat').innerHTML = h;
+    $('rp-read').innerHTML =
+      `<div><span>c = ΔX/L</span><b>${fr(c, 3)}</b></div><div><span>s = ΔY/L</span><b>${fr(s, 3)}</b></div>` +
+      `<div><span>α du sujet (sens horaire)</span><b>${String(-st.a).replace('-', '−')}°</b></div>` +
+      `<div><span>u_l = cU + sV</span><b>${fr(c)}×${fr(st.U)} + ${fr(s)}×${fr(st.V)} = ${fr(ul)}</b></div>`;
+    $('rp-a-out').textContent = st.a + '°';
+  }
+  let dragging = false;
+  svg.addEventListener('pointermove', (ev) => {
+    if (!dragging) return;
+    const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    ang.set(Math.round(Math.atan2(-(p.y - O[1]), p.x - O[0]) * 180 / Math.PI));
+  });
+  svg.addEventListener('pointerup', () => { dragging = false; });
+  svg.addEventListener('pointercancel', () => { dragging = false; });
+  const ang = bindRange('rp-a', (v) => v + '°', (v) => { st.a = v; render(); });
+  bindRange('rp-U', (v) => fr(v), (v) => { st.U = v; render(); }).upd();
+  bindRange('rp-V', (v) => fr(v), (v) => { st.V = v; render(); }).upd();
+})();
+
+/* =========================================================================
+   C.1 Timoshenko / Euler-Bernoulli
+   ========================================================================= */
+(function timo() {
+  const svg = $('tm-svg');
+  const st = { r: 10, timo: true };
+  const X0 = 80, Lp = 500, Yc = 100, D = 62;
+  function render() {
+    clear(svg);
+    const phi = 3 / (st.r * st.r);
+    const shareReal = (phi / 4) / (1 + phi / 4);
+    const share = st.timo ? shareReal : 0;
+    const db = D * (1 - share), ds = D * share;
+    const hp = Math.min(Lp / st.r, 110);
+    const w = (q) => db * (3 * q * q - q * q * q) / 2 + ds * q;
+    const sb = (q) => db * 1.5 * (2 * q - q * q) / Lp;
+    const stt = (q) => sb(q) + ds / Lp;
+    const top = [], bot = [];
+    for (let i = 0; i <= 60; i++) {
+      const q = i / 60, cx = X0 + q * Lp, cy = Yc + w(q), m = sb(q), nn = Math.hypot(1, m);
+      const dx = m / nn, dy = -1 / nn;
+      top.push([cx + dx * hp / 2, cy + dy * hp / 2]); bot.push([cx - dx * hp / 2, cy - dy * hp / 2]);
+    }
+    el('rect', { x: X0 - 18, y: Yc - Math.max(hp, 40) / 2 - 20, width: 18, height: Math.max(hp, 40) + 40, class: 'wall' }, svg);
+    el('path', { d: 'M' + top.map((p) => p.join(',')).join('L') + 'L' + bot.reverse().map((p) => p.join(',')).join('L') + 'Z', class: 'beam-fill' }, svg);
+    let cl = '';
+    for (let i = 0; i <= 60; i++) { const q = i / 60; cl += (i ? 'L' : 'M') + (X0 + q * Lp) + ',' + (Yc + w(q)); }
+    el('path', { d: cl, class: 'curve-m' }, svg);
+    [0.2, 0.4, 0.6, 0.8, 0.97].forEach((q) => {
+      const cx = X0 + q * Lp, cy = Yc + w(q);
+      const m = sb(q), nn = Math.hypot(1, m), dx = m / nn, dy = -1 / nn;
+      const mt = stt(q), nt = Math.hypot(1, mt), ex = mt / nt, ey = -1 / nt;
+      const hh = hp / 2 + 8;
+      el('line', { x1: cx - ex * hh, y1: cy - ey * hh, x2: cx + ex * hh, y2: cy + ey * hh, class: 'sec-n' }, svg);
+      el('line', { x1: cx - dx * hp / 2, y1: cy - dy * hp / 2, x2: cx + dx * hp / 2, y2: cy + dy * hp / 2, class: 'sec' }, svg);
+    });
+    const tx = X0 + Lp, ty = Yc + w(1) - hp / 2;
+    arrow(svg, tx, ty - 50, tx, ty - 6, 'arr', 10);
+    el('text', { x: tx + 8, y: ty - 34, class: 'lbl-l', text: 'F' }, svg);
+    el('text', { x: X0, y: 238, class: 'lbl-m', text: hp >= 110 ? 'épaisseur dessinée plafonnée' : 'déformée amplifiée, flèche totale identique pour comparer' }, svg);
+    $('tm-r-out').textContent = fr(st.r, st.r < 10 ? 1 : 0);
+    let verdict;
+    if (shareReal < 0.01) verdict = 'négligeable : Euler-Bernoulli suffit (poutre mince)';
+    else if (shareReal < 0.05) verdict = 'faible';
+    else verdict = 'à prendre en compte : Timoshenko (poutre épaisse)';
+    $('tm-read').innerHTML =
+      `<div><span>φ = 12EI/(L²kGA) ≈ 3(h/L)²</span><b>${phi < 0.01 ? sci(phi, 1) : fr(phi, 3)}</b></div>` +
+      `<div><span>part du cisaillement dans la flèche</span><b>${fr(100 * shareReal, shareReal < 0.01 ? 2 : 1)} %</b></div>` +
+      `<div><span>verdict</span><b>${verdict}</b></div>` +
+      (st.timo ? '' : `<div><span>Euler-Bernoulli</span><b>ignore ces ${fr(100 * shareReal, 1)} %</b></div>`);
+  }
+  const sl = $('tm-r');
+  const toR = (v) => Math.pow(100, v / 100);
+  const toV = (r) => 50 * Math.log10(r);
+  sl.addEventListener('input', () => { st.r = toR(+sl.value); render(); });
+  document.querySelectorAll('[data-tm]').forEach((b) => b.addEventListener('click', () => { st.r = +b.dataset.tm; sl.value = toV(st.r); render(); }));
+  const bE = $('tm-eb'), bT = $('tm-ti');
+  bE.addEventListener('click', () => { st.timo = false; setPressed([bE, bT], bE); render(); });
+  bT.addEventListener('click', () => { st.timo = true; setPressed([bE, bT], bT); render(); });
+  sl.value = toV(st.r);
+  render();
+})();
+
+/* =========================================================================
+   Poutre : fonctions d'Hermite (ξ = x/L, L donné)
+   ========================================================================= */
+const H = {
+  N: (q, L) => [1 - 3 * q * q + 2 * q ** 3, L * (-q + 2 * q * q - q ** 3), 3 * q * q - 2 * q ** 3, L * (q * q - q ** 3)],
+  d1: (q, L) => [(-6 * q + 6 * q * q) / L, -1 + 4 * q - 3 * q * q, (6 * q - 6 * q * q) / L, 2 * q - 3 * q * q],
+  d2: (q, L) => [6 / (L * L) * (2 * q - 1), 2 / L * (2 - 3 * q), 6 / (L * L) * (1 - 2 * q), 2 / L * (1 - 3 * q)]
+};
+const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+
+/* ---------- C.2 Hermite ---------- */
+(function hermite() {
+  const svg = $('hm-svg');
+  const st = { q: [0.4, -1, -0.3, 0.5], parts: false };
+  const X0 = 100, X1 = 580, Y = 125, S = 95;
+  const names = ['w₁', 'θ₁', 'w₂', 'θ₂'];
+  const colors = ['var(--e1)', 'var(--e2)', 'var(--e3)', 'var(--exact)'];
+  const sx = (q) => X0 + q * (X1 - X0), sy = (w) => Y - S * w;
+  function render() {
+    clear(svg);
+    el('line', { x1: X0, y1: Y, x2: X1, y2: Y, class: 'ghost' }, svg);
+    if (st.parts) {
+      for (let k = 0; k < 4; k++) {
+        let d = '';
+        for (let i = 0; i <= 60; i++) { const q = i / 60; d += (i ? 'L' : 'M') + sx(q) + ',' + sy(H.N(q, 1)[k] * st.q[k]); }
+        el('path', { d, fill: 'none', stroke: colors[k], 'stroke-width': 1.8, 'stroke-dasharray': '6 4' }, svg);
+      }
+      names.forEach((nm, k) => el('text', { x: 20 + k * 70, y: 22, fill: colors[k], text: 'N' + '₁₂₃₄'[k] + '·' + nm }, svg));
+    }
+    let d = '';
+    for (let i = 0; i <= 80; i++) { const q = i / 80; d += (i ? 'L' : 'M') + sx(q) + ',' + sy(dot4(H.N(q, 1), st.q)); }
+    el('path', { d, class: 'barl', 'stroke-width': 5 }, svg);
+    [[0, st.q[0], st.q[1]], [1, st.q[2], st.q[3]]].forEach(([q, w, th], k) => {
+      const x = sx(q), y = sy(w);
+      const slope = -th; // w,x = −θ
+      const dx = (X1 - X0), dy = -S * slope, n = Math.hypot(dx, dy);
+      el('line', { x1: x - 55 * dx / n, y1: y - 55 * dy / n, x2: x + 55 * dx / n, y2: y + 55 * dy / n, stroke: 'var(--node)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }, svg);
+      el('line', { x1: x, y1: Y, x2: x, y2: y, class: 'ghost', 'stroke-width': 1 }, svg);
+      el('circle', { cx: x, cy: y, r: 8, class: 'node' }, svg);
+      el('text', { x: x + (k ? 14 : -14), y: y - 12, class: 'lbl-n ' + (k ? '' : 'end'), text: `w${k ? '₂' : '₁'} = ${fr(w)}` }, svg);
+      el('text', { x: x + (k ? 14 : -14), y: y + 22, class: 'lbl-n ' + (k ? '' : 'end'), text: `θ${k ? '₂' : '₁'} = ${fr(th)}` }, svg);
+    });
+    el('text', { x: 340, y: 240, class: 'lbl-m mid', text: 'tirets bleus : tangente aux nœuds, de pente w,x = −θ' }, svg);
+  }
+  const rs = ['hm-w1', 'hm-t1', 'hm-w2', 'hm-t2'].map((id, k) => bindRange(id, (v) => fr(v), (v) => { st.q[k] = v; render(); }));
+  rs.forEach((r) => { r.inp.dispatchEvent(new Event('input')); });
+  const bp = $('hm-parts');
+  bp.addEventListener('click', () => { st.parts = !st.parts; bp.setAttribute('aria-pressed', st.parts); render(); });
+  // vignettes
+  const cards = $('hm-cards');
+  ['N₁ : w₁ = 1', 'N₂ : θ₁ = 1', 'N₃ : w₂ = 1', 'N₄ : θ₂ = 1'].forEach((lbl, k) => {
+    const b = document.createElement('button'); b.className = 'btn'; b.type = 'button';
+    b.style.display = 'grid'; b.style.gap = '4px'; b.style.justifyItems = 'center';
+    const s = el('svg', { viewBox: '0 0 90 36', width: 90, height: 36, 'aria-hidden': 'true' });
+    el('line', { x1: 5, y1: 20, x2: 85, y2: 20, class: 'ghost', 'stroke-width': 1 }, s);
+    let d = '';
+    const amp = k % 2 ? 60 : 16;
+    for (let i = 0; i <= 30; i++) { const q = i / 30; d += (i ? 'L' : 'M') + (5 + 80 * q) + ',' + (20 - amp * H.N(q, 1)[k]); }
+    el('path', { d, fill: 'none', stroke: colors[k], 'stroke-width': 2.4 }, s);
+    b.appendChild(s);
+    const t = document.createElement('span'); t.textContent = lbl; t.style.fontSize = '13px'; b.appendChild(t);
+    b.addEventListener('click', () => { rs.forEach((r, j) => r.set(j === k ? 1 : 0)); });
+    cards.appendChild(b);
+  });
+  render();
+})();
+
+/* ---------- C.3 Colonnes de [k] poutre ---------- */
+(function kBeam() {
+  const svg = $('kc-svg');
+  const dofs = ['u₁', 'w₁', 'θ₁', 'u₂', 'w₂', 'θ₂'];
+  const KS = [
+    ['EA/L', '0', '0', '−EA/L', '0', '0'],
+    ['0', '12EI/L³', '−6EI/L²', '0', '−12EI/L³', '−6EI/L²'],
+    ['0', '−6EI/L²', '4EI/L', '0', '6EI/L²', '2EI/L'],
+    ['−EA/L', '0', '0', 'EA/L', '0', '0'],
+    ['0', '−12EI/L³', '6EI/L²', '0', '12EI/L³', '6EI/L²'],
+    ['0', '−6EI/L²', '2EI/L', '0', '6EI/L²', '4EI/L']
+  ];
+  const X0 = 150, X1 = 530, Y = 120;
+  let sel = 1;
+  const btns = [];
+  dofs.forEach((d, j) => {
+    const b = document.createElement('button'); b.className = 'btn'; b.type = 'button';
+    b.textContent = `Imposer ${d} = 1`;
+    b.addEventListener('click', () => { sel = j; render(); });
+    $('kc-btns').appendChild(b); btns.push(b);
+  });
+  function render() {
+    btns.forEach((b, j) => b.setAttribute('aria-pressed', j === sel ? 'true' : 'false'));
+    clear(svg);
+    el('line', { x1: X0, y1: Y, x2: X1, y2: Y, class: 'ghost' }, svg);
+    const q = [0, 0, 0, 0, 0, 0]; q[sel] = 1;
+    let xa = X0, xb = X1, ya = Y, yb = Y;
+    if (sel === 0 || sel === 3) {
+      xa += 45 * q[0]; xb += 45 * q[3];
+      el('line', { x1: xa, y1: Y, x2: xb, y2: Y, class: 'barl', stroke: sel === 0 ? 'var(--comp)' : 'var(--tens)' }, svg);
+    } else {
+      const v = [q[1], q[2], q[4], q[5]];
+      const amp = (sel === 2 || sel === 5) ? 330 : 62;
+      let d = '';
+      for (let i = 0; i <= 80; i++) { const s = i / 80; d += (i ? 'L' : 'M') + (X0 + s * (X1 - X0)) + ',' + (Y - amp * dot4(H.N(s, 1), v)); }
+      el('path', { d, class: 'barl' }, svg);
+      ya = Y - amp * v[0]; yb = Y - amp * v[2];
+    }
+    const col = KS.map((r) => r[sel]);
+    const nodeXY = [[xa, ya], [xb, yb]];
+    [0, 1].forEach((nd) => {
+      const [x, y] = nodeXY[nd];
+      const fu = col[3 * nd], fw = col[3 * nd + 1], m = col[3 * nd + 2];
+      const side = nd ? 1 : -1;
+      if (fu !== '0') {
+        const pos = !fu.startsWith('−');
+        if (pos === (side < 0)) arrow(svg, x + side * 80, y, x + side * 12, y, 'arr', 10); else arrow(svg, x + side * 12, y, x + side * 80, y, 'arr', 10);
+        el('text', { x: x + side * 46, y: y - 12, class: 'lbl-l mid', text: fu }, svg);
+      }
+      if (fw !== '0') {
+        const up = !fw.startsWith('−');
+        arrow(svg, x, y + (up ? -12 : 12), x, y + (up ? -70 : 70), 'arr', 10);
+        el('text', { x: x + side * 12, y: y + (up ? -56 : 66), class: 'lbl-l ' + (nd ? '' : 'end'), text: fw }, svg);
+      }
+      if (m !== '0') {
+        momentArc(svg, x, y, 26, !m.startsWith('−'), 'arr');
+        el('text', { x: x + side * 40, y: y + 46, class: 'lbl-l ' + (nd ? '' : 'end'), text: 'M : ' + m }, svg);
+      }
+      el('circle', { cx: x, cy: y, r: 8, class: 'node' }, svg);
+    });
+    el('text', { x: 340, y: 220, class: 'lbl-m mid', text: 'flèche vers le haut = force positive · arc horaire = moment positif' }, svg);
+    // matrice
+    let h = '<tr><th></th>' + dofs.map((d, j) => `<th>${d}</th>`).join('') + '</tr>';
+    KS.forEach((r, i) => {
+      h += `<tr><th>${dofs[i]}</th>` + r.map((v, j) => `<td class="${j === sel ? 'hl' : ''} ${v === '0' ? 'zero' : (v.startsWith('−') ? 'neg' : '')}">${v}</td>`).join('') + '</tr>';
+    });
+    $('kc-mat').innerHTML = h;
+    const desc = (nd) => {
+      const parts = [];
+      const fu = col[3 * nd], fw = col[3 * nd + 1], m = col[3 * nd + 2];
+      if (fu !== '0') parts.push(`une force axiale ${fu.replace('−', '')} ${fu.startsWith('−') ? 'vers la gauche' : 'vers la droite'}`);
+      if (fw !== '0') parts.push(`une force ${fw.replace('−', '')} ${fw.startsWith('−') ? 'vers le bas' : 'vers le haut'}`);
+      if (m !== '0') parts.push(`un moment ${m.replace('−', '')} ${m.startsWith('−') ? 'anti-horaire' : 'horaire'}`);
+      return parts.length ? parts.join(' et ') : 'rien';
+    };
+    $('kc-read').textContent = `Pour imposer ${dofs[sel]} = 1 (tous les autres ddl bloqués à 0), il faut appliquer au nœud 1 : ${desc(0)} ; au nœud 2 : ${desc(1)}. Ce sont les termes de la colonne surlignée.`;
+  }
+  render();
+})();
+
+/* ---------- C.5 Console ---------- */
+(function console_() {
+  const sw = $('cs-w'), sm = $('cs-m');
+  const st = { n: 1, dist: false };
+  function fe(n, dist) {
+    const h = 1 / n, nd = 2 * (n + 1);
+    const K = Array.from({ length: nd }, () => new Array(nd).fill(0)), F = new Array(nd).fill(0);
+    const kl = [[12, -6 * h, -12, -6 * h], [-6 * h, 4 * h * h, 6 * h, 2 * h * h], [-12, 6 * h, 12, 6 * h], [-6 * h, 2 * h * h, 6 * h, 4 * h * h]].map((r) => r.map((v) => v / h ** 3));
+    for (let e = 0; e < n; e++) {
+      const id = [2 * e, 2 * e + 1, 2 * e + 2, 2 * e + 3];
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) K[id[i]][id[j]] += kl[i][j];
+      if (dist) { const fe_ = [-h / 2, h * h / 12, -h / 2, -h * h / 12]; for (let i = 0; i < 4; i++) F[id[i]] += fe_[i]; }
+    }
+    if (!dist) F[nd - 2] = -1;
+    return { U: reduceSolve(K, F, [0, 1]).U, h };
+  }
+  const wEx = (x, dist) => dist ? -x * x * (x * x - 4 * x + 6) / 24 : -x * x * (3 - x) / 6;
+  const mEx = (x, dist) => dist ? (1 - x) * (1 - x) / 2 : 1 - x;
+  function render() {
+    const { n, dist } = st;
+    const r = fe(n, dist), h = r.h;
+    const ev = (x) => { const e = Math.min(n - 1, Math.floor(x / h)); const q = (x - e * h) / h; return { e, q }; };
+    const loc = (e) => [r.U[2 * e], r.U[2 * e + 1], r.U[2 * e + 2], r.U[2 * e + 3]];
+    const wFE = (x) => { const { e, q } = ev(x); return dot4(H.N(q, h), loc(e)); };
+    const mFE = (e, q) => -dot4(H.d2(q, h), loc(e));
+    // flèche
+    clear(sw);
+    const X0 = 45, X1 = 380, wmax = dist ? 1 / 8 : 1 / 3;
+    const xs = (x) => X0 + x * (X1 - X0), ys = (w) => 70 - w / wmax * 145;
+    el('rect', { x: X0 - 14, y: 45, width: 14, height: 50, class: 'wall' }, sw);
+    el('line', { x1: X0, y1: 70, x2: X1, y2: 70, class: 'ghost' }, sw);
+    if (dist) for (let i = 0; i < 9; i++) { const x = xs((i + 0.5) / 9); arrow(sw, x, 30, x, 62, 'arr', 7); }
+    else arrow(sw, X1, 22, X1, 62, 'arr', 10);
+    el('text', { x: 45, y: 20, class: 'lbl-m', text: 'Flèche w' }, sw);
+    let de = '', df = '';
+    for (let i = 0; i <= 100; i++) { const x = i / 100; de += (i ? 'L' : 'M') + xs(x) + ',' + ys(wEx(x, dist)); df += (i ? 'L' : 'M') + xs(x) + ',' + ys(wFE(Math.min(x, 1 - 1e-9))); }
+    el('path', { d: de, class: 'curve-e' }, sw);
+    el('path', { d: df, class: 'curve-f', 'stroke-dasharray': '7 4' }, sw);
+    for (let i = 0; i <= n; i++) el('circle', { cx: xs(i * h), cy: ys(r.U[2 * i]), r: 4.5, class: 'dot-f' }, sw);
+    el('text', { x: 200, y: 232, class: 'lbl-m mid', text: 'magenta : exact · vert pointillé : EF' }, sw);
+    // moment
+    clear(sm);
+    const mmax = 1.1 * (dist ? 0.5 : 1);
+    const ym = (m) => 205 - m / mmax * 165;
+    el('text', { x: 45, y: 20, class: 'lbl-m', text: 'Moment fléchissant M' }, sm);
+    el('line', { x1: X0, y1: ym(0), x2: X1, y2: ym(0), class: 'ax' }, sm);
+    el('line', { x1: X0, y1: 25, x2: X0, y2: ym(0), class: 'ax' }, sm);
+    let dm = '';
+    for (let i = 0; i <= 100; i++) { const x = i / 100; dm += (i ? 'L' : 'M') + xs(x) + ',' + ym(mEx(x, dist)); }
+    el('path', { d: dm, class: 'curve-e' }, sm);
+    for (let e = 0; e < n; e++) {
+      el('line', { x1: xs(e * h), y1: ym(mFE(e, 0)), x2: xs((e + 1) * h), y2: ym(mFE(e, 1)), class: 'curve-f' }, sm);
+      if (e) el('line', { x1: xs(e * h), y1: ym(mFE(e - 1, 1)), x2: xs(e * h), y2: ym(mFE(e, 0)), class: 'curve-f', 'stroke-dasharray': '2 3', 'stroke-width': 1.4 }, sm);
+    }
+    el('text', { x: xs(0) + 6, y: ym(mFE(0, 0)) - 8, class: 'lbl-f', text: fr(mFE(0, 0), 3) }, sm);
+    // lecture
+    const wl = r.U[2 * n], we = wEx(1, dist), m0 = mFE(0, 0), me = mEx(0, dist);
+    const u = dist ? 'qL⁴/EI' : 'FL³/EI', um = dist ? 'qL²' : 'FL';
+    $('cs-n-out').textContent = n + (n > 1 ? ' éléments' : ' élément');
+    $('cs-read').innerHTML =
+      `<div><span>w(L) EF</span><b>${fr(wl, 4)} ${u}</b></div><div><span>w(L) exact</span><b>${fr(we, 4)} ${u}</b></div>` +
+      `<div><span>M encastrement EF</span><b>${fr(m0, 3)} ${um}</b></div><div><span>M exact</span><b>${fr(me, 3)} ${um}</b></div>` +
+      `<div><span>erreur sur M</span><b>${fr(100 * Math.abs(m0 - me) / me, 1)} %</b></div>`;
+    $('cs-msg').innerHTML = dist
+      ? 'Charge répartie : la solution exacte est un polynôme de degré 4, l\'élément est cubique. <b>Aux nœuds, w est exact</b> (−qL⁴/8EI dès 1 élément), mais entre les nœuds c\'est approché. Surtout, <b>M est linéaire par élément</b> alors que le vrai M est parabolique : 17 % d\'erreur à l\'encastrement avec 1 élément. Raffine pour voir l\'escalier de droites coller à la parabole.'
+      : 'Force au bout : la solution exacte est une cubique, exactement ce que l\'élément sait représenter. <b>Un seul élément donne w et M exacts partout</b> (w = −FL³/3EI, θ = FL²/2EI, M = F(L − x)). Ajouter des éléments ne change rien.';
+  }
+  bindRange('cs-n', () => '', (v) => { st.n = v; render(); });
+  const bp = $('cs-p'), bq = $('cs-q');
+  bp.addEventListener('click', () => { st.dist = false; setPressed([bp, bq], bp); render(); });
+  bq.addEventListener('click', () => { st.dist = true; setPressed([bp, bq], bq); render(); });
+  render();
+})();
+
+/* =========================================================================
+   C.7 Portique : solveur de poutres 2D
+   ========================================================================= */
+(function portique() {
+  const E = 210000;
+  const nodes = [[0, 0], [0, 5000], [4000, 5000]];
+  const els = [
+    { n: [0, 1], A: 1240, I: 1934000, z: 50, name: 'Poteau (élément 1)' },
+    { n: [1, 2], A: 3960, I: 30600000, z: 110, name: 'Traverse (élément 2)' }
+  ];
+  function kloc(A, I, L) {
+    const a = E * A / L, b = 12 * E * I / L ** 3, c = 6 * E * I / L ** 2, d = 4 * E * I / L, e = 2 * E * I / L;
+    return [[a, 0, 0, -a, 0, 0], [0, b, -c, 0, -b, -c], [0, -c, d, 0, c, e], [-a, 0, 0, a, 0, 0], [0, -b, c, 0, b, c], [0, -c, e, 0, c, d]];
+  }
+  const geo = els.map((e) => {
+    const [a, b] = e.n, dx = nodes[b][0] - nodes[a][0], dz = nodes[b][1] - nodes[a][1];
+    const L = Math.hypot(dx, dz), C = dx / L, S = dz / L;
+    const t = [[C, S, 0], [-S, C, 0], [0, 0, 1]];
+    const T = Array.from({ length: 6 }, (_, i) => Array.from({ length: 6 }, (_, j) => (Math.floor(i / 3) === Math.floor(j / 3)) ? t[i % 3][j % 3] : 0));
+    const kl = kloc(e.A, e.I, L);
+    const kg = Array.from({ length: 6 }, (_, i) => Array.from({ length: 6 }, (_, j) => { let s = 0; for (let p = 0; p < 6; p++) for (let q = 0; q < 6; q++) s += T[p][i] * kl[p][q] * T[q][j]; return s; }));
+    return { L, C, S, T, kg, id: [3 * a, 3 * a + 1, 3 * a + 2, 3 * b, 3 * b + 1, 3 * b + 2] };
+  });
+  const K = Array.from({ length: 9 }, () => new Array(9).fill(0));
+  geo.forEach((g) => { for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) K[g.id[i]][g.id[j]] += g.kg[i][j]; });
+  const svg = $('pq-svg');
+  const st = { m: 250, amp: 60 };
+  const sc = 0.05, ox = 110, oy = 320;
+  const P = (X, Z) => [ox + X * sc, oy - Z * sc];
+  function render() {
+    const F = new Array(9).fill(0); F[7] = -st.m * 9.81 / 2;
+    const res = reduceSolve(K, F, [0, 1, 2, 6, 8]);
+    const U = res.U, R = res.R;
+    const out = els.map((e, k) => {
+      const g = geo[k];
+      const ug = g.id.map((d) => U[d]);
+      const ul = g.T.map((row) => row.reduce((s, v, j) => s + v * ug[j], 0));
+      const N = E * e.A / g.L * (ul[3] - ul[0]);
+      const v = [ul[1], ul[2], ul[4], ul[5]];
+      const M0 = -E * e.I * dot4(H.d2(0, g.L), v), ML = -E * e.I * dot4(H.d2(1, g.L), v);
+      const sMax = Math.abs(N / e.A) + Math.max(Math.abs(M0), Math.abs(ML)) * e.z / e.I;
+      return { ul, N, M0, ML, sMax };
+    });
+    // dessin
+    clear(svg);
+    el('rect', { x: ox - 30, y: oy + 2, width: 60, height: 12, class: 'wall' }, svg);
+    const [sx3] = P(4000, 0);
+    el('line', { x1: sx3, y1: 20, x2: sx3, y2: 360, class: 'ghost', 'stroke-width': 1.3 }, svg);
+    el('text', { x: sx3 + 6, y: 352, class: 'lbl-m', text: 'axe de symétrie' }, svg);
+    els.forEach((e, k) => {
+      const g = geo[k], [a, b] = e.n;
+      const p1 = P(...nodes[a]), p2 = P(...nodes[b]);
+      el('line', { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], class: 'ghost', 'stroke-width': 1.5 }, svg);
+      let d = '';
+      for (let i = 0; i <= 40; i++) {
+        const s = i / 40;
+        const uax = (1 - s) * out[k].ul[0] + s * out[k].ul[3];
+        const w = dot4(H.N(s, g.L), [out[k].ul[1], out[k].ul[2], out[k].ul[4], out[k].ul[5]]);
+        const X = nodes[a][0] + s * (nodes[b][0] - nodes[a][0]) + st.amp * (uax * g.C - w * g.S);
+        const Z = nodes[a][1] + s * (nodes[b][1] - nodes[a][1]) + st.amp * (uax * g.S + w * g.C);
+        const [x, y] = P(X, Z); d += (i ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1);
+      }
+      el('path', { d, class: 'barl', stroke: k ? 'var(--e2)' : 'var(--e3)', 'stroke-width': k ? 7 : 5 }, svg);
+    });
+    const def = (i) => P(nodes[i][0] + st.amp * U[3 * i], nodes[i][1] + st.amp * U[3 * i + 1]);
+    [0, 1, 2].forEach((i) => { const [x, y] = def(i); el('circle', { cx: x, cy: y, r: 7, class: 'node' }, svg); });
+    const [x3, y3] = def(2);
+    if (st.m > 0) arrow(svg, x3, y3 - 58, x3, y3 - 9, 'arr', 10);
+    el('text', { x: x3 - 8, y: y3 - 44, class: 'lbl-l end', text: 'F/2 = ' + fr(st.m * 9.81 / 2, 0) + ' N' }, svg);
+    el('text', { x: P(0, 5000)[0] - 14, y: P(0, 5000)[1] - 12, class: 'lbl-n end', text: '2' }, svg);
+    el('text', { x: P(0, 0)[0] + 14, y: P(0, 0)[1] - 8, class: 'lbl-n', text: '1' }, svg);
+    el('text', { x: 200, y: 40, class: 'lbl-m mid', text: 'IPN220, L = 4 m' }, svg);
+    el('text', { x: 72, y: 200, class: 'lbl-m end', text: '5 m' }, svg);
+    // tableau
+    const row = (l, v) => `<tr><th style="text-align:left">${l}</th><td style="text-align:right">${v}</td></tr>`;
+    let h = '<tr><th colspan="2" style="text-align:left;color:var(--ink)">Déplacements (inconnues)</th></tr>' +
+      row('U₂', sci(U[3], 2) + ' mm') + row('W₂', sci(U[4], 2) + ' mm') + row('θ₂', sci(U[5], 2) + ' rad') + row('W₃', fr(U[7], 2) + ' mm') +
+      '<tr><th colspan="2" style="text-align:left;color:var(--ink)">Réactions {R} = [K]{U} − {F}</th></tr>' +
+      row('R<sub>U1</sub> / R<sub>W1</sub>', fr(R[0], 1) + ' / ' + fr(R[1], 1) + ' N') + row('R<sub>θ1</sub>', sci(R[2], 2) + ' N·mm') +
+      row('R<sub>U3</sub>', fr(R[6], 1) + ' N') + row('R<sub>θ3</sub>', sci(R[8], 2) + ' N·mm');
+    els.forEach((e, k) => {
+      h += `<tr><th colspan="2" style="text-align:left;color:var(--ink)">${e.name}</th></tr>` +
+        row('N', fr(out[k].N, 1) + ' N') + row('M début / fin', sci(out[k].M0, 2) + ' / ' + sci(out[k].ML, 2)) +
+        row('σ max = |N/A| + |M|·z/I', fr(out[k].sMax, 1) + ' MPa');
+    });
+    $('pq-tab').innerHTML = h;
+    const smax = Math.max(out[0].sMax, out[1].sMax);
+    $('pq-m-out').textContent = st.m + ' kg';
+    $('pq-amp-out').textContent = '×' + st.amp;
+    $('pq-read').innerHTML =
+      `<div><span>flèche au milieu W₃</span><b>${fr(U[7], 2)} mm</b></div>` +
+      `<div><span>σ max</span><b>${fr(smax, 1)} MPa</b></div>` +
+      `<div><span>marge / S235</span><b>${smax > 0 ? '×' + fr(235 / smax, 0) : '—'}</b></div>`;
+    $('pq-msg').textContent = st.m === 250
+      ? 'Avec 250 kg on retrouve le cours : W₃ ≈ −3,6 mm (Abaqus : −3,56), R_W1 = 1226 N, R_θ3 ≈ −4,5·10⁶ N·mm, σ ≈ 16 MPa dans la traverse au milieu (z = h/2 = 110 mm).'
+      : 'Tout est linéaire : double la charge et tous les déplacements, réactions et contraintes doublent. C\'est l\'hypothèse d\'élasticité linéaire en petits déplacements.';
+  }
+  bindRange('pq-m', (v) => v + ' kg', (v) => { st.m = v; render(); });
+  bindRange('pq-amp', (v) => '×' + v, (v) => { st.amp = v; render(); });
+  render();
+})();
+
+/* =========================================================================
+   Barre de chapitres : chapitre courant
+   ========================================================================= */
+(function nav() {
+  const links = [...document.querySelectorAll('.chapters a')];
+  const map = new Map(links.map((a) => [a.getAttribute('href').slice(1), a]));
+  if (!('IntersectionObserver' in window)) return;
+  const obs = new IntersectionObserver((ents) => {
+    ents.forEach((e) => {
+      if (e.isIntersecting) { links.forEach((a) => a.classList.remove('on')); const a = map.get(e.target.id); if (a) a.classList.add('on'); }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  map.forEach((_, id) => { const s = document.getElementById(id); if (s) obs.observe(s); });
+})();
+
+})();
+
+
+/* =========================================================================
+   E. Entraînement : figures et déformées des exercices
+   ========================================================================= */
+(function training() {
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = (id) => document.getElementById(id);
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    if (attrs) for (const k in attrs) { if (k === 'text') e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+  function fr(v, d = 2) { if (!isFinite(v)) return '—'; if (Math.abs(v) < 0.5 * Math.pow(10, -d)) v = 0; return v.toFixed(d).replace('.', ',').replace('-', '−'); }
+  function arrow(g, x1, y1, x2, y2, cls, head = 9) {
+    const L = Math.hypot(x2 - x1, y2 - y1); if (L < 2) return;
+    const ux = (x2 - x1) / L, uy = (y2 - y1) / L, h = Math.min(head, L * 0.7), bx = x2 - ux * h, by = y2 - uy * h;
+    el('line', { x1, y1, x2: bx, y2: by, class: cls }, g);
+    el('polygon', { points: `${x2},${y2} ${bx - uy * h * 0.5},${by + ux * h * 0.5} ${bx + uy * h * 0.5},${by - ux * h * 0.5}`, class: cls + ' head' }, g);
+  }
+  function pin(g, x, y) {
+    el('polygon', { points: `${x},${y + 5} ${x - 10},${y + 21} ${x + 10},${y + 21}`, class: 'support' }, g);
+    el('rect', { x: x - 15, y: y + 21, width: 30, height: 7, class: 'wall' }, g);
+  }
+  function pinTop(g, x, y) {
+    el('polygon', { points: `${x},${y - 5} ${x - 10},${y - 21} ${x + 10},${y - 21}`, class: 'support' }, g);
+    el('rect', { x: x - 15, y: y - 28, width: 30, height: 7, class: 'wall' }, g);
+  }
+  function solve(K, F) {
+    const n = F.length; if (!n) return [];
+    let sc = 0; for (let i = 0; i < n; i++) sc = Math.max(sc, Math.abs(K[i][i]));
+    const A = K.map((r, i) => [...r, F[i]]);
+    for (let c = 0; c < n; c++) {
+      let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+      if (Math.abs(A[p][c]) < 1e-12 * (sc || 1)) return null;
+      [A[c], A[p]] = [A[p], A[c]];
+      for (let r = 0; r < n; r++) if (r !== c) { const f = A[r][c] / A[c][c]; for (let k = c; k <= n; k++) A[r][k] -= f * A[c][k]; }
+    }
+    return A.map((r, i) => r[n] / r[i]);
+  }
+  function reduceSolve(K, F, fixed) {
+    const nd = F.length, free = [];
+    for (let d = 0; d < nd; d++) if (!fixed.includes(d)) free.push(d);
+    const u = solve(free.map((i) => free.map((j) => K[i][j])), free.map((i) => F[i]));
+    const U = new Array(nd).fill(0); free.forEach((d, i) => { U[d] = u[i]; });
+    return { U, free };
+  }
+  const SUBS = '₀₁₂₃₄₅₆₇₈₉';
+  const sub = (n) => String(n).split('').map((c) => SUBS[+c]).join('');
+
+  /* ---------- Treillis générique ---------- */
+  function exTruss(c) {
+    const svg = $(c.id), nn = c.nodes.length, nd = 2 * nn;
+    const K = Array.from({ length: nd }, () => new Array(nd).fill(0)), F = new Array(nd).fill(0);
+    const geo = c.els.map((e) => {
+      const [a, b] = e.n, dx = c.nodes[b][0] - c.nodes[a][0], dy = c.nodes[b][1] - c.nodes[a][1];
+      const L = Math.hypot(dx, dy), cs = dx / L, sn = dy / L, k = e.EA / L;
+      const P = [[cs * cs, cs * sn], [cs * sn, sn * sn]], id = [2 * a, 2 * a + 1, 2 * b, 2 * b + 1];
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) K[id[i]][id[j]] += ((i < 2) === (j < 2) ? 1 : -1) * k * P[i % 2][j % 2];
+      return { L, cs, sn };
+    });
+    for (const d in c.loads) F[d] = c.loads[d];
+    const { U, free } = reduceSolve(K, F, c.fixed);
+    const N = c.els.map((e, i) => { const [a, b] = e.n, g = geo[i]; return e.EA / g.L * ((U[2 * b] - U[2 * a]) * g.cs + (U[2 * b + 1] - U[2 * a + 1]) * g.sn); });
+    let Umax = 0; for (let i = 0; i < nn; i++) Umax = Math.max(Umax, Math.hypot(U[2 * i], U[2 * i + 1]));
+    const Nmax = Math.max(...N.map(Math.abs));
+    const { sc, ox, oy } = c.view;
+    const inp = $(c.id + '-amp'), out = $(c.id + '-amp-out');
+    function P(i, amp, mir) {
+      let X = c.nodes[i][0], Y = c.nodes[i][1], u = U[2 * i] * amp, v = U[2 * i + 1] * amp;
+      if (mir) { X = 2 * c.mirrorX - X; u = -u; }
+      return [ox + (X + u) * sc, oy - (Y + v) * sc];
+    }
+    function render() {
+      const s = +inp.value; out.textContent = s ? 'amplifiée' : 'aucune';
+      const amp = Umax > 0 ? (s / 100) * 48 / (Umax * sc) : 0;
+      clear(svg);
+      if (c.mirrorX !== undefined) {
+        const xa = ox + c.mirrorX * sc;
+        el('line', { x1: xa, y1: 12, x2: xa, y2: +svg.getAttribute('viewBox').split(' ')[3] - 8, class: 'axis-sym' }, svg);
+        el('text', { x: xa + 6, y: 24, class: 'lbl-n', text: 'axe de symétrie' }, svg);
+      }
+      // fantômes
+      const gG = el('g', null, svg);
+      c.els.forEach((e) => {
+        const [a, b] = e.n;
+        const p = P(a, 0), q = P(b, 0);
+        el('line', { x1: p[0], y1: p[1], x2: q[0], y2: q[1], class: 'ghost', 'stroke-width': 1.2 }, gG);
+      });
+      (c.supports || []).forEach((sp) => { const [x, y] = P(sp, 0); pin(gG, x, y); if (c.mirrorX !== undefined) { const [mx, my] = P(sp, 0, true); const gm = el('g', { class: 'mirror-ghost' }, svg); pin(gm, mx, my); } });
+      (c.supportsTop || []).forEach((sp) => { const [x, y] = P(sp, 0); pinTop(gG, x, y); });
+      // moitié miroir
+      if (c.mirrorX !== undefined) {
+        const gm = el('g', { class: 'mirror-ghost' }, svg);
+        c.els.forEach((e, i) => {
+          const [a, b] = e.n;
+          if (Math.abs(c.nodes[a][0] - c.mirrorX) < 1e-9 && Math.abs(c.nodes[b][0] - c.mirrorX) < 1e-9) return;
+          const p = P(a, amp, true), q = P(b, amp, true);
+          el('line', { x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: 'var(--muted)', 'stroke-width': 4, 'stroke-linecap': 'round' }, gm);
+        });
+      }
+      // barres déformées
+      const gB = el('g', null, svg);
+      c.els.forEach((e, i) => {
+        const [a, b] = e.n, p = P(a, amp), q = P(b, amp), r = Nmax > 0 ? Math.abs(N[i]) / Nmax : 0;
+        const col = r < 0.01 ? 'var(--muted)' : (N[i] > 0 ? 'var(--tens)' : 'var(--comp)');
+        el('line', { x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: col, 'stroke-width': 3 + 5 * r, 'stroke-linecap': 'round' }, gB);
+        const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+        el('circle', { cx: mx, cy: my, r: 9.5, fill: 'var(--sheet)', stroke: col, 'stroke-width': 1.4 }, gB);
+        el('text', { x: mx, y: my + 4, class: 'mid', 'font-size': 11, text: String(i + 1) }, gB);
+      });
+      (c.loadArrows || []).forEach((la) => { const [x, y] = P(la.n, amp); arrow(gB, x, y + 8, x, y + 50, 'arr', 10); el('text', { x: x + 8, y: y + 46, class: 'lbl-l', text: la.lbl }, gB); });
+      c.nodes.forEach((_, i) => {
+        const [x, y] = P(i, amp);
+        el('circle', { cx: x, cy: y, r: 6, class: 'node' }, gB);
+        const off = (c.labelOff && c.labelOff[i]) || [-12, -10];
+        el('text', { x: x + off[0], y: y + off[1], class: 'lbl-n mid', text: String(i + 1) }, gB);
+      });
+      // valeurs
+      let h = free.map((d) => `<div><span>${d % 2 ? 'V' : 'U'}${sub(Math.floor(d / 2) + 1)}</span><b>${c.fmtU(U[d])}</b></div>`).join('');
+      h += N.map((n, i) => `<div><span>N${sub(i + 1)}</span><b>${c.fmtN(n)}</b></div>`).join('');
+      $(c.id + '-read').innerHTML = h;
+    }
+    inp.addEventListener('input', render);
+    render();
+  }
+
+  /* ---------- Poutre (flexion pure) générique ---------- */
+  const Hn = (q, L) => [1 - 3 * q * q + 2 * q ** 3, L * (-q + 2 * q * q - q ** 3), 3 * q * q - 2 * q ** 3, L * (q * q - q ** 3)];
+  const Hd2 = (q, L) => [6 / (L * L) * (2 * q - 1), 2 / L * (2 - 3 * q), 6 / (L * L) * (1 - 2 * q), 2 / L * (1 - 3 * q)];
+  const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+  function exBeam(c) {
+    const svg = $(c.id), nn = c.xs.length, nd = 2 * nn;
+    const K = Array.from({ length: nd }, () => new Array(nd).fill(0)), F = new Array(nd).fill(0);
+    c.els.forEach((e) => {
+      const [a, b] = e.n, h = c.xs[b] - c.xs[a], id = [2 * a, 2 * a + 1, 2 * b, 2 * b + 1];
+      const k = [[12, -6 * h, -12, -6 * h], [-6 * h, 4 * h * h, 6 * h, 2 * h * h], [-12, 6 * h, 12, 6 * h], [-6 * h, 2 * h * h, 6 * h, 4 * h * h]];
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) K[id[i]][id[j]] += k[i][j] / h ** 3;
+      if (e.q) { const f = [e.q * h / 2, -e.q * h * h / 12, e.q * h / 2, e.q * h * h / 12]; for (let i = 0; i < 4; i++) F[id[i]] += f[i]; }
+    });
+    for (const d in (c.nodal || {})) F[d] += c.nodal[d];
+    const { U, free } = reduceSolve(K, F, c.fixed);
+    // échantillons
+    const pts = [], mseg = [];
+    c.els.forEach((e) => {
+      const [a, b] = e.n, h = c.xs[b] - c.xs[a], v = [U[2 * a], U[2 * a + 1], U[2 * b], U[2 * b + 1]];
+      for (let i = 0; i <= 30; i++) { const q = i / 30; pts.push([c.xs[a] + q * h, dot4(Hn(q, h), v)]); }
+      mseg.push([[c.xs[a], -dot4(Hd2(0, h), v)], [c.xs[b], -dot4(Hd2(1, h), v)]]);
+    });
+    const sgn = c.mirror.type === 'anti' ? -1 : 1, X0 = c.mirror.x;
+    const mpts = pts.map(([x, w]) => [2 * X0 - x, sgn * w]);
+    const mmseg = mseg.map((s) => s.map(([x, m]) => [2 * X0 - x, sgn * m]));
+    const wmax = Math.max(...pts.map((p) => Math.abs(p[1]))) || 1;
+    const mmax = Math.max(...mseg.flat().map((p) => Math.abs(p[1]))) || 1;
+    const Ltot = c.total, ox = 60, sx = 560 / Ltot, yb = 105, ym = 238;
+    const X = (x) => ox + x * sx;
+    const inp = $(c.id + '-amp'), out = $(c.id + '-amp-out');
+    function render() {
+      const s = +inp.value; out.textContent = s ? 'amplifiée' : 'aucune';
+      const aw = (s / 100) * 46 / wmax, am = 40 / mmax;
+      clear(svg);
+      // axe de symétrie
+      el('line', { x1: X(X0), y1: 14, x2: X(X0), y2: 290, class: 'axis-sym' }, svg);
+      el('text', { x: X(X0) + 6, y: 24, class: 'lbl-n', text: c.mirror.type === 'anti' ? 'antisymétrie' : 'symétrie' }, svg);
+      // charges
+      (c.dist || []).forEach((d) => {
+        const n = Math.max(2, Math.round((d.x1 - d.x0) * 6));
+        for (let i = 0; i <= n; i++) {
+          const x = X(d.x0 + (d.x1 - d.x0) * i / n);
+          if (d.dir < 0) arrow(svg, x, yb - 52, x, yb - 8, 'arr', 7); else arrow(svg, x, yb - 8, x, yb - 52, 'arr', 7);
+        }
+        el('text', { x: X((d.x0 + d.x1) / 2), y: yb - 58, class: 'lbl-l mid', text: d.lbl }, svg);
+      });
+      (c.point || []).forEach((p) => { arrow(svg, X(p.x), yb - 80, X(p.x), yb - 8, 'arr', 11); el('text', { x: X(p.x) + 8, y: yb - 70, class: 'lbl-l', text: p.lbl }, svg); });
+      // appuis
+      el('line', { x1: X(0), y1: yb, x2: X(Ltot), y2: yb, class: 'ghost', 'stroke-width': 1.3 }, svg);
+      (c.supports || []).forEach((sp) => {
+        if (sp.kind === 'clamp') { const left = sp.x < Ltot / 2; el('rect', { x: left ? X(sp.x) - 14 : X(sp.x), y: yb - 26, width: 14, height: 52, class: 'wall' }, svg); }
+        else pin(svg, X(sp.x), yb + 2);
+      });
+      // déformée
+      const path = (arr) => arr.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ',' + (yb - aw * p[1]).toFixed(1)).join('');
+      el('path', { d: path(mpts), class: 'barl', stroke: 'var(--muted)', 'stroke-width': 4, opacity: 0.45 }, svg);
+      el('path', { d: path(pts), class: 'barl', stroke: 'var(--node)', 'stroke-width': 4.5 }, svg);
+      c.xs.forEach((x, i) => {
+        el('circle', { cx: X(x), cy: yb - aw * U[2 * i], r: 6.5, class: 'node' }, svg);
+        el('text', { x: X(x) + 9, y: yb - aw * U[2 * i] + 20, class: 'lbl-n', text: String(i + 1) }, svg);
+      });
+      // moment
+      el('text', { x: 14, y: ym - 48, class: 'lbl-m', text: 'M' }, svg);
+      el('line', { x1: X(0), y1: ym, x2: X(Ltot), y2: ym, class: 'ax' }, svg);
+      const poly = (seg, cls) => el('polygon', { points: `${X(seg[0][0])},${ym} ${X(seg[0][0])},${ym - am * seg[0][1]} ${X(seg[1][0])},${ym - am * seg[1][1]} ${X(seg[1][0])},${ym}`, class: cls }, svg);
+      mmseg.forEach((s) => poly(s, 'mdiag ghost-m'));
+      mseg.forEach((s) => poly(s, 'mdiag'));
+      mseg.forEach((s) => s.forEach(([x, m]) => {
+        if (Math.abs(m) < 1e-9) return;
+        el('text', { x: X(x) + (x === s[0][0] ? 4 : -4), y: ym - am * m + (m > 0 ? -6 : 14), class: 'lbl-f ' + (x === s[0][0] ? '' : 'end'), 'font-size': 11.5, text: c.fmtM(m) }, svg);
+      }));
+      el('text', { x: X(Ltot) + 4, y: ym + 4, class: 'lbl-m', text: 'x' }, svg);
+    }
+    $(c.id + '-read').innerHTML = free.map((d) => `<div><span>${d % 2 ? 'θ' : 'W'}${sub(Math.floor(d / 2) + 1)}</span><b>${d % 2 ? c.fmtT(U[d]) : c.fmtW(U[d])}</b></div>`).join('') +
+      mseg.map((s, i) => `<div><span>M élément ${i + 1} (début → fin)</span><b>${c.fmtM(s[0][1])} → ${c.fmtM(s[1][1])}</b></div>`).join('');
+    inp.addEventListener('input', render);
+    render();
+  }
+  const DENS = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 16, 24, 30, 32, 48, 60, 96];
+  function frac(v, dens) { // écrit v comme fraction simple si possible
+    for (const d of dens) { const n = v * d; if (Math.abs(n - Math.round(n)) < 1e-6) { const r = Math.round(n); return r === 0 ? '0' : (d === 1 ? String(r) : `${r}/${d}`).replace('-', '−'); } }
+    return fr(v, 3);
+  }
+
+  /* ---------- TD1 : figure statique ---------- */
+  (function td1() {
+    const svg = $('fig-td1');
+    el('rect', { x: 50, y: 14, width: 120, height: 12, class: 'wall' }, svg);
+    el('rect', { x: 88, y: 26, width: 44, height: 160, fill: 'color-mix(in srgb, var(--e1) 22%, var(--sheet))', stroke: 'var(--ink)', 'stroke-width': 1.4 }, svg);
+    el('rect', { x: 99, y: 186, width: 22, height: 80, fill: 'color-mix(in srgb, var(--e1) 22%, var(--sheet))', stroke: 'var(--ink)', 'stroke-width': 1.4 }, svg);
+    for (let i = 0; i < 5; i++) arrow(svg, 110, 36 + i * 30, 110, 56 + i * 30, 'arr', 7);
+    el('line', { x1: 110, y1: 266, x2: 110, y2: 282, class: 'barl', 'stroke-width': 2 }, svg);
+    el('rect', { x: 94, y: 282, width: 32, height: 26, rx: 2, fill: 'var(--load)' }, svg);
+    el('text', { x: 140, y: 300, class: 'lbl-l', text: 'M' }, svg);
+    el('text', { x: 140, y: 100, class: 'lbl-l', text: 'ρg' }, svg);
+    el('text', { x: 40, y: 110, class: 'lbl-m end', text: '2L' }, svg); el('text', { x: 40, y: 230, class: 'lbl-m end', text: 'L' }, svg);
+    el('line', { x1: 46, y1: 26, x2: 46, y2: 186, class: 'ax' }, svg); el('line', { x1: 46, y1: 186, x2: 46, y2: 266, class: 'ax' }, svg);
+    el('text', { x: 10, y: 140, class: 'lbl-m', text: '3E, 2A', 'font-size': 11 }, svg);
+    el('text', { x: 10, y: 250, class: 'lbl-m', text: 'E, A', 'font-size': 11 }, svg);
+    // modèle EF
+    const xm = 235, ys = [26, 186, 266];
+    el('text', { x: xm, y: 12, class: 'lbl-m mid', text: 'modèle EF' }, svg);
+    el('line', { x1: xm, y1: ys[0], x2: xm, y2: ys[2], class: 'barl', 'stroke-width': 5 }, svg);
+    arrow(svg, xm + 26, ys[0] - 2, xm + 26, ys[0] + 30, 'arr', 8); el('text', { x: xm + 32, y: ys[0] + 22, class: 'lbl-l', text: 'ρgL' }, svg);
+    arrow(svg, xm + 26, ys[1] - 2, xm + 26, ys[1] + 30, 'arr', 8); el('text', { x: xm + 32, y: ys[1] + 22, class: 'lbl-l', text: 'ρgL' }, svg);
+    arrow(svg, xm, ys[2] + 6, xm, ys[2] + 46, 'arr', 9); el('text', { x: xm + 8, y: ys[2] + 42, class: 'lbl-l', text: 'Mg' }, svg);
+    ys.forEach((y, i) => { el('circle', { cx: xm, cy: y, r: 7, class: 'node' }, svg); el('text', { x: xm - 12, y: y + 4, class: 'lbl-n end', text: i ? 'u' + sub(i + 1) + ' ?' : 'u₁ = 0' }, svg); });
+    el('text', { x: xm - 12, y: 110, class: 'lbl-m end', 'font-size': 11, text: 'élt 1' }, svg);
+    el('text', { x: xm - 12, y: 230, class: 'lbl-m end', 'font-size': 11, text: 'élt 2' }, svg);
+  })();
+
+  /* ---------- TD2 ---------- */
+  exTruss({
+    id: 'fig-td2',
+    nodes: [[0, 0], [2, 0], [2, 1], [4, 0], [4, 2]],
+    els: [{ n: [0, 1], EA: 1 }, { n: [0, 2], EA: 1 }, { n: [1, 2], EA: 1 }, { n: [1, 3], EA: 1 }, { n: [2, 3], EA: 1 }, { n: [2, 4], EA: 1 }, { n: [3, 4], EA: 0.5 }],
+    fixed: [0, 1, 6, 8], loads: { 7: -0.5 }, mirrorX: 4,
+    view: { sc: 72, ox: 52, oy: 205 }, supports: [0],
+    loadArrows: [{ n: 3, lbl: 'F/2' }],
+    labelOff: { 0: [-14, -10], 1: [0, 22], 3: [-14, 22], 4: [-14, -8] },
+    fmtU: (v) => fr(v, 2) + ' FL/EA', fmtN: (v) => fr(v, 3) + ' F'
+  });
+  /* ---------- Médian A24, Pb I ---------- */
+  exTruss({
+    id: 'fig-a24',
+    nodes: [[0, 0], [1, -1], [1, 0], [2, 0]],
+    els: [{ n: [0, 1], EA: 17.5e9 * 0.000239 }, { n: [1, 3], EA: 17.5e9 * 0.000239 }, { n: [1, 2], EA: 4 * 17.5e9 * 0.000239 }, { n: [2, 3], EA: 4 * 17.5e9 * 0.000239 }],
+    fixed: [0, 1, 4, 5], loads: { 7: -981 },
+    view: { sc: 170, ox: 170, oy: 75 }, supports: [], supportsTop: [0, 2],
+    loadArrows: [{ n: 3, lbl: 'mg' }],
+    labelOff: { 0: [-14, -8], 1: [16, 16], 2: [-14, -8], 3: [14, -10] },
+    fmtU: (v) => fr(v * 1e3, 3) + ' mm', fmtN: (v) => fr(v, 0) + ' N'
+  });
+  /* ---------- Médian A25, Pb I ---------- */
+  const s2 = Math.SQRT2;
+  exTruss({
+    id: 'fig-a25',
+    nodes: [[0, 0], [2, 0], [1, -1], [2, -1]],
+    els: [{ n: [0, 2], EA: 1 }, { n: [0, 1], EA: 1 }, { n: [1, 2], EA: 1 }, { n: [2, 3], EA: 1 }, { n: [1, 3], EA: 0.5 }],
+    fixed: [0, 1, 2, 6], loads: { 3: -(5 + 2 * s2) / 4, 5: -(2 + 4 * s2) / 4, 7: -0.75 }, mirrorX: 2,
+    view: { sc: 125, ox: 90, oy: 62 }, supports: [0],
+    loadArrows: [],
+    labelOff: { 0: [-14, -8], 1: [-14, -10], 2: [-14, 20], 3: [-14, 22] },
+    fmtU: (v) => fr(v, 1) + ' a', fmtN: (v) => fr(v, 2) + ' ρAgL'
+  });
+  /* ---------- TD3 ---------- */
+  exBeam({
+    id: 'fig-td3', xs: [0, 1, 2], total: 4,
+    els: [{ n: [0, 1], q: -1 }, { n: [1, 2], q: -1 }], nodal: { 4: -0.5 }, fixed: [0, 1, 2, 5],
+    mirror: { x: 2, type: 'sym' },
+    supports: [{ x: 0, kind: 'clamp' }, { x: 1, kind: 'pin' }, { x: 3, kind: 'pin' }, { x: 4, kind: 'clamp' }],
+    dist: [{ x0: 0, x1: 4, dir: -1, lbl: 'fz = −f' }], point: [{ x: 2, lbl: 'F = −fL' }],
+    fmtW: (v) => frac(v, DENS) + ' fL⁴/EI', fmtT: (v) => frac(v, DENS) + ' fL³/EI',
+    fmtM: (v) => frac(v, DENS) + ' fL²'
+  });
+  /* ---------- Médian A24, Pb II ---------- */
+  exBeam({
+    id: 'fig-a24b', xs: [0, 1], total: 2,
+    els: [{ n: [0, 1], q: 1 }], fixed: [0, 2],
+    mirror: { x: 1, type: 'anti' },
+    supports: [{ x: 0, kind: 'pin' }, { x: 2, kind: 'pin' }],
+    dist: [{ x0: 0, x1: 1, dir: 1, lbl: 'fz = f' }, { x0: 1, x1: 2, dir: -1, lbl: 'fz = −f' }],
+    fmtW: (v) => frac(v, DENS) + ' fL⁴/EI', fmtT: (v) => frac(v, DENS) + ' fL³/EI', fmtM: (v) => frac(v, DENS) + ' fL²'
+  });
+  /* ---------- Médian A25, Pb II ---------- */
+  exBeam({
+    id: 'fig-a25b', xs: [0, 1, 2], total: 4,
+    els: [{ n: [0, 1] }, { n: [1, 2], q: 1 }], fixed: [0, 1, 4, 5],
+    mirror: { x: 2, type: 'sym' },
+    supports: [{ x: 0, kind: 'clamp' }, { x: 2, kind: 'pin' }, { x: 4, kind: 'clamp' }],
+    dist: [{ x0: 1, x1: 3, dir: 1, lbl: 'fz = f' }],
+    fmtW: (v) => frac(v, DENS) + ' fL⁴/EI', fmtT: (v) => frac(v, DENS) + ' fL³/EI', fmtM: (v) => frac(v, DENS) + ' fL²'
+  });
+
+  /* ---------- Tout dévoiler / masquer ---------- */
+  const all = () => document.querySelectorAll('#entrainement details');
+  $('e-reveal-all').addEventListener('click', () => all().forEach((d) => { d.open = true; }));
+  $('e-hide-all').addEventListener('click', () => all().forEach((d) => { d.open = false; }));
+})();
+
+</script>
