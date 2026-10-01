@@ -976,7 +976,7 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       <details><summary><b>Q4</b>Calculer N et σ dans chaque élément. Interpréter.</summary><div class="ans">
         <div class="math-scroll">\[N^1 = 3E\cdot 2A\,\frac{u_2 - u_1}{2L} = \rho g L + Mg = 15\,696\ \text{N} \qquad N^2 = EA\,\frac{u_3-u_2}{L} = Mg = 9810\ \text{N}\]</div>
         <p>σ¹ = N¹/2A ≈ 1,0 MPa et σ² = Mg/A ≈ 1,25 MPa (le corrigé arrondit à 1 MPa). Contraintes très faibles : la résistance est vérifiée.</p>
-        <p><strong>Interprétation :</strong> dans le tronçon 1 le vrai N varie linéairement de 2ρgL + Mg (en haut) à Mg (en bas). L'élément donne une valeur constante, <strong>exactement celle du milieu</strong> : ρgL + Mg. Dans le tronçon 2 il n'y a pas de charge répartie, N = Mg est exact.</p><figure class="ans-fig"><svg data-fig="td1-N" viewBox="0 0 540 270" role="img" aria-label="Effort normal le long de l'arbre : exact (magenta) et éléments finis (vert)"></svg><figcaption>Effort normal le long de l'arbre : exact (magenta) et éléments finis (vert)</figcaption></figure>
+        <p><strong>Interprétation :</strong> dans le tronçon 1 le vrai N varie linéairement de 2ρgL + Mg (en haut) à Mg (en bas). L'élément donne une valeur constante, <strong>exactement celle du milieu</strong> : ρgL + Mg. Dans le tronçon 2 il n'y a pas de charge répartie, N = Mg est exact.</p><figure class="ans-fig"><svg data-fig="td1-N" viewBox="0 0 600 270" role="img" aria-label="Effort normal le long de l'arbre : exact (magenta) et éléments finis (vert)"></svg><figcaption>Effort normal le long de l'arbre : exact (magenta) et éléments finis (vert)</figcaption></figure>
       </div></details>
     </div>
   </article>
@@ -999,7 +999,7 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       <details><summary><b>Q1</b>Modéliser la moitié avec 7 éléments (type d'EF, ddl, sections, longueurs, CL, symétrie, chargement).</summary><div class="ans">
         <p>1 direction privilégiée ; 7 éléments de <strong>barre 2D</strong> à 2 nœuds (tubes élancés, liaisons articulées, charges aux nœuds) ; 2 ddl par nœud : U, V.</p>
         <p>Éléments 1 et 4 : E, A, 2L · éléments 2, 5, 6 : E, A, L√5 · élément 3 : E, A, L · <strong>élément 7 : E, A/2, 2L</strong> (il est coupé en deux par l'axe de symétrie, chaque moitié de modèle n'en garde que la moitié).</p>
-        <p>CL : U₁ = V₁ = 0. Symétrie : <strong>U₄ = U₅ = 0</strong> (les nœuds sur l'axe ne bougent pas horizontalement). Chargement : <strong>F/2</strong> au nœud 4 vers −Y.</p><figure class="ans-fig"><svg data-fig="td2-model" viewBox="0 0 540 260" role="img" aria-label="Demi-modèle : 5 nœuds, 7 barres, ddl bloqués en rouge, inconnues en bleu"></svg><figcaption>Demi-modèle : 5 nœuds, 7 barres, ddl bloqués en rouge, inconnues en bleu</figcaption></figure>
+        <p>CL : U₁ = V₁ = 0. Symétrie : <strong>U₄ = U₅ = 0</strong> (les nœuds sur l'axe ne bougent pas horizontalement). Chargement : <strong>F/2</strong> au nœud 4 vers −Y.</p><figure class="ans-fig"><svg data-fig="td2-model" viewBox="0 0 580 262" role="img" aria-label="Demi-modèle : 5 nœuds, 7 barres, ddl bloqués en rouge, inconnues en bleu"></svg><figcaption>Demi-modèle : 5 nœuds, 7 barres, ddl bloqués en rouge, inconnues en bleu</figcaption></figure>
       </div></details>
       <details><summary><b>Q2</b>Matrices de rigidité effectives des éléments 1 et 7 dans le repère global.</summary><div class="ans">
         <p>Élément 1 (1→2) : horizontal, c = 1, s = 0, longueur 2L. Le nœud 1 est bloqué, il reste U₂, V₂ :</p>
@@ -1020,7 +1020,7 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
         <p>σ est constante dans la section et le long de l'élément (traction).</p>
       </div></details>
       <details><summary><b>Q6</b>σ = −93,6 MPa dans 2 et 6, nulle dans 1, 3, 4, 5 : rôle des profilés ?</summary><div class="ans">
-        <p>L'élément 7 travaille en <strong>traction</strong>, les éléments 2 et 6 en <strong>compression</strong> (ils forment l'arc qui porte la charge). Les éléments 1, 3, 4, 5 ne transmettent aucun effort pour ce chargement, mais ils sont indispensables à la <strong>stabilité</strong> : sans eux le treillis serait un mécanisme et [K] serait singulière.</p><figure class="ans-fig"><svg data-fig="td2-roles" viewBox="0 0 540 260" role="img" aria-label="Chemin de la charge : l'arc 2-6 en compression, le tirant 7 en traction"></svg><figcaption>Chemin de la charge : l'arc 2-6 en compression, le tirant 7 en traction</figcaption></figure>
+        <p>L'élément 7 travaille en <strong>traction</strong>, les éléments 2 et 6 en <strong>compression</strong> (ils forment l'arc qui porte la charge). Les éléments 1, 3, 4, 5 ne transmettent aucun effort pour ce chargement, mais ils sont indispensables à la <strong>stabilité</strong> : sans eux le treillis serait un mécanisme et [K] serait singulière.</p><figure class="ans-fig"><svg data-fig="td2-roles" viewBox="0 0 580 262" role="img" aria-label="Chemin de la charge : l'arc 2-6 en compression, le tirant 7 en traction"></svg><figcaption>Chemin de la charge : l'arc 2-6 en compression, le tirant 7 en traction</figcaption></figure>
       </div></details>
     </div>
   </article>
@@ -1081,12 +1081,12 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       <details><summary><b>Q1</b>Modéliser la moitié avec 7 éléments dans le plan (X, Z).</summary><div class="ans">
         <p>Même maillage que le TD2, mais <strong>éléments de poutre 2D</strong> (liaisons rigides, charge répartie qui fait fléchir les barres) : 3 ddl par nœud U, W, θ.</p>
         <p>Éléments 1 et 4 : E, A, I, 2L · 2, 5, 6 : E, A, I, L√5 · 3 : E, A, I, L · <strong>7 : E, A/2, I/2, 2L</strong> (coupé par l'axe).</p>
-        <p>CL : U₁ = W₁ = θ₁ = 0 (encastrement). Symétrie : <strong>U = 0 et θ = 0</strong> aux nœuds 4 et 5. Chargement : f<sub>z</sub> = −f sur les éléments 1 et 4.</p><figure class="ans-fig"><svg data-fig="td4-model" viewBox="0 0 540 270" role="img" aria-label="Demi-passerelle en poutres : 3 ddl par nœud, symétrie U = θ = 0 sur l'axe"></svg><figcaption>Demi-passerelle en poutres : 3 ddl par nœud, symétrie U = θ = 0 sur l'axe</figcaption></figure>
+        <p>CL : U₁ = W₁ = θ₁ = 0 (encastrement). Symétrie : <strong>U = 0 et θ = 0</strong> aux nœuds 4 et 5. Chargement : f<sub>z</sub> = −f sur les éléments 1 et 4.</p><figure class="ans-fig"><svg data-fig="td4-model" viewBox="0 0 580 274" role="img" aria-label="Demi-passerelle en poutres : 3 ddl par nœud, symétrie U = θ = 0 sur l'axe"></svg><figcaption>Demi-passerelle en poutres : 3 ddl par nœud, symétrie U = θ = 0 sur l'axe</figcaption></figure>
       </div></details>
       <details><summary><b>Q2</b>Charges équivalentes effectives de l'élément 1, de façon intuitive.</summary><div class="ans">
         <p>Élément 1 de longueur 2L : charge totale −f·2L, la moitié à chaque nœud, et les moments d'encastrement parfait \(\mp f_z \ell^2/12\) avec ℓ = 2L :</p>
         <div class="math-scroll">\[\langle f_n\rangle = \left\langle 0\;\; -fL\;\; \tfrac{fL^2}{3}\;\; 0\;\; -fL\;\; -\tfrac{fL^2}{3}\right\rangle \;\Rightarrow\; \langle f_n\rangle_{\text{eff}} = \left\langle 0\;\; -fL\;\; -\tfrac{fL^2}{3}\right\rangle \;(U_2, W_2, \theta_2)\]</div>
-        <p>Le nœud 1 étant encastré, seuls les termes du nœud 2 sont effectifs.</p><figure class="ans-fig"><svg data-fig="td4-loads" viewBox="0 0 540 230" role="img" aria-label="Charge répartie sur l'élément 1 et son équivalent nodal"></svg><figcaption>Charge répartie sur l'élément 1 et son équivalent nodal</figcaption></figure>
+        <p>Le nœud 1 étant encastré, seuls les termes du nœud 2 sont effectifs.</p><figure class="ans-fig"><svg data-fig="td4-loads" viewBox="0 0 540 248" role="img" aria-label="Charge répartie sur l'élément 1 et son équivalent nodal"></svg><figcaption>Charge répartie sur l'élément 1 et son équivalent nodal</figcaption></figure>
       </div></details>
       <details><summary><b>Q3</b>Avec W₂ = −2,8 mm et θ₂ = −0,8·10⁻³ rad, exprimer M sur l'élément 1, M au nœud 1 et σ de flexion.</summary><div class="ans">
         <p>w₁ = θ₁ = 0, longueur ℓ = 2 m. Avec les dérivées du cours (x en m) :</p>
@@ -1131,7 +1131,7 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       </div></details>
       <details><summary><b>Q4</b>Déformée avec U₂ = −0,78 ; V₂ = −0,12 ; U₄ = 0,06 ; V₄ = −1,62 (10⁻³ m).</summary><div class="ans"><p>Voir la figure : le calcul de la page retrouve ces valeurs. Les barres restent droites.</p></div></details>
       <details><summary><b>Q5</b>N et σ au centre des éléments 1 et 3, distribution dans la section (2,5 pts).</summary><div class="ans">
-        <p>Élément 1 (1→2) : c = √2/2, s = −√2/2. u₁ = 0, u₂ = c U₂ + s V₂ = (√2/2)(U₂ − V₂) = −0,47·10⁻³ m.</p><figure class="ans-fig"><svg data-fig="a24-proj" viewBox="0 0 400 240" role="img" aria-label="Le déplacement du nœud 2 projeté sur l'axe de la barre 1"></svg><figcaption>Le déplacement du nœud 2 projeté sur l'axe de la barre 1</figcaption></figure>
+        <p>Élément 1 (1→2) : c = √2/2, s = −√2/2. u₁ = 0, u₂ = c U₂ + s V₂ = (√2/2)(U₂ − V₂) = −0,47·10⁻³ m.</p><figure class="ans-fig"><svg data-fig="a24-proj" viewBox="0 0 450 240" role="img" aria-label="Le déplacement du nœud 2 projeté sur l'axe de la barre 1"></svg><figcaption>Le déplacement du nœud 2 projeté sur l'axe de la barre 1</figcaption></figure>
         <div class="math-scroll">\[N^1 = 17{,}5\cdot10^9 \times 0{,}000239 \times \frac{-0{,}47\cdot10^{-3}}{\sqrt2} \approx -1380\ \text{N} \qquad \sigma = N/A \approx -5{,}8\ \text{MPa (compression)}\]</div>
         <p>Élément 3 (2→3) : u₁ = V₂ = −0,12·10⁻³ m, u₂ = 0 : N³ = 4EA(0 + 0,12·10⁻³)/L ≈ 2008 N, σ ≈ 8,4 MPa (traction).</p>
         <p>σ est <strong>constante dans la section</strong> et le long de chaque barre.</p><figure class="ans-fig"><svg data-fig="a24-sec" viewBox="0 0 520 170" role="img" aria-label="Répartition de σ dans la section : uniforme pour une barre"></svg><figcaption>Répartition de σ dans la section : uniforme pour une barre</figcaption></figure>
@@ -2870,8 +2870,8 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
   const RED = 'var(--load)', BLUE = 'var(--node)';
   const E5 = ['var(--e1)', 'var(--e2)', 'var(--e3)', 'var(--load)', 'var(--node)'];
   function el(tag, a, p) { const e = document.createElementNS(NS, tag); if (a) for (const k in a) { if (k === 'text') e.textContent = a[k]; else e.setAttribute(k, a[k]); } if (p) p.appendChild(e); return e; }
-  function T(g, x, y, s, cls, extra) { return el('text', Object.assign({ x, y, text: s }, cls ? { class: cls } : {}, extra || {}), g); }
-  function Tc(g, x, y, s, color, anchor, size) { return el('text', { x, y, text: s, fill: color, 'text-anchor': anchor || 'start', 'font-size': size || 12, 'font-weight': 600 }, g); }
+  function T(g, x, y, s, cls, extra) { const a = Object.assign({ x, y, text: s }, cls ? { class: cls } : {}); if (extra && extra['font-size']) a.style = `font-size:${extra['font-size']}px`; return el('text', a, g); }
+  function Tc(g, x, y, s, color, anchor, size) { return el('text', { x, y, text: s, 'text-anchor': anchor || 'start', style: `fill:${color};font-size:${size || 12}px;font-weight:600` }, g); }
   function arrow(g, x1, y1, x2, y2, cls, head = 9) {
     const L = Math.hypot(x2 - x1, y2 - y1); if (L < 2) return;
     const ux = (x2 - x1) / L, uy = (y2 - y1) / L, h = Math.min(head, L * 0.7), bx = x2 - ux * h, by = y2 - uy * h;
@@ -2903,7 +2903,7 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
     el('rect', { x: 46, y: 18, width: 70, height: 10, class: 'wall' }, s);
     el('rect', { x: 69, y: 28, width: 24, height: 140, fill: 'color-mix(in srgb, var(--e1) 22%, var(--sheet))', stroke: 'var(--ink)' }, s);
     el('rect', { x: 75, y: 168, width: 12, height: 70, fill: 'color-mix(in srgb, var(--e1) 22%, var(--sheet))', stroke: 'var(--ink)' }, s);
-    T(s, 40, 32, 'x = 0', 'lbl-m end'); T(s, 40, 172, 'x = 2L', 'lbl-m end'); T(s, 40, 242, 'x = 3L', 'lbl-m end');
+    Tc(s, 62, 42, 'x = 0', 'var(--muted)', 'end', 11); Tc(s, 62, 172, 'x = 2L', 'var(--muted)', 'end', 11); Tc(s, 62, 242, 'x = 3L', 'var(--muted)', 'end', 11);
     const x0 = 160, k = 300 / 21582, X = (n) => x0 + n * k;
     el('line', { x1: x0, y1: 28, x2: x0, y2: 250, class: 'ax' }, s);
     el('line', { x1: 60, y1: 168, x2: 500, y2: 168, class: 'ghost', 'stroke-width': 1 }, s);
@@ -2917,10 +2917,10 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
     Tc(s, X(9810) + 8, 210, 'Mg = 9,8 (exact et EF)', 'var(--ink)', 'start', 11.5);
   };
   /* ---------- TD2 ---------- */
-  const td2P = (X, Y) => [50 + X * 90, 225 - Y * 90];
+  const td2P = (X, Y) => [74 + X * 90, 225 - Y * 90];
   const TD2 = { n: [[0, 0], [2, 0], [2, 1], [4, 0], [4, 2]], e: [[0, 1], [0, 2], [1, 2], [1, 3], [2, 3], [2, 4], [3, 4]] };
   function td2Truss(s, colorOf, widthOf, dashOf) {
-    axis(s, 410, 14, 252); T(s, 404, 24, 'axe', 'lbl-n end');
+    axis(s, 434, 14, 252); T(s, 428, 24, 'axe', 'lbl-n end');
     TD2.e.forEach(([a, b], i) => {
       const p = td2P(...TD2.n[a]), q = td2P(...TD2.n[b]);
       bar(s, p[0], p[1], q[0], q[1], colorOf(i), widthOf(i), dashOf ? dashOf(i) : 'none');
@@ -2928,25 +2928,25 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
       circ(s, mx + off[0], my + off[1], String(i + 1), colorOf(i));
     });
     TD2.n.forEach((n) => { const [x, y] = td2P(...n); node(s, x, y); });
-    pin(s, 50, 225);
+    pin(s, 74, 225);
   }
   FIG['td2-model'] = (s) => {
     td2Truss(s, () => 'var(--ink)', (i) => i === 6 ? 3 : 5);
-    lines(s, 40, 198, [['U₁ = 0', RED], ['V₁ = 0', RED]], 'end');
-    Tc(s, 230, 250, 'U₂, V₂', BLUE, 'middle');
-    Tc(s, 222, 122, 'U₃, V₃', BLUE, 'end');
-    lines(s, 422, 212, [['U₄ = 0', RED], ['V₄', BLUE]]);
-    lines(s, 422, 40, [['U₅ = 0', RED], ['V₅', BLUE]]);
-    arrow(s, 410, 231, 410, 257, 'arr', 8); Tc(s, 402, 256, 'F/2', RED, 'end');
-    lines(s, 446, 100, [['1, 4 : 2L', 'var(--muted)'], ['2, 5, 6 : L√5', 'var(--muted)'], ['3 : L', 'var(--muted)'], ['7 : 2L, A/2', 'var(--muted)']], 'start', 11);
+    lines(s, 62, 198, [['U₁ = 0', RED], ['V₁ = 0', RED]], 'end');
+    Tc(s, 254, 250, 'U₂, V₂', BLUE, 'middle');
+    Tc(s, 246, 122, 'U₃, V₃', BLUE, 'end');
+    lines(s, 446, 212, [['U₄ = 0', RED], ['V₄', BLUE]]);
+    lines(s, 446, 40, [['U₅ = 0', RED], ['V₅', BLUE]]);
+    arrow(s, 434, 231, 434, 257, 'arr', 8); Tc(s, 426, 256, 'F/2', RED, 'end');
+    lines(s, 470, 100, [['1, 4 : 2L', 'var(--muted)'], ['2, 5, 6 : L√5', 'var(--muted)'], ['3 : L', 'var(--muted)'], ['7 : 2L, A/2', 'var(--muted)']], 'start', 11);
   };
   FIG['td2-roles'] = (s) => {
     const col = (i) => (i === 1 || i === 5) ? 'var(--comp)' : (i === 6 ? 'var(--tens)' : 'var(--muted)');
     td2Truss(s, col, (i) => [1, 5, 6].includes(i) ? 7 : 3, (i) => [1, 5, 6].includes(i) ? 'none' : '5 5');
-    arrow(s, 410, 231, 410, 257, 'arr', 8); Tc(s, 402, 256, 'F/2', RED, 'end');
+    arrow(s, 434, 231, 434, 257, 'arr', 8); Tc(s, 426, 256, 'F/2', RED, 'end');
     Tc(s, 16, 40, '2 et 6 : compression, σ = −93,6 MPa', 'var(--comp)');
-    lines(s, 420, 150, [['7 : traction', 'var(--tens)'], ['σ = 83,8 MPa', 'var(--tens)']]);
-    Tc(s, 64, 256, '1, 3, 4, 5 : N = 0, mais ils stabilisent', 'var(--muted)', 'start', 11.5);
+    lines(s, 446, 150, [['7 : traction', 'var(--tens)'], ['σ = 83,8 MPa', 'var(--tens)']]);
+    Tc(s, 96, 256, '1, 3, 4, 5 : N = 0, mais ils stabilisent', 'var(--muted)', 'start', 11.5);
   };
   FIG['td2-rigid'] = (s) => {
     const base = [[25, 115], [125, 115], [125, 45]];
@@ -2988,10 +2988,10 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
   FIG['td3-reac'] = (s) => {
     const y = 105, xs = [70, 270, 470];
     clampL(s, 70, y); axis(s, 470, 14, 190); beamBase(s, y, xs);
-    arrow(s, 70, y + 8, 70, y + 44, 'arr-f', 9); Tc(s, 80, y + 44, 'R_W1 = −6/60 fL', 'var(--fe)');
-    marc(s, 70, y, 24, true, 'arr-f'); Tc(s, 70, y - 38, 'R_θ1 = 7/60 fL²', 'var(--fe)', 'middle');
-    arrow(s, 270, y - 8, 270, y - 80, 'arr-f', 10); Tc(s, 280, y - 66, 'R_W2 = 156/60 fL', 'var(--fe)');
-    marc(s, 470, y, 24, false, 'arr-f'); Tc(s, 462, y + 52, 'R_θ3 = −31/60 fL²', 'var(--fe)', 'end');
+    arrow(s, 70, y + 8, 70, y + 44, 'arr-f', 9); Tc(s, 80, y + 44, 'RW₁ = −6/60 fL', 'var(--fe)');
+    marc(s, 70, y, 24, true, 'arr-f'); Tc(s, 70, y - 38, 'Rθ₁ = 7/60 fL²', 'var(--fe)', 'middle');
+    arrow(s, 270, y - 8, 270, y - 80, 'arr-f', 10); Tc(s, 280, y - 66, 'RW₂ = 156/60 fL', 'var(--fe)');
+    marc(s, 470, y, 24, false, 'arr-f'); Tc(s, 462, y + 52, 'Rθ₃ = −31/60 fL²', 'var(--fe)', 'end');
     Tc(s, 270, 190, 'pas de réaction en W₃ ni en θ₂ : ce sont des ddl libres', 'var(--muted)', 'middle', 11);
   };
   FIG['td3-MT'] = (s) => {
@@ -3008,45 +3008,45 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
   };
   /* ---------- TD4 ---------- */
   FIG['td4-model'] = (s) => {
-    axis(s, 410, 14, 262); T(s, 404, 24, 'axe', 'lbl-n end');
+    axis(s, 434, 14, 262); T(s, 428, 24, 'axe', 'lbl-n end');
     TD2.e.forEach(([a, b], i) => { const p = td2P(...TD2.n[a]), q = td2P(...TD2.n[b]); bar(s, p[0], p[1], q[0], q[1], 'var(--ink)', i === 6 ? 3 : 5); circ(s, (p[0] + q[0]) / 2 - (i === 2 || i === 6 ? 14 : 0), (p[1] + q[1]) / 2, String(i + 1)); });
-    for (let i = 0; i <= 14; i++) { const x = 58 + i * 25; arrow(s, x, 231, x, 254, 'arr', 6); }
-    Tc(s, 230, 268, 'fz = −f sur les éléments 1 et 4', RED, 'middle', 11.5);
+    for (let i = 0; i <= 14; i++) { const x = 82 + i * 25; arrow(s, x, 231, x, 254, 'arr', 6); }
+    Tc(s, 254, 268, 'fz = −f sur les éléments 1 et 4', RED, 'middle', 11.5);
     TD2.n.forEach((n) => { const [x, y] = td2P(...n); node(s, x, y); });
-    clampL(s, 50, 225);
-    lines(s, 30, 176, [['U₁ = 0', RED], ['W₁ = 0', RED], ['θ₁ = 0', RED]], 'end');
-    Tc(s, 222, 122, 'U₃ W₃ θ₃', BLUE, 'end');
-    Tc(s, 236, 212, 'U₂ W₂ θ₂', BLUE, 'start');
-    lines(s, 418, 200, [['U₄ = θ₄ = 0', RED], ['W₄', BLUE]]);
-    lines(s, 418, 40, [['U₅ = θ₅ = 0', RED], ['W₅', BLUE]]);
-    Tc(s, 418, 130, '7 : A/2, I/2', 'var(--muted)', 'start', 11.5);
+    clampL(s, 74, 225);
+    lines(s, 54, 176, [['U₁ = 0', RED], ['W₁ = 0', RED], ['θ₁ = 0', RED]], 'end');
+    Tc(s, 246, 122, 'U₃ W₃ θ₃', BLUE, 'end');
+    Tc(s, 260, 212, 'U₂ W₂ θ₂', BLUE, 'start');
+    lines(s, 442, 200, [['U₄ = θ₄ = 0', RED], ['W₄', BLUE]]);
+    lines(s, 442, 40, [['U₅ = θ₅ = 0', RED], ['W₅', BLUE]]);
+    Tc(s, 442, 130, '7 : A/2, I/2', 'var(--muted)', 'start', 11.5);
   };
   FIG['td4-loads'] = (s) => {
     const x1 = 110, x2 = 430;
     distDown(s, x1 + 10, x2 - 10, 72, 12); Tc(s, 270, 24, 'fz = −f sur ℓ = 2L (charge totale −2fL)', RED, 'middle', 11.5);
     beamBase(s, 72, [x1, x2]);
-    Tc(s, 270, 112, '⇓ équivalent nodal (moitié à chaque nœud + moments ∓fz ℓ²/12)', 'var(--muted)', 'middle', 11);
+    Tc(s, 270, 112, '↓ équivalent nodal : moitié à chaque nœud + moments ∓fz ℓ²/12', 'var(--muted)', 'middle', 11);
     const y = 175; beamBase(s, y, [x1, x2]);
     arrow(s, x1, y - 50, x1, y - 8, 'arr', 9); Tc(s, x1 - 8, y - 32, '−fL', RED, 'end');
     arrow(s, x2, y - 50, x2, y - 8, 'arr', 9); Tc(s, x2 + 8, y - 32, '−fL', RED, 'start');
     marc(s, x1, y, 22, true, 'arr'); Tc(s, x1, y + 42, '+fL²/3', RED, 'middle');
     marc(s, x2, y, 22, false, 'arr'); Tc(s, x2, y + 42, '−fL²/3', RED, 'middle');
-    Tc(s, 270, 226, 'nœud 1 encastré : seuls U₂, W₂, θ₂ comptent', 'var(--muted)', 'middle', 11);
+    Tc(s, 270, 240, 'nœud 1 encastré : seuls U₂, W₂, θ₂ comptent', 'var(--muted)', 'middle', 11);
   };
   FIG['td4-M'] = (s) => {
-    const EI = 2.1e11 * 4.3216e-8, M = (x) => EI * (5.0 - 5.4 * x) * 1e-3, X = (x) => 70 + x * 150, yb = 110, k = 1.4;
+    const EI = 2.1e11 * 4.3216e-8, M = (x) => EI * (5.0 - 5.4 * x) * 1e-3, X = (x) => 60 + x * 140, yb = 110, k = 1.4;
     el('line', { x1: X(0), y1: yb, x2: X(2) + 10, y2: yb, class: 'ax' }, s); T(s, X(2) + 14, yb + 4, 'x (m)', 'lbl-m');
     el('polygon', { points: `${X(0)},${yb} ${X(0)},${yb - k * M(0)} ${X(2)},${yb - k * M(2)} ${X(2)},${yb}`, class: 'mdiag' }, s);
     Tc(s, X(0) + 6, yb - k * M(0) - 6, 'M(0) = 5·10⁻³ EI ≈ 45 N·m', 'var(--fe)', 'start', 11.5);
     Tc(s, X(2) - 4, yb - k * M(2) + 16, 'M(2 m) ≈ −53 N·m', 'var(--fe)', 'end', 11.5);
-    T(s, X(0), yb + 18, 'nœud 1', 'lbl-n mid'); T(s, X(2), yb - 8, 'nœud 2', 'lbl-n mid');
-    const sx = 480, y1 = 70, y2 = 150, ym = 110;
+    T(s, X(0), yb + 18, 'nœud 1', 'lbl-n mid'); T(s, X(2) - 4, yb - 8, 'nœud 2', 'lbl-n end');
+    const sx = 450, y1 = 70, y2 = 150, ym = 110;
     el('line', { x1: sx, y1, x2: sx, y2, class: 'sec' }, s);
     for (let i = 0; i <= 6; i++) { const y = y1 + (y2 - y1) * i / 6, L = 40 * (ym - y) / (ym - y1); if (Math.abs(L) > 3) arrow(s, sx, y, sx + L, y, 'arr', 6); }
     el('line', { x1: sx + 40, y1, x2: sx - 40, y2, stroke: RED, 'stroke-width': 1.2 }, s);
     Tc(s, sx, 50, 'section au nœud 1', 'var(--ink)', 'middle', 11.5);
     Tc(s, sx + 44, y1 + 4, '+21 MPa', RED, 'start', 11.5); Tc(s, sx - 44, y2 + 4, '−21 MPa', RED, 'end', 11.5);
-    Tc(s, sx, 178, 'traction en haut, compression en bas', 'var(--muted)', 'middle', 11);
+    Tc(s, sx, 180, 'traction en haut', 'var(--muted)', 'middle', 11); Tc(s, sx, 194, 'compression en bas', 'var(--muted)', 'middle', 11);
   };
   /* ---------- Médian A24 ---------- */
   FIG['a24-axes'] = (s) => {
@@ -3061,8 +3061,8 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
     });
     N.forEach((n, i) => { const [x, y] = P(...n); node(s, x, y); T(s, x + (i === 3 ? 12 : -12), y + (i === 1 ? 20 : 16), String(i + 1), 'lbl-n mid'); });
     pinTop(s, 70, 60); pinTop(s, 190, 60);
-    lines(s, 340, 50, [['1 (1→2) bois : c = √2/2, s = −√2/2', 'var(--ink)'], ['2 (2→4) bois : c = √2/2, s = √2/2', 'var(--ink)'], ['3 (2→3) alu : c = 0, s = 1', 'var(--ink)'], ['4 (3→4) alu : c = 1, s = 0', 'var(--ink)']], 'start', 11);
-    lines(s, 340, 130, [['[P] = [ c²  cs ; cs  s² ]', 'var(--fe)'], ['bois : E · alu : 4E', 'var(--muted)'], ['flèche verte = axe local x', 'var(--muted)']], 'start', 11);
+    lines(s, 338, 50, [['1 (1→2) : c=√2/2, s=−√2/2', 'var(--ink)'], ['2 (2→4) : c=√2/2, s=√2/2', 'var(--ink)'], ['3 (2→3) : c=0, s=1', 'var(--ink)'], ['4 (3→4) : c=1, s=0', 'var(--ink)']], 'start', 11);
+    lines(s, 338, 130, [['[P] = [c² cs ; cs s²]', 'var(--fe)'], ['1, 2 bois : E', 'var(--muted)'], ['3, 4 alu : 4E', 'var(--muted)'], ['flèche verte = axe x', 'var(--muted)']], 'start', 11);
   };
   FIG['a24-proj'] = (s) => {
     const n1 = [60, 50], n2 = [200, 190], d = [Math.SQRT1_2, Math.SQRT1_2], k = 90;
@@ -3094,8 +3094,8 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
     for (let i = 0; i <= 8; i++) { const y = y1 + (y2 - y1) * i / 8, L = 55 * (ym - y) / (ym - y1); if (Math.abs(L) > 3) arrow(s, x, y, x + L, y, 'arr', 6); }
     el('line', { x1: x + 55, y1, x2: x - 55, y2, stroke: RED, 'stroke-width': 1.2 }, s);
     Tc(s, x, 20, 'M = fL²/12 > 0 : σ = M z / I', 'var(--ink)', 'middle', 11.5);
-    Tc(s, x + 60, y1 + 4, 'z = +h/2 : +σmax (traction)', RED, 'start', 11.5);
-    Tc(s, x - 60, y2 + 4, 'z = −h/2 : −σmax (compression)', RED, 'end', 11.5);
+    Tc(s, x + 60, y1 + 4, '+σmax (traction)', RED, 'start', 11.5);
+    Tc(s, x - 60, y2 + 4, '−σmax (compression)', RED, 'end', 11.5);
     Tc(s, x - 76, ym + 4, 'fibre moyenne : σ = 0', 'var(--muted)', 'end', 11);
   };
   FIG['a24b-model'] = (s) => {
@@ -3131,7 +3131,6 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
     lines(s, 8, 80, [['1 : poutre 2D (U, W, θ)', 'var(--ink)'], ['    Aₑ/2, Iₑ/2, L', 'var(--muted)'], ['2 : barre 2D (U, W)', 'var(--ink)'], ['    Aₕ, Lₕ', 'var(--muted)'], ['3 : poutre 2D', 'var(--ink)'], ['    Aₑ, Iₑ, L', 'var(--muted)']], 'start', 11);
     Tc(s, 172, 262, 'U₁=W₁=θ₁=0', RED, 'end', 11); Tc(s, 204, 262, 'U₄=W₄=0, θ₄ ?', RED, 'start', 11);
     Tc(s, 188, 26, 'U₂ = θ₂ = 0, W₂ ?', RED, 'start', 11); Tc(s, n3[0] + 10, n3[1] + 4, 'U₃ W₃ θ₃ ?', BLUE, 'start', 11);
-    T(s, 172, 274, 'tube central sur l\'axe : section coupée en deux', 'lbl-m end', { 'font-size': 10.5 });
   };
   /* ---------- Médian A25 ---------- */
   FIG['a25-model'] = (s) => {
