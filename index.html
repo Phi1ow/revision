@@ -347,6 +347,27 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
 .mdiag { fill: color-mix(in srgb, var(--fe) 22%, transparent); stroke: var(--fe); stroke-width: 2; }
 .mdiag.ghost-m { fill: color-mix(in srgb, var(--fe) 10%, transparent); stroke-dasharray: 4 3; }
 .axis-sym { stroke: var(--node); stroke-width: 1.3; stroke-dasharray: 8 4 2 4; }
+
+/* ------- Schémas et matrices des corrections ------- */
+.ans-fig { margin: 0; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 8px 6px; display: grid; gap: 4px; justify-items: center; }
+.ans-fig svg { width: 100%; max-width: 580px; height: auto; display: block; }
+.ans-fig figcaption { font-size: 13px; color: var(--muted); text-align: center; max-width: 70ch; }
+.cmat { display: grid; gap: 6px; justify-items: center; overflow-x: auto; padding: 6px 0; min-width: 0; }
+.cm-pair { display: flex; flex-wrap: wrap; gap: 10px 26px; justify-content: center; }
+.cm-row { display: flex; align-items: center; gap: 10px; }
+.cm-f { font-family: var(--f-mono); font-size: 13px; white-space: nowrap; }
+.cm-grid { display: grid; gap: 3px; font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.cm-h { color: var(--node); font-weight: 600; display: grid; place-items: center; font-size: 12px; padding: 0 4px; }
+.cm-h.fx { color: var(--load); text-decoration: line-through; }
+.cm-c { min-height: 30px; padding: 3px 7px; border: 1px solid var(--grid-strong); border-radius: 4px; display: grid; place-items: center; white-space: nowrap; background: var(--sheet); position: relative; overflow: hidden; }
+.cm-c.struck { opacity: .35; }
+.cm-c.gone { opacity: .2; }
+.cm-c.gone::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 47%, var(--load) 47%, var(--load) 53%, transparent 53%); opacity: .7; }
+.cm-c.keep { border-color: var(--ink); border-width: 1.5px; font-weight: 600; }
+.cm-c.tot { font-weight: 700; border-color: var(--ink); }
+.cm-leg { display: flex; gap: 6px 14px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; justify-content: center; }
+.cm-leg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+.cm-cap { font-size: 13px; color: var(--muted); text-align: center; max-width: 62ch; }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -945,17 +966,17 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       <details><summary><b>Q2</b>Construire la matrice de rigidité et le vecteur chargement.</summary><div class="ans">
         <div class="math-scroll">\[[k]^1 = \frac{3E\cdot 2A}{2L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix} = \frac{EA}{L}\begin{bmatrix}3&-3\\-3&3\end{bmatrix} \qquad [k]^2 = \frac{EA}{L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix}\]</div>
         <div class="math-scroll">\[[K] = \frac{EA}{L}\begin{bmatrix}3&-3&0\\-3&3+1&-1\\0&-1&1\end{bmatrix} \qquad \{F\} = g\begin{Bmatrix}\rho L\\ \rho L\\ M\end{Bmatrix}\]</div>
-        <p>Le « 3+1 » sur u₂ : c'est le nœud partagé, les deux éléments s'additionnent.</p>
+        <p>Le « 3+1 » sur u₂ : c'est le nœud partagé, les deux éléments s'additionnent.</p><div class="cmat" data-mat="td1-K"></div>
       </div></details>
       <details><summary><b>Q3</b>Résoudre le système effectif. Interpréter les déplacements.</summary><div class="ans">
-        <p>On barre la ligne et la colonne de u₁ :</p>
+        <p>On barre la ligne et la colonne de u₁ :</p><div class="cmat" data-mat="td1-Kr"></div>
         <div class="math-scroll">\[\frac{EA}{L}\begin{bmatrix}4&-1\\-1&1\end{bmatrix}\begin{Bmatrix}u_2\\u_3\end{Bmatrix} = g\begin{Bmatrix}\rho L\\ M\end{Bmatrix} \;\Rightarrow\; u_2 = \frac{L(\rho g L + Mg)}{3EA},\quad u_3 = \frac{L(\rho g L + 4Mg)}{3EA}\]</div>
         <p>A.N. : u₂ = 9,5·10⁻³ mm et u₃ = 2,7·10⁻² mm. Les déplacements nodaux d'un modèle de barres 1D sont <strong>exacts</strong> (cf. A.7) et minuscules : la rigidité est largement suffisante.</p>
       </div></details>
       <details><summary><b>Q4</b>Calculer N et σ dans chaque élément. Interpréter.</summary><div class="ans">
         <div class="math-scroll">\[N^1 = 3E\cdot 2A\,\frac{u_2 - u_1}{2L} = \rho g L + Mg = 15\,696\ \text{N} \qquad N^2 = EA\,\frac{u_3-u_2}{L} = Mg = 9810\ \text{N}\]</div>
         <p>σ¹ = N¹/2A ≈ 1,0 MPa et σ² = Mg/A ≈ 1,25 MPa (le corrigé arrondit à 1 MPa). Contraintes très faibles : la résistance est vérifiée.</p>
-        <p><strong>Interprétation :</strong> dans le tronçon 1 le vrai N varie linéairement de 2ρgL + Mg (en haut) à Mg (en bas). L'élément donne une valeur constante, <strong>exactement celle du milieu</strong> : ρgL + Mg. Dans le tronçon 2 il n'y a pas de charge répartie, N = Mg est exact.</p>
+        <p><strong>Interprétation :</strong> dans le tronçon 1 le vrai N varie linéairement de 2ρgL + Mg (en haut) à Mg (en bas). L'élément donne une valeur constante, <strong>exactement celle du milieu</strong> : ρgL + Mg. Dans le tronçon 2 il n'y a pas de charge répartie, N = Mg est exact.</p><figure class="ans-fig"><svg data-fig="td1-N" viewBox="0 0 540 270" role="img" aria-label="Effort normal le long de l'arbre : exact (magenta) et éléments finis (vert)"></svg><figcaption>Effort normal le long de l'arbre : exact (magenta) et éléments finis (vert)</figcaption></figure>
       </div></details>
     </div>
   </article>
@@ -978,28 +999,28 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       <details><summary><b>Q1</b>Modéliser la moitié avec 7 éléments (type d'EF, ddl, sections, longueurs, CL, symétrie, chargement).</summary><div class="ans">
         <p>1 direction privilégiée ; 7 éléments de <strong>barre 2D</strong> à 2 nœuds (tubes élancés, liaisons articulées, charges aux nœuds) ; 2 ddl par nœud : U, V.</p>
         <p>Éléments 1 et 4 : E, A, 2L · éléments 2, 5, 6 : E, A, L√5 · élément 3 : E, A, L · <strong>élément 7 : E, A/2, 2L</strong> (il est coupé en deux par l'axe de symétrie, chaque moitié de modèle n'en garde que la moitié).</p>
-        <p>CL : U₁ = V₁ = 0. Symétrie : <strong>U₄ = U₅ = 0</strong> (les nœuds sur l'axe ne bougent pas horizontalement). Chargement : <strong>F/2</strong> au nœud 4 vers −Y.</p>
+        <p>CL : U₁ = V₁ = 0. Symétrie : <strong>U₄ = U₅ = 0</strong> (les nœuds sur l'axe ne bougent pas horizontalement). Chargement : <strong>F/2</strong> au nœud 4 vers −Y.</p><figure class="ans-fig"><svg data-fig="td2-model" viewBox="0 0 540 260" role="img" aria-label="Demi-modèle : 5 nœuds, 7 barres, ddl bloqués en rouge, inconnues en bleu"></svg><figcaption>Demi-modèle : 5 nœuds, 7 barres, ddl bloqués en rouge, inconnues en bleu</figcaption></figure>
       </div></details>
       <details><summary><b>Q2</b>Matrices de rigidité effectives des éléments 1 et 7 dans le repère global.</summary><div class="ans">
         <p>Élément 1 (1→2) : horizontal, c = 1, s = 0, longueur 2L. Le nœud 1 est bloqué, il reste U₂, V₂ :</p>
-        <div class="math-scroll">\[[k]^1_{g,\text{eff}} = \frac{EA}{2L}\begin{bmatrix}1&0\\0&0\end{bmatrix} \quad (U_2, V_2)\]</div>
+        <div class="math-scroll">\[[k]^1_{g,\text{eff}} = \frac{EA}{2L}\begin{bmatrix}1&0\\0&0\end{bmatrix} \quad (U_2, V_2)\]</div><div class="cmat" data-mat="td2-k1"></div>
         <p>Élément 7 (4→5) : vertical vers le haut, c = 0, s = 1 (α = −90° dans la convention du sujet), section A/2, longueur 2L. U₄ et U₅ sont bloqués, il reste V₄, V₅ :</p>
-        <div class="math-scroll">\[[k]^7_g = \frac{EA}{4L}\begin{bmatrix}0&0&0&0\\0&1&0&-1\\0&0&0&0\\0&-1&0&1\end{bmatrix} \;\Rightarrow\; [k]^7_{g,\text{eff}} = \frac{EA}{4L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix}\quad (V_4, V_5)\]</div>
+        <div class="math-scroll">\[[k]^7_g = \frac{EA}{4L}\begin{bmatrix}0&0&0&0\\0&1&0&-1\\0&0&0&0\\0&-1&0&1\end{bmatrix} \;\Rightarrow\; [k]^7_{g,\text{eff}} = \frac{EA}{4L}\begin{bmatrix}1&-1\\-1&1\end{bmatrix}\quad (V_4, V_5)\]</div><div class="cmat" data-mat="td2-k7"></div>
       </div></details>
       <details><summary><b>Q3</b>Système effectif : quelle propriété doit avoir [K]<sub>eff</sub> ? Quels mouvements rigides sont supprimés ?</summary><div class="ans">
         <p>[K]<sub>eff</sub>{U}<sub>eff</sub> = {F}<sub>eff</sub> avec 6 inconnues (U₂, V₂, U₃, V₃, V₄, V₅). [K]<sub>eff</sub> doit être <strong>inversible</strong> : aucun mouvement de corps rigide possible.</p>
-        <p>L'appui au nœud 1 supprime les 2 translations (X et Y). Les conditions de symétrie suppriment la <strong>rotation</strong> dans le plan.</p>
+        <p>L'appui au nœud 1 supprime les 2 translations (X et Y). Les conditions de symétrie suppriment la <strong>rotation</strong> dans le plan.</p><figure class="ans-fig"><svg data-fig="td2-rigid" viewBox="0 0 600 170" role="img" aria-label="Les 3 mouvements de corps rigide dans le plan, et ce qui bloque chacun"></svg><figcaption>Les 3 mouvements de corps rigide dans le plan, et ce qui bloque chacun</figcaption></figure>
       </div></details>
       <details><summary><b>Q4</b>Tracer la déformée avec U₂ = 0 ; U₃ = 1,9 ; V₂ = V₃ = −9,4 ; V₄ = −13,2 ; V₅ = −11,2 (en FL/EA).</summary><div class="ans">
         <p>Voir la figure ci-dessus : le solveur de la page retrouve exactement ces valeurs. Pour un treillis, seule la membrane est modélisée : <strong>les barres restent droites</strong>, on déplace les nœuds et on les relie.</p>
       </div></details>
       <details><summary><b>Q5</b>Effort normal dans l'élément 7, puis contrainte au centre.</summary><div class="ans">
-        <p>Avec c = 0, s = 1 : u₁ = V₄ = −13,2 FL/EA et u₂ = V₅ = −11,2 FL/EA.</p>
+        <figure class="ans-fig"><svg data-fig="td2-el7" viewBox="0 0 340 220" role="img" aria-label="Élément 7 : axe local vers le haut, la barre ne voit que V"></svg><figcaption>Élément 7 : axe local vers le haut, la barre ne voit que V</figcaption></figure><p>Avec c = 0, s = 1 : u₁ = V₄ = −13,2 FL/EA et u₂ = V₅ = −11,2 FL/EA.</p>
         <div class="math-scroll">\[N = \frac{EA}{2}\cdot\frac{-11{,}2 + 13{,}2}{2L}\cdot\frac{FL}{EA} = \frac F2 \qquad \sigma_{xx} = \frac{N}{A/2} = \frac FA = \frac{20\,000}{238{,}76} = 83{,}8\ \text{MPa}\]</div>
         <p>σ est constante dans la section et le long de l'élément (traction).</p>
       </div></details>
       <details><summary><b>Q6</b>σ = −93,6 MPa dans 2 et 6, nulle dans 1, 3, 4, 5 : rôle des profilés ?</summary><div class="ans">
-        <p>L'élément 7 travaille en <strong>traction</strong>, les éléments 2 et 6 en <strong>compression</strong> (ils forment l'arc qui porte la charge). Les éléments 1, 3, 4, 5 ne transmettent aucun effort pour ce chargement, mais ils sont indispensables à la <strong>stabilité</strong> : sans eux le treillis serait un mécanisme et [K] serait singulière.</p>
+        <p>L'élément 7 travaille en <strong>traction</strong>, les éléments 2 et 6 en <strong>compression</strong> (ils forment l'arc qui porte la charge). Les éléments 1, 3, 4, 5 ne transmettent aucun effort pour ce chargement, mais ils sont indispensables à la <strong>stabilité</strong> : sans eux le treillis serait un mécanisme et [K] serait singulière.</p><figure class="ans-fig"><svg data-fig="td2-roles" viewBox="0 0 540 260" role="img" aria-label="Chemin de la charge : l'arc 2-6 en compression, le tirant 7 en traction"></svg><figcaption>Chemin de la charge : l'arc 2-6 en compression, le tirant 7 en traction</figcaption></figure>
       </div></details>
     </div>
   </article>
@@ -1019,15 +1040,15 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
     <div class="ex-qs">
       <details><summary><b>Q1</b>Minimum d'éléments : connectivités, ddl, CL, réactions, ddl effectifs.</summary><div class="ans">
         <p>Poutre droite chargée seulement suivant z : <strong>flexion pure</strong>, élément de poutre à 2 ddl/nœud (W, θ), sans membrane. Problème symétrique : on étudie A → C.</p>
-        <p>Maillage minimal : <strong>2 éléments</strong> (A-B, B-C), 3 nœuds, 6 ddl. CL : W₁ = θ₁ = 0 (encastrement), W₂ = 0 (appui). Symétrie : θ₃ = 0. Réactions possibles : R<sub>W1</sub>, R<sub>θ1</sub>, R<sub>W2</sub>, R<sub>θ3</sub>. <strong>2 ddl effectifs : θ₂ et W₃.</strong></p>
+        <p>Maillage minimal : <strong>2 éléments</strong> (A-B, B-C), 3 nœuds, 6 ddl. CL : W₁ = θ₁ = 0 (encastrement), W₂ = 0 (appui). Symétrie : θ₃ = 0. Réactions possibles : R<sub>W1</sub>, R<sub>θ1</sub>, R<sub>W2</sub>, R<sub>θ3</sub>. <strong>2 ddl effectifs : θ₂ et W₃.</strong></p><figure class="ans-fig"><svg data-fig="td3-model" viewBox="0 0 540 190" role="img" aria-label="Demi-poutre A → C : 2 éléments, ddl bloqués en rouge, inconnues en bleu"></svg><figcaption>Demi-poutre A → C : 2 éléments, ddl bloqués en rouge, inconnues en bleu</figcaption></figure>
       </div></details>
       <details><summary><b>Q2</b>Matrice de rigidité et charges équivalentes de chaque élément.</summary><div class="ans">
         <p>On retire les lignes/colonnes 1 et 4 (membrane) de la matrice du cours. x = X pour les deux éléments, pas de rotation :</p>
-        <div class="math-scroll">\[[k_1]_g = [k_2]_g = \frac{EI}{L^3}\begin{bmatrix}12&-6L&-12&-6L\\ &4L^2&6L&2L^2\\ &&12&6L\\ \text{sym}&&&4L^2\end{bmatrix} \qquad \langle f_n\rangle = \left\langle -\tfrac{fL}{2}\;\; \tfrac{fL^2}{12}\;\; -\tfrac{fL}{2}\;\; -\tfrac{fL^2}{12}\right\rangle\]</div>
+        <div class="math-scroll">\[[k_1]_g = [k_2]_g = \frac{EI}{L^3}\begin{bmatrix}12&-6L&-12&-6L\\ &4L^2&6L&2L^2\\ &&12&6L\\ \text{sym}&&&4L^2\end{bmatrix} \qquad \langle f_n\rangle = \left\langle -\tfrac{fL}{2}\;\; \tfrac{fL^2}{12}\;\; -\tfrac{fL}{2}\;\; -\tfrac{fL^2}{12}\right\rangle\]</div><div class="cm-pair"><div class="cmat" data-mat="td3-k1"></div><div class="cmat" data-mat="td3-k2"></div></div>
       </div></details>
       <details><summary><b>Q3</b>Assembler et réduire au système 2×2.</summary><div class="ans">
         <div class="math-scroll">\[[K'] = \frac{EI}{L^3}\begin{bmatrix}8L^2 & 6L\\ 6L & 12\end{bmatrix}\begin{matrix}\theta_2\\W_3\end{matrix} \qquad \langle F'\rangle = \langle 0 \;\;\; -fL\rangle\]</div>
-        <p>8L² = 4L² + 4L² (θ₂ partagé). Sur θ₂ les moments fL²/12 des deux éléments s'annulent. Sur W₃ : −fL/2 (élément 2) − fL/2 (moitié de F) = −fL.</p>
+        <div class="cmat" data-mat="td3-K"></div><p>8L² = 4L² + 4L² (θ₂ partagé). Sur θ₂ les moments fL²/12 des deux éléments s'annulent. Sur W₃ : −fL/2 (élément 2) − fL/2 (moitié de F) = −fL.</p>
       </div></details>
       <details><summary><b>Q4</b>Résoudre et tracer la déformée.</summary><div class="ans">
         <div class="math-scroll">\[\theta_2 = \frac{1}{10}\frac{fL^3}{EI} \qquad W_3 = -\frac{2}{15}\frac{fL^4}{EI}\]</div>
@@ -1035,12 +1056,12 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       </div></details>
       <details><summary><b>Q5</b>Réactions d'appui.</summary><div class="ans">
         <div class="math-scroll">\[\{R\} = [K]\{U\} - \{F\} \;\Rightarrow\; R_{W1} = -\tfrac{6}{60}fL,\;\; R_{\theta1} = \tfrac{7}{60}fL^2,\;\; R_{W2} = \tfrac{156}{60}fL,\;\; R_{\theta3} = -\tfrac{31}{60}fL^2\]</div>
-        <p>Vérification : −6/60 + 156/60 − 2 − 1/2 = 0 ✓ (charge répartie 2fL + demi-force fL/2).</p>
+        <p>Vérification : −6/60 + 156/60 − 2 − 1/2 = 0 ✓ (charge répartie 2fL + demi-force fL/2).</p><figure class="ans-fig"><svg data-fig="td3-reac" viewBox="0 0 540 200" role="img" aria-label="Réactions sur la demi-poutre (θ positif = horaire)"></svg><figcaption>Réactions sur la demi-poutre (θ positif = horaire)</figcaption></figure>
       </div></details>
       <details><summary><b>Q6</b>M et T dans chaque élément.</summary><div class="ans">
         <p>\(M = -EI\,w_{,xx}\), \(T = M_{,x}\), avec les dérivées secondes des fonctions d'Hermite :</p>
         <div class="math-scroll">\[\text{élt 1 : } M = \tfrac{fL}{5}(3x - L),\; T = \tfrac35 fL \qquad \text{élt 2 : } M = \tfrac{fL}{5}(2L - 5x),\; T = -fL\]</div>
-        <p>M est linéaire par élément (alors que le vrai M est parabolique sous charge répartie) : c'est une approximation.</p>
+        <p>M est linéaire par élément (alors que le vrai M est parabolique sous charge répartie) : c'est une approximation.</p><figure class="ans-fig"><svg data-fig="td3-MT" viewBox="0 0 540 260" role="img" aria-label="Diagrammes EF de M (linéaire par élément) et T (constant par élément)"></svg><figcaption>Diagrammes EF de M (linéaire par élément) et T (constant par élément)</figcaption></figure>
       </div></details>
       <details><summary><b>Q7</b>Contrainte σ<sub>xx</sub> maximale et sa position.</summary><div class="ans">
         <p>Flexion pure : \(\sigma_{xx} = z\,M/I = 12zM/(bh^3)\). Maximum là où |M| est maximal (au centre C, |M| = 3fL²/5) et en peau (z = ±h/2) :</p>
@@ -1060,18 +1081,18 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       <details><summary><b>Q1</b>Modéliser la moitié avec 7 éléments dans le plan (X, Z).</summary><div class="ans">
         <p>Même maillage que le TD2, mais <strong>éléments de poutre 2D</strong> (liaisons rigides, charge répartie qui fait fléchir les barres) : 3 ddl par nœud U, W, θ.</p>
         <p>Éléments 1 et 4 : E, A, I, 2L · 2, 5, 6 : E, A, I, L√5 · 3 : E, A, I, L · <strong>7 : E, A/2, I/2, 2L</strong> (coupé par l'axe).</p>
-        <p>CL : U₁ = W₁ = θ₁ = 0 (encastrement). Symétrie : <strong>U = 0 et θ = 0</strong> aux nœuds 4 et 5. Chargement : f<sub>z</sub> = −f sur les éléments 1 et 4.</p>
+        <p>CL : U₁ = W₁ = θ₁ = 0 (encastrement). Symétrie : <strong>U = 0 et θ = 0</strong> aux nœuds 4 et 5. Chargement : f<sub>z</sub> = −f sur les éléments 1 et 4.</p><figure class="ans-fig"><svg data-fig="td4-model" viewBox="0 0 540 270" role="img" aria-label="Demi-passerelle en poutres : 3 ddl par nœud, symétrie U = θ = 0 sur l'axe"></svg><figcaption>Demi-passerelle en poutres : 3 ddl par nœud, symétrie U = θ = 0 sur l'axe</figcaption></figure>
       </div></details>
       <details><summary><b>Q2</b>Charges équivalentes effectives de l'élément 1, de façon intuitive.</summary><div class="ans">
         <p>Élément 1 de longueur 2L : charge totale −f·2L, la moitié à chaque nœud, et les moments d'encastrement parfait \(\mp f_z \ell^2/12\) avec ℓ = 2L :</p>
         <div class="math-scroll">\[\langle f_n\rangle = \left\langle 0\;\; -fL\;\; \tfrac{fL^2}{3}\;\; 0\;\; -fL\;\; -\tfrac{fL^2}{3}\right\rangle \;\Rightarrow\; \langle f_n\rangle_{\text{eff}} = \left\langle 0\;\; -fL\;\; -\tfrac{fL^2}{3}\right\rangle \;(U_2, W_2, \theta_2)\]</div>
-        <p>Le nœud 1 étant encastré, seuls les termes du nœud 2 sont effectifs.</p>
+        <p>Le nœud 1 étant encastré, seuls les termes du nœud 2 sont effectifs.</p><figure class="ans-fig"><svg data-fig="td4-loads" viewBox="0 0 540 230" role="img" aria-label="Charge répartie sur l'élément 1 et son équivalent nodal"></svg><figcaption>Charge répartie sur l'élément 1 et son équivalent nodal</figcaption></figure>
       </div></details>
       <details><summary><b>Q3</b>Avec W₂ = −2,8 mm et θ₂ = −0,8·10⁻³ rad, exprimer M sur l'élément 1, M au nœud 1 et σ de flexion.</summary><div class="ans">
         <p>w₁ = θ₁ = 0, longueur ℓ = 2 m. Avec les dérivées du cours (x en m) :</p>
         <div class="math-scroll">\[M = -EI\left(N_{3,xx}W_2 + N_{4,xx}\theta_2\right) = -EI\left(\tfrac{6}{\ell^3}(\ell - 2x)W_2 + \tfrac{2}{\ell^2}(\ell - 3x)\theta_2\right) = EI\,(5{,}0 - 5{,}4\,x)\cdot 10^{-3}\]</div>
         <p>Au nœud 1 : M = 5·10⁻³ EI = 5·10⁻³ × 2,1·10¹¹ × 4,3216·10⁻⁸ ≈ <strong>45 N·m</strong>.</p>
-        <p>σ = ±M·(d/2)/I = ±45,4 × 0,02 / 4,3216·10⁻⁸ ≈ <strong>±21 MPa</strong> : traction en peau supérieure, compression en peau inférieure près de l'encastrement.</p>
+        <p>σ = ±M·(d/2)/I = ±45,4 × 0,02 / 4,3216·10⁻⁸ ≈ <strong>±21 MPa</strong> : traction en peau supérieure, compression en peau inférieure près de l'encastrement.</p><figure class="ans-fig"><svg data-fig="td4-M" viewBox="0 0 560 210" role="img" aria-label="M(x) sur l'élément 1 et contrainte de flexion dans la section au nœud 1"></svg><figcaption>M(x) sur l'élément 1 et contrainte de flexion dans la section au nœud 1</figcaption></figure>
       </div></details>
       <details><summary><b>Château d'eau</b>Modèle 1D puis modèle 3D du fût (25 m, Ø 5 m, paroi 0,25 m, 1000 t d'eau).</summary><div class="ans">
         <p><strong>1D :</strong> 1 direction privilégiée (fût élancé chargé suivant son axe). Quelques éléments de <strong>barre 1D</strong> (1 ddl u par nœud), section annulaire A = π(5² − 4,5²)/4 ≈ 3,7 m². CL : u = 0 à la base (fondation). Chargement : Mg = 1000·10³ × 9,81 ≈ 9,8 MN en tête (plus le poids propre du fût, réparti).</p>
@@ -1102,18 +1123,18 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
         <p>Élément 3 (2→3) vertical vers le haut : c = 0, s = 1. Seuls U₂, V₂ sont libres :</p>
         <div class="math-scroll">\[[k]^3_{g,\text{eff}} = \frac{4EA}{L}\begin{bmatrix}0&0\\0&1\end{bmatrix} = \frac{EA}{L}\begin{bmatrix}0&0\\0&4\end{bmatrix} \quad (U_2, V_2)\]</div>
         <p>Élément 4 (3→4) horizontal : c = 1, s = 0. Seuls U₄, V₄ sont libres :</p>
-        <div class="math-scroll">\[[k]^4_{g,\text{eff}} = \frac{EA}{L}\begin{bmatrix}4&0\\0&0\end{bmatrix} \quad (U_4, V_4)\]</div>
+        <div class="math-scroll">\[[k]^4_{g,\text{eff}} = \frac{EA}{L}\begin{bmatrix}4&0\\0&0\end{bmatrix} \quad (U_4, V_4)\]</div><figure class="ans-fig"><svg data-fig="a24-axes" viewBox="0 0 560 230" role="img" aria-label="Axe local x de chaque barre (du 1er vers le 2e nœud), avec c = ΔX/L et s = ΔY/L"></svg><figcaption>Axe local x de chaque barre (du 1er vers le 2e nœud), avec c = ΔX/L et s = ΔY/L</figcaption></figure><div class="cm-pair"><div class="cmat" data-mat="a24-k3"></div><div class="cmat" data-mat="a24-k4"></div></div>
       </div></details>
       <details><summary><b>Q3</b>Compléter [K]<sub>eff</sub> et former {F}<sub>eff</sub> (1 pt).</summary><div class="ans">
         <div class="math-scroll">\[[K]_{\text{eff}} = \frac{EA}{L}\begin{bmatrix}\frac{1}{\sqrt2} & 0 & \frac{-1}{2\sqrt2} & \frac{-1}{2\sqrt2}\\ 0 & \frac{1}{\sqrt2}+4 & \frac{-1}{2\sqrt2} & \frac{-1}{2\sqrt2}\\ \frac{-1}{2\sqrt2} & \frac{-1}{2\sqrt2} & \frac{1}{2\sqrt2}+4 & \frac{1}{2\sqrt2}\\ \frac{-1}{2\sqrt2} & \frac{-1}{2\sqrt2} & \frac{1}{2\sqrt2} & \frac{1}{2\sqrt2}\end{bmatrix}\begin{matrix}U_2\\V_2\\U_4\\V_4\end{matrix} \qquad \langle F_{\text{eff}}\rangle = \langle 0\;\;0\;\;0\;\;-mg\rangle\]</div>
-        <p>Les « +4 » viennent des barres alu 3 (sur V₂) et 4 (sur U₄).</p>
+        <p>Les « +4 » viennent des barres alu 3 (sur V₂) et 4 (sur U₄).</p><div class="cmat" data-mat="a24-K"></div>
       </div></details>
       <details><summary><b>Q4</b>Déformée avec U₂ = −0,78 ; V₂ = −0,12 ; U₄ = 0,06 ; V₄ = −1,62 (10⁻³ m).</summary><div class="ans"><p>Voir la figure : le calcul de la page retrouve ces valeurs. Les barres restent droites.</p></div></details>
       <details><summary><b>Q5</b>N et σ au centre des éléments 1 et 3, distribution dans la section (2,5 pts).</summary><div class="ans">
-        <p>Élément 1 (1→2) : c = √2/2, s = −√2/2. u₁ = 0, u₂ = c U₂ + s V₂ = (√2/2)(U₂ − V₂) = −0,47·10⁻³ m.</p>
+        <p>Élément 1 (1→2) : c = √2/2, s = −√2/2. u₁ = 0, u₂ = c U₂ + s V₂ = (√2/2)(U₂ − V₂) = −0,47·10⁻³ m.</p><figure class="ans-fig"><svg data-fig="a24-proj" viewBox="0 0 400 240" role="img" aria-label="Le déplacement du nœud 2 projeté sur l'axe de la barre 1"></svg><figcaption>Le déplacement du nœud 2 projeté sur l'axe de la barre 1</figcaption></figure>
         <div class="math-scroll">\[N^1 = 17{,}5\cdot10^9 \times 0{,}000239 \times \frac{-0{,}47\cdot10^{-3}}{\sqrt2} \approx -1380\ \text{N} \qquad \sigma = N/A \approx -5{,}8\ \text{MPa (compression)}\]</div>
         <p>Élément 3 (2→3) : u₁ = V₂ = −0,12·10⁻³ m, u₂ = 0 : N³ = 4EA(0 + 0,12·10⁻³)/L ≈ 2008 N, σ ≈ 8,4 MPa (traction).</p>
-        <p>σ est <strong>constante dans la section</strong> et le long de chaque barre.</p>
+        <p>σ est <strong>constante dans la section</strong> et le long de chaque barre.</p><figure class="ans-fig"><svg data-fig="a24-sec" viewBox="0 0 520 170" role="img" aria-label="Répartition de σ dans la section : uniforme pour une barre"></svg><figcaption>Répartition de σ dans la section : uniforme pour une barre</figcaption></figure>
         <p class="note">Avec les déplacements non arrondis, le solveur de la page donne N¹ = −mg√2 = −1387 N et N³ = 2mg = 1962 N : l'écart vient de l'arrondi de V₂ dans le sujet.</p>
       </div></details>
     </div>
@@ -1132,7 +1153,7 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
         <p>Poutre droite selon X, chargée seulement selon Z, aucune charge selon X : <strong>flexion pure</strong>. Le chargement est <strong>antisymétrique</strong> par rapport au milieu : un seul élément (nœuds 1-2) suffit, avec la condition d'antisymétrie <strong>W₂ = 0</strong> (θ₂ reste libre).</p>
       </div></details>
       <details><summary><b>Q3–Q4</b>Modèle, charges effectives, [K]<sub>eff</sub> et système (2 pts).</summary><div class="ans">
-        <p>ddl : W₁ = 0 (appui), θ₁ libre, W₂ = 0 (antisymétrie), θ₂ libre. Charges effectives : −fL²/12 sur θ₁ et +fL²/12 sur θ₂.</p>
+        <p>ddl : W₁ = 0 (appui), θ₁ libre, W₂ = 0 (antisymétrie), θ₂ libre. Charges effectives : −fL²/12 sur θ₁ et +fL²/12 sur θ₂.</p><figure class="ans-fig"><svg data-fig="a24b-model" viewBox="0 0 540 190" role="img" aria-label="Modèle à 1 élément : W₁ = W₂ = 0, seules les rotations sont inconnues"></svg><figcaption>Modèle à 1 élément : W₁ = W₂ = 0, seules les rotations sont inconnues</figcaption></figure><div class="cmat" data-mat="a24b-k"></div>
         <div class="math-scroll">\[[K]_{\text{eff}} = \frac{EI}{L^3}\begin{bmatrix}4L^2&2L^2\\2L^2&4L^2\end{bmatrix} = \frac{2EI}{L}\begin{bmatrix}2&1\\1&2\end{bmatrix} \qquad \frac{2EI}{L}\begin{bmatrix}2&1\\1&2\end{bmatrix}\begin{Bmatrix}\theta_1\\\theta_2\end{Bmatrix} = \frac{fL^2}{12}\begin{Bmatrix}-1\\1\end{Bmatrix}\]</div>
       </div></details>
       <details><summary><b>Q5</b>ddl effectifs et déformée (1 pt).</summary><div class="ans">
@@ -1141,10 +1162,10 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       </div></details>
       <details><summary><b>Q6</b>M le long de l'élément, puis sur toute la structure (1,5 pt).</summary><div class="ans">
         <div class="math-scroll">\[M = -EI\left(N_{2,xx}\theta_1 + N_{4,xx}\theta_2\right) = \frac{fL^2}{12}\ \text{(constant)}\]</div>
-        <p>Par antisymétrie, M = −fL²/12 sur la seconde moitié.</p>
+        <p>Par antisymétrie, M = −fL²/12 sur la seconde moitié.</p><figure class="ans-fig"><svg data-fig="a24b-M" viewBox="0 0 540 220" role="img" aria-label="M EF (constant) et M exact de la RdM (parabolique) : la valeur EF est la moyenne de la parabole"></svg><figcaption>M EF (constant) et M exact de la RdM (parabolique) : la valeur EF est la moyenne de la parabole</figcaption></figure>
       </div></details>
       <details><summary><b>Q7–Q8</b>Contrainte le long de la structure ; comparaison avec la RdM (2 pts).</summary><div class="ans">
-        <p>\(\sigma_{xx} = \frac{M}{I}z = \frac{fL^2}{12}\frac zI\) : constante le long de chaque moitié pour un z donné, linéaire dans la section, maximale en z = ±h/2.</p>
+        <p>\(\sigma_{xx} = \frac{M}{I}z = \frac{fL^2}{12}\frac zI\) : constante le long de chaque moitié pour un z donné, linéaire dans la section, maximale en z = ±h/2.</p><figure class="ans-fig"><svg data-fig="sec-lin" viewBox="0 0 520 170" role="img" aria-label="Flexion : σ varie linéairement dans la section, nulle sur la fibre moyenne"></svg><figcaption>Flexion : σ varie linéairement dans la section, nulle sur la fibre moyenne</figcaption></figure>
         <p>La RdM donne un M exact en x² (parabolique). Avec 1 élément, M EF est constant par moitié : c'est une approximation grossière. Il faut <strong>raffiner le maillage</strong> pour approcher l'ordre 2 (comme en C.5).</p>
       </div></details>
     </div>
@@ -1155,7 +1176,7 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
       <details><summary><b>Q1</b>Effets (membrane, flexion) dans chaque tube (1 pt).</summary><div class="ans"><p>Poids selon −Z. Le tube vertical est chargé selon son axe : <strong>membrane seulement</strong>. Les tubes à ±45° reçoivent une composante axiale et une composante transverse : <strong>membrane + flexion</strong>.</p></div></details>
       <details><summary><b>Q2</b>Modèle à 3 éléments dans le plan (X, Z) (1,5 pt).</summary><div class="ans">
         <p>EF 1 (tube vertical, nœuds 1-2) : <strong>poutre 2D</strong> (U, W, θ), E, A<sub>e</sub>/2, I<sub>e</sub>/2 (sur l'axe de symétrie), longueur L. EF 2 (hauban, nœuds 2-3) : <strong>barre 2D</strong> (U, W), E, A<sub>h</sub>, L<sub>h</sub>. EF 3 (tube à 45°, nœuds 3-4) : poutre 2D, E, A<sub>e</sub>, I<sub>e</sub>, L.</p>
-        <p>CL (articulations) : U₁ = W₁ = U₄ = W₄ = 0. Symétrie : U₁ = θ₁ = U₂ = θ₂ = 0.</p>
+        <p>CL (articulations) : U₁ = W₁ = U₄ = W₄ = 0. Symétrie : U₁ = θ₁ = U₂ = θ₂ = 0.</p><figure class="ans-fig"><svg data-fig="a24c-model" viewBox="0 0 440 280" role="img" aria-label="Modèle à 3 éléments : 2 poutres et 1 barre, demi-structure"></svg><figcaption>Modèle à 3 éléments : 2 poutres et 1 barre, demi-structure</figcaption></figure>
       </div></details>
       <details><summary><b>Q3</b>Tube à 45° avec 3 éléments (0,5 pt).</summary><div class="ans"><p>3 éléments de longueur L/3 : (E, A<sub>e</sub>, I<sub>e</sub>), (E, A<sub>m</sub>, I<sub>m</sub>), (E, A<sub>e</sub>, I<sub>e</sub>). On approche la section variable par une section constante par morceaux.</p></div></details>
       <details><summary><b>Q4–Q5</b>Modèle à 2 directions privilégiées du tube vertical ; effets pris en compte (1,5 pt).</summary><div class="ans">
@@ -1183,22 +1204,22 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
     <div class="ex-qs">
       <details><summary><b>Q1</b>Trois arguments pour l'élément de barre 2D (1 pt).</summary><div class="ans"><p>Structure plane (X, Y) ; profilés élancés (d ≪ L) ; liaisons articulées ; poids propre ramené à des forces ponctuelles aux nœuds.</p></div></details>
       <details><summary><b>Q2</b>Modèle de la moitié à 5 éléments (1 pt).</summary><div class="ans">
-        <p>5 segments à 2 nœuds, barre 2D (U, V). Éléments 1 et 3 : E, A, L√2 · élément 2 : E, A, 2L · élément 4 : E, A, L · <strong>élément 5 : E, A/2, L</strong> (sur l'axe). CL : U₁ = V₁ = 0. Symétrie : <strong>U₂ = U₄ = 0</strong>.</p>
+        <p>5 segments à 2 nœuds, barre 2D (U, V). Éléments 1 et 3 : E, A, L√2 · élément 2 : E, A, 2L · élément 4 : E, A, L · <strong>élément 5 : E, A/2, L</strong> (sur l'axe). CL : U₁ = V₁ = 0. Symétrie : <strong>U₂ = U₄ = 0</strong>.</p><figure class="ans-fig"><svg data-fig="a25-model" viewBox="0 0 520 230" role="img" aria-label="Demi-treillis : 4 nœuds, 5 barres, 4 inconnues V₂, U₃, V₃, V₄"></svg><figcaption>Demi-treillis : 4 nœuds, 5 barres, 4 inconnues V₂, U₃, V₃, V₄</figcaption></figure>
       </div></details>
       <details><summary><b>Q3</b>Charges équivalentes des éléments 2, 3 et 5 ; charge au nœud 2 (1 pt).</summary><div class="ans">
         <p>Chaque barre de poids ρ<sub>V</sub>Ag·ℓ en donne la moitié à chacun de ses nœuds : élément 2 (2L) → −ρ<sub>V</sub>AgL par nœud ; éléments 1 et 3 (L√2) → −ρ<sub>V</sub>AgL√2/2 ; élément 4 (L) → −ρ<sub>V</sub>AgL/2 ; élément 5 (A/2, L) → −ρ<sub>V</sub>AgL/4.</p>
-        <div class="math-scroll">\[\{F_{\text{eff}}\} = -\frac{\rho_V A g L}{4}\begin{Bmatrix}5+2\sqrt2\\0\\2+4\sqrt2\\3\end{Bmatrix}\begin{matrix}V_2\\U_3\\V_3\\V_4\end{matrix}\]</div>
+        <div class="math-scroll">\[\{F_{\text{eff}}\} = -\frac{\rho_V A g L}{4}\begin{Bmatrix}5+2\sqrt2\\0\\2+4\sqrt2\\3\end{Bmatrix}\begin{matrix}V_2\\U_3\\V_3\\V_4\end{matrix}\]</div><div class="cmat" data-mat="a25-F"></div>
       </div></details>
       <details><summary><b>Q4–Q5</b>Matrices effectives des éléments 2, 4, 5 ; assemblage (1,5 pt).</summary><div class="ans">
         <p>Élément 2 (1→2) horizontal : seul V₂ est libre et il n'a pas de rigidité selon V : [k]<sub>eff</sub> = 0. Élément 4 (3→4) horizontal : (EA/L)·1 sur U₃. Élément 5 (2→4) vertical, A/2 : (EA/2L)[1 −1 ; −1 1] sur (V₂, V₄).</p>
         <div class="math-scroll">\[\frac{EA}{4L}\begin{bmatrix}\sqrt2+2&-\sqrt2&-\sqrt2&-2\\-\sqrt2&2\sqrt2+4&0&0\\-\sqrt2&0&2\sqrt2&0\\-2&0&0&2\end{bmatrix}\begin{Bmatrix}V_2\\U_3\\V_3\\V_4\end{Bmatrix} = -\frac{\rho_VAgL}{4}\begin{Bmatrix}5+2\sqrt2\\0\\2+4\sqrt2\\3\end{Bmatrix}\]</div>
-        <p>Solution : V₂ = −35,4a, U₃ = −7,3a, V₃ = −20,4a, V₄ = −36,9a avec a = ρ<sub>V</sub>gL²/E.</p>
+        <div class="cmat" data-mat="a25-K"></div><p>Solution : V₂ = −35,4a, U₃ = −7,3a, V₃ = −20,4a, V₄ = −36,9a avec a = ρ<sub>V</sub>gL²/E.</p>
       </div></details>
       <details><summary><b>Q6</b>Déformée (0,5 pt).</summary><div class="ans"><p>Voir la figure, recalculée avec ces valeurs.</p></div></details>
       <details><summary><b>Q7–Q8</b>N et σ dans les éléments 2, 4 et 5 (2,5 pts).</summary><div class="ans">
         <p>Élément 2 : U₁ = U₂ = 0 donc <strong>N = 0</strong>, σ = 0 (la barre ne porte rien).</p>
         <p>Élément 4 : u₁ = U₃ = −7,3a, u₂ = U₄ = 0 : N = EA(0 + 7,3a)/L = 7,3ρ<sub>V</sub>AgL (traction), σ = 7,3ρ<sub>V</sub>gL ≈ 0,56 MPa.</p>
-        <p>Élément 5 (2→4, vers le bas) : u₁ = −V₂, u₂ = −V₄ : N = (EA/2)(−V₄ + V₂)/L = 3ρ<sub>V</sub>AgL/4 (traction), σ = N/(A/2) ≈ 0,12 MPa, constante dans la section.</p>
+        <figure class="ans-fig"><svg data-fig="a25-el5" viewBox="0 0 360 210" role="img" aria-label="Élément 5 : axe local vers le bas, u = −V"></svg><figcaption>Élément 5 : axe local vers le bas, u = −V</figcaption></figure><p>Élément 5 (2→4, vers le bas) : u₁ = −V₂, u₂ = −V₄ : N = (EA/2)(−V₄ + V₂)/L = 3ρ<sub>V</sub>AgL/4 (traction), σ = N/(A/2) ≈ 0,12 MPa, constante dans la section.</p>
       </div></details>
     </div>
 
@@ -1217,16 +1238,16 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
         <p>L'élément du cours a 4 variables nodales et des fonctions d'interpolation cubiques (base ⟨1 x x² x³⟩) : c'est l'équivalent de <strong>B23</strong> (interpolation cubique) dans Abaqus, pas de B21 (linéaire).</p>
       </div></details>
       <details><summary><b>Q3–Q4</b>Modèle, charges effectives, système (2 pts).</summary><div class="ans">
-        <p>W₁ = θ₁ = 0 (encastrement), W₃ = 0 (appui) et θ₃ = 0 (symétrie). Libres : W₂, θ₂. Seul l'élément 2 est chargé : f L/2 sur W₂ et −fL²/12 sur θ₂.</p>
+        <p>W₁ = θ₁ = 0 (encastrement), W₃ = 0 (appui) et θ₃ = 0 (symétrie). Libres : W₂, θ₂. Seul l'élément 2 est chargé : f L/2 sur W₂ et −fL²/12 sur θ₂.</p><figure class="ans-fig"><svg data-fig="a25b-model" viewBox="0 0 540 200" role="img" aria-label="Demi-poutre : 2 éléments, charges équivalentes effectives au nœud 2"></svg><figcaption>Demi-poutre : 2 éléments, charges équivalentes effectives au nœud 2</figcaption></figure>
         <div class="math-scroll">\[\frac{EI}{L^3}\begin{bmatrix}24&0\\0&8L^2\end{bmatrix}\begin{Bmatrix}W_2\\\theta_2\end{Bmatrix} = \begin{Bmatrix}fL/2\\-fL^2/12\end{Bmatrix}\]</div>
-        <p>Les termes croisés −6L + 6L s'annulent : la matrice est diagonale.</p>
+        <div class="cmat" data-mat="a25b-k"></div><p>Les termes croisés −6L + 6L s'annulent : la matrice est diagonale.</p>
       </div></details>
       <details><summary><b>Q5</b>ddl effectifs et déformée (1 pt).</summary><div class="ans">
         <div class="math-scroll">\[W_2 = \frac{fL^4}{48EI} \qquad \theta_2 = -\frac{fL^3}{96EI}\]</div>
       </div></details>
       <details><summary><b>Q6</b>Réactions R<sub>1Z</sub> et R<sub>3Z</sub> (1 pt).</summary><div class="ans">
         <div class="math-scroll">\[R_{1Z} = \frac{EI}{L^3}\left(-12W_2 - 6L\theta_2\right) = -\frac{3fL}{16} \qquad R_{3Z} = -\frac{fL}{2} - R_{1Z} = -\frac{5fL}{16}\]</div>
-        <p>La somme des charges sur la demi-structure vaut fL/2 ; les réactions doivent faire −fL/2.</p>
+        <p>La somme des charges sur la demi-structure vaut fL/2 ; les réactions doivent faire −fL/2.</p><figure class="ans-fig"><svg data-fig="a25b-reac" viewBox="0 0 540 190" role="img" aria-label="Réactions verticales : elles équilibrent la charge fL/2"></svg><figcaption>Réactions verticales : elles équilibrent la charge fL/2</figcaption></figure>
       </div></details>
       <details><summary><b>Q7–Q8</b>M le long des éléments, σ en x = L de l'élément 2 (2 pts).</summary><div class="ans">
         <div class="math-scroll">\[\text{élt 1 : } M = \frac{fL}{48}(9x - 5L) \qquad \text{élt 2 : } M = \frac{fL}{48}(8L - 15x)\]</div>
@@ -1238,7 +1259,7 @@ footer { padding-block: 40px 60px; color: var(--muted); font-size: 13.5px; }
     <h4 class="pb">Problème III · Fuselage en treillis 3D (3 + 1,5 pts)</h4>
     <div class="ex-statement prose"><p>73 tubes, 28 nœuds, barres 3D. Encastrement des 4 nœuds de l'extrémité étroite, 1000 N sur chacun des 4 nœuds de l'extrémité large. La zone du poste de pilotage n'est pas triangulée.</p></div>
     <div class="ex-qs">
-      <details><summary><b>Q1</b>La matrice est singulière : pourquoi (1 pt) ?</summary><div class="ans"><p>Bloquer les 3 déplacements de 4 nœuds supprime les 6 mouvements de corps rigide. La singularité vient donc d'un <strong>mécanisme interne</strong> : la zone du poste de pilotage n'est pas triangulée, avec des liaisons articulées un rectangle peut se déformer sans allonger de barre (comme dans le labo B.3).</p></div></details>
+      <details><summary><b>Q1</b>La matrice est singulière : pourquoi (1 pt) ?</summary><div class="ans"><p>Bloquer les 3 déplacements de 4 nœuds supprime les 6 mouvements de corps rigide. La singularité vient donc d'un <strong>mécanisme interne</strong> : la zone du poste de pilotage n'est pas triangulée, avec des liaisons articulées un rectangle peut se déformer sans allonger de barre (comme dans le labo B.3).</p><figure class="ans-fig"><svg data-fig="a25-mech" viewBox="0 0 520 170" role="img" aria-label="Un panneau rectangulaire articulé est un mécanisme ; une diagonale le rend rigide"></svg><figcaption>Un panneau rectangulaire articulé est un mécanisme ; une diagonale le rend rigide</figcaption></figure></div></details>
       <details><summary><b>Q2</b>Nombre de ddl effectifs après correction (0,5 pt).</summary><div class="ans"><p>28 nœuds dont 4 encastrés : 24 nœuds libres × 3 ddl (u, v, w) = <strong>72 ddl effectifs</strong>.</p></div></details>
       <details><summary><b>Q3</b>Un autre élément de barre sans raffiner (1,5 pt).</summary><div class="ans"><p>La <strong>barre à 3 nœuds</strong> : u(x) = N₁u₁ + N₂u₂ + N₃u₃, base ⟨1 x x²⟩, fonctions d'interpolation <strong>quadratiques</strong>. Elle approche mieux le déplacement que la barre à 2 nœuds (linéaire).</p></div></details>
       <details><summary><b>III-bis</b>Modéliser la peau en aluminium de 2 mm (1,5 pt).</summary><div class="ans">
@@ -2838,6 +2859,386 @@ const dot4 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
   const all = () => document.querySelectorAll('#entrainement details');
   $('e-reveal-all').addEventListener('click', () => all().forEach((d) => { d.open = true; }));
   $('e-hide-all').addEventListener('click', () => all().forEach((d) => { d.open = false; }));
+})();
+
+
+/* =========================================================================
+   E. Schémas et matrices dans les corrections
+   ========================================================================= */
+(function answerFigures() {
+  const NS = 'http://www.w3.org/2000/svg';
+  const RED = 'var(--load)', BLUE = 'var(--node)';
+  const E5 = ['var(--e1)', 'var(--e2)', 'var(--e3)', 'var(--load)', 'var(--node)'];
+  function el(tag, a, p) { const e = document.createElementNS(NS, tag); if (a) for (const k in a) { if (k === 'text') e.textContent = a[k]; else e.setAttribute(k, a[k]); } if (p) p.appendChild(e); return e; }
+  function T(g, x, y, s, cls, extra) { return el('text', Object.assign({ x, y, text: s }, cls ? { class: cls } : {}, extra || {}), g); }
+  function Tc(g, x, y, s, color, anchor, size) { return el('text', { x, y, text: s, fill: color, 'text-anchor': anchor || 'start', 'font-size': size || 12, 'font-weight': 600 }, g); }
+  function arrow(g, x1, y1, x2, y2, cls, head = 9) {
+    const L = Math.hypot(x2 - x1, y2 - y1); if (L < 2) return;
+    const ux = (x2 - x1) / L, uy = (y2 - y1) / L, h = Math.min(head, L * 0.7), bx = x2 - ux * h, by = y2 - uy * h;
+    el('line', { x1, y1, x2: bx, y2: by, class: cls }, g);
+    el('polygon', { points: `${x2},${y2} ${bx - uy * h * 0.5},${by + ux * h * 0.5} ${bx + uy * h * 0.5},${by - ux * h * 0.5}`, class: cls + ' head' }, g);
+  }
+  function marc(g, cx, cy, r, cw, cls) {
+    const sw = Math.PI * 1.35, a0 = cw ? -Math.PI * 0.92 : -Math.PI * 0.08, a1 = cw ? a0 + sw : a0 - sw;
+    const p0 = [cx + r * Math.cos(a0), cy + r * Math.sin(a0)], p1 = [cx + r * Math.cos(a1), cy + r * Math.sin(a1)];
+    el('path', { d: `M${p0[0]},${p0[1]} A${r},${r} 0 1 ${cw ? 1 : 0} ${p1[0]},${p1[1]}`, class: cls }, g);
+    const tx = cw ? -Math.sin(a1) : Math.sin(a1), ty = cw ? Math.cos(a1) : -Math.cos(a1), nx = -ty, ny = tx;
+    const tip = [p1[0] + tx * 6, p1[1] + ty * 6], b = [p1[0] - tx * 4, p1[1] - ty * 4];
+    el('polygon', { points: `${tip[0]},${tip[1]} ${b[0] + nx * 5},${b[1] + ny * 5} ${b[0] - nx * 5},${b[1] - ny * 5}`, class: cls + ' head' }, g);
+  }
+  const node = (g, x, y) => el('circle', { cx: x, cy: y, r: 6, class: 'node' }, g);
+  const bar = (g, x1, y1, x2, y2, col, w, dash) => el('line', { x1, y1, x2, y2, stroke: col || 'var(--ink)', 'stroke-width': w || 5, 'stroke-linecap': 'round', 'stroke-dasharray': dash || 'none' }, g);
+  function circ(g, x, y, lbl, col) { el('circle', { cx: x, cy: y, r: 10, fill: 'var(--sheet)', stroke: col || 'var(--muted)', 'stroke-width': 1.4 }, g); T(g, x, y + 4, lbl, 'mid', { 'font-size': 11 }); }
+  function pin(g, x, y) { el('polygon', { points: `${x},${y + 5} ${x - 10},${y + 21} ${x + 10},${y + 21}`, class: 'support' }, g); el('rect', { x: x - 15, y: y + 21, width: 30, height: 7, class: 'wall' }, g); }
+  function pinTop(g, x, y) { el('polygon', { points: `${x},${y - 5} ${x - 10},${y - 21} ${x + 10},${y - 21}`, class: 'support' }, g); el('rect', { x: x - 15, y: y - 28, width: 30, height: 7, class: 'wall' }, g); }
+  const clampL = (g, x, y) => el('rect', { x: x - 14, y: y - 24, width: 14, height: 48, class: 'wall' }, g);
+  const axis = (g, x, y1, y2) => el('line', { x1: x, y1, x2: x, y2, class: 'axis-sym' }, g);
+  function lines(g, x, y, arr, anchor, size) { arr.forEach(([s, col], i) => Tc(g, x, y + i * 14, s, col, anchor, size)); }
+  function distDown(g, x0, x1, yBeam, n, len) { for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; arrow(g, x, yBeam - (len || 36), x, yBeam - 6, 'arr', 7); } }
+  function distUp(g, x0, x1, yBeam, n, len) { for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; arrow(g, x, yBeam - 6, x, yBeam - (len || 36), 'arr', 7); } }
+
+  const FIG = {};
+  /* ---------- TD1 ---------- */
+  FIG['td1-N'] = (s) => {
+    el('rect', { x: 46, y: 18, width: 70, height: 10, class: 'wall' }, s);
+    el('rect', { x: 69, y: 28, width: 24, height: 140, fill: 'color-mix(in srgb, var(--e1) 22%, var(--sheet))', stroke: 'var(--ink)' }, s);
+    el('rect', { x: 75, y: 168, width: 12, height: 70, fill: 'color-mix(in srgb, var(--e1) 22%, var(--sheet))', stroke: 'var(--ink)' }, s);
+    T(s, 40, 32, 'x = 0', 'lbl-m end'); T(s, 40, 172, 'x = 2L', 'lbl-m end'); T(s, 40, 242, 'x = 3L', 'lbl-m end');
+    const x0 = 160, k = 300 / 21582, X = (n) => x0 + n * k;
+    el('line', { x1: x0, y1: 28, x2: x0, y2: 250, class: 'ax' }, s);
+    el('line', { x1: 60, y1: 168, x2: 500, y2: 168, class: 'ghost', 'stroke-width': 1 }, s);
+    T(s, x0, 262, 'N (kN) →', 'lbl-m');
+    el('path', { d: `M${X(15696)},28 L${X(15696)},168 L${X(9810)},168 L${X(9810)},238`, class: 'curve-f', 'stroke-width': 4 }, s);
+    el('path', { d: `M${X(21582)},28 L${X(9810)},168 L${X(9810)},238`, class: 'curve-e' }, s);
+    el('circle', { cx: X(15696), cy: 98, r: 5, class: 'dot-e' }, s);
+    Tc(s, X(21582) - 4, 22, 'exact : 2ρgL + Mg = 21,6', 'var(--exact)', 'end', 11.5);
+    Tc(s, X(15696) + 8, 102, 'EF : ρgL + Mg = 15,7', 'var(--fe)', 'start', 11.5);
+    Tc(s, X(15696) + 8, 117, '(= valeur exacte au milieu)', 'var(--muted)', 'start', 11);
+    Tc(s, X(9810) + 8, 210, 'Mg = 9,8 (exact et EF)', 'var(--ink)', 'start', 11.5);
+  };
+  /* ---------- TD2 ---------- */
+  const td2P = (X, Y) => [50 + X * 90, 225 - Y * 90];
+  const TD2 = { n: [[0, 0], [2, 0], [2, 1], [4, 0], [4, 2]], e: [[0, 1], [0, 2], [1, 2], [1, 3], [2, 3], [2, 4], [3, 4]] };
+  function td2Truss(s, colorOf, widthOf, dashOf) {
+    axis(s, 410, 14, 252); T(s, 404, 24, 'axe', 'lbl-n end');
+    TD2.e.forEach(([a, b], i) => {
+      const p = td2P(...TD2.n[a]), q = td2P(...TD2.n[b]);
+      bar(s, p[0], p[1], q[0], q[1], colorOf(i), widthOf(i), dashOf ? dashOf(i) : 'none');
+      const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2, off = i === 6 ? [-14, 0] : (i === 2 ? [-14, 0] : [0, 0]);
+      circ(s, mx + off[0], my + off[1], String(i + 1), colorOf(i));
+    });
+    TD2.n.forEach((n) => { const [x, y] = td2P(...n); node(s, x, y); });
+    pin(s, 50, 225);
+  }
+  FIG['td2-model'] = (s) => {
+    td2Truss(s, () => 'var(--ink)', (i) => i === 6 ? 3 : 5);
+    lines(s, 40, 198, [['U₁ = 0', RED], ['V₁ = 0', RED]], 'end');
+    Tc(s, 230, 250, 'U₂, V₂', BLUE, 'middle');
+    Tc(s, 222, 122, 'U₃, V₃', BLUE, 'end');
+    lines(s, 422, 212, [['U₄ = 0', RED], ['V₄', BLUE]]);
+    lines(s, 422, 40, [['U₅ = 0', RED], ['V₅', BLUE]]);
+    arrow(s, 410, 231, 410, 257, 'arr', 8); Tc(s, 402, 256, 'F/2', RED, 'end');
+    lines(s, 446, 100, [['1, 4 : 2L', 'var(--muted)'], ['2, 5, 6 : L√5', 'var(--muted)'], ['3 : L', 'var(--muted)'], ['7 : 2L, A/2', 'var(--muted)']], 'start', 11);
+  };
+  FIG['td2-roles'] = (s) => {
+    const col = (i) => (i === 1 || i === 5) ? 'var(--comp)' : (i === 6 ? 'var(--tens)' : 'var(--muted)');
+    td2Truss(s, col, (i) => [1, 5, 6].includes(i) ? 7 : 3, (i) => [1, 5, 6].includes(i) ? 'none' : '5 5');
+    arrow(s, 410, 231, 410, 257, 'arr', 8); Tc(s, 402, 256, 'F/2', RED, 'end');
+    Tc(s, 16, 40, '2 et 6 : compression, σ = −93,6 MPa', 'var(--comp)');
+    lines(s, 420, 150, [['7 : traction', 'var(--tens)'], ['σ = 83,8 MPa', 'var(--tens)']]);
+    Tc(s, 64, 256, '1, 3, 4, 5 : N = 0, mais ils stabilisent', 'var(--muted)', 'start', 11.5);
+  };
+  FIG['td2-rigid'] = (s) => {
+    const base = [[25, 115], [125, 115], [125, 45]];
+    const panels = [
+      { f: ([x, y]) => [x + 32, y], t: ['translation X', 'bloquée par U₁ = 0'], a: [70, 140, 115, 140] },
+      { f: ([x, y]) => [x, y - 28], t: ['translation Y', 'bloquée par V₁ = 0'], a: [160, 100, 160, 62] },
+      { f: ([x, y]) => { const c = Math.cos(-0.3), sn = Math.sin(-0.3), dx = x - 25, dy = y - 115; return [25 + dx * c - dy * sn, 115 + dx * sn + dy * c]; }, t: ['rotation autour de 1', 'bloquée par U₄ = U₅ = 0'], a: null }
+    ];
+    panels.forEach((p, k) => {
+      const g = el('g', { transform: `translate(${k * 200 + 10},0)` }, s);
+      const tri = (pts, st) => el('polygon', { points: pts.map((q) => q.join(',')).join(' '), fill: 'none', stroke: st, 'stroke-width': 3, 'stroke-dasharray': st === 'var(--muted)' ? '5 4' : 'none', 'stroke-linejoin': 'round' }, g);
+      tri(base, 'var(--muted)'); tri(base.map(p.f), BLUE);
+      base.map(p.f).forEach(([x, y]) => node(g, x, y));
+      if (p.a) arrow(g, ...p.a, 'arr-n', 8);
+      else el('path', { d: 'M140,105 A115,115 0 0 0 132,62', fill: 'none', class: 'arr-n' }, g);
+      Tc(g, 90, 152, p.t[0], 'var(--ink)', 'middle'); Tc(g, 90, 166, p.t[1], RED, 'middle', 11.5);
+    });
+  };
+  FIG['td2-el7'] = (s) => {
+    bar(s, 120, 190, 120, 40, 'var(--ink)', 4); node(s, 120, 190); node(s, 120, 40);
+    arrow(s, 146, 170, 146, 70, 'arr-f', 9); Tc(s, 154, 120, 'x local', 'var(--fe)');
+    Tc(s, 110, 194, '4 : u₁ = V₄', BLUE, 'end'); Tc(s, 110, 44, '5 : u₂ = V₅', BLUE, 'end');
+    lines(s, 196, 56, [['c = ΔX/L = 0', 'var(--ink)'], ['s = ΔY/L = +1', 'var(--ink)'], ['u = cU + sV = V', 'var(--fe)']]);
+    arrow(s, 250, 200, 310, 200, 'arr-m', 7); arrow(s, 250, 200, 250, 140, 'arr-m', 7);
+    T(s, 314, 204, 'X', 'lbl-m'); T(s, 256, 142, 'Y', 'lbl-m');
+  };
+  /* ---------- TD3 ---------- */
+  function beamBase(s, y, xs) { bar(s, xs[0], y, xs[xs.length - 1], y, 'var(--ink)', 5); xs.forEach((x) => node(s, x, y)); }
+  FIG['td3-model'] = (s) => {
+    const y = 100, xs = [70, 270, 470];
+    distDown(s, 80, 455, y, 12); Tc(s, 180, 52, 'fz = −f', RED, 'middle');
+    arrow(s, 470, 24, 470, 94, 'arr', 10); Tc(s, 462, 26, 'F/2 = −fL/2', RED, 'end');
+    clampL(s, 70, y); pin(s, 270, y); axis(s, 470, 18, 182);
+    beamBase(s, y, xs); circ(s, 170, 122, '1'); circ(s, 370, 122, '2');
+    lines(s, 70, 152, [['W₁ = 0', RED], ['θ₁ = 0', RED]], 'middle');
+    lines(s, 300, 152, [['W₂ = 0', RED], ['θ₂ ?', BLUE]], 'start');
+    lines(s, 462, 152, [['W₃ ?', BLUE], ['θ₃ = 0', RED]], 'end');
+  };
+  FIG['td3-reac'] = (s) => {
+    const y = 105, xs = [70, 270, 470];
+    clampL(s, 70, y); axis(s, 470, 14, 190); beamBase(s, y, xs);
+    arrow(s, 70, y + 8, 70, y + 44, 'arr-f', 9); Tc(s, 80, y + 44, 'R_W1 = −6/60 fL', 'var(--fe)');
+    marc(s, 70, y, 24, true, 'arr-f'); Tc(s, 70, y - 38, 'R_θ1 = 7/60 fL²', 'var(--fe)', 'middle');
+    arrow(s, 270, y - 8, 270, y - 80, 'arr-f', 10); Tc(s, 280, y - 66, 'R_W2 = 156/60 fL', 'var(--fe)');
+    marc(s, 470, y, 24, false, 'arr-f'); Tc(s, 462, y + 52, 'R_θ3 = −31/60 fL²', 'var(--fe)', 'end');
+    Tc(s, 270, 190, 'pas de réaction en W₃ ni en θ₂ : ce sont des ddl libres', 'var(--muted)', 'middle', 11);
+  };
+  FIG['td3-MT'] = (s) => {
+    const X = (x) => 70 + x * 200;
+    [0, 1, 2].forEach((x) => el('line', { x1: X(x), y1: 20, x2: X(x), y2: 240, class: 'ghost', 'stroke-width': 1 }, s));
+    const plot = (yb, sc, segs, labels, name) => {
+      el('line', { x1: X(0), y1: yb, x2: X(2), y2: yb, class: 'ax' }, s); T(s, 30, yb + 4, name, 'lbl-m');
+      segs.forEach(([x0, v0, x1, v1]) => el('polygon', { points: `${X(x0)},${yb} ${X(x0)},${yb - sc * v0} ${X(x1)},${yb - sc * v1} ${X(x1)},${yb}`, class: 'mdiag' }, s));
+      labels.forEach(([x, v, t, a]) => Tc(s, X(x) + (a === 'end' ? -4 : 4), yb - sc * v + (v >= 0 ? -6 : 14), t, 'var(--fe)', a || 'start', 11.5));
+    };
+    plot(80, 80, [[0, -0.2, 1, 0.4], [1, 0.4, 2, -0.6]], [[0, -0.2, '−fL²/5'], [1, 0.4, '2fL²/5', 'middle'], [2, -0.6, '−3fL²/5', 'end']], 'M');
+    plot(190, 40, [[0, 0.6, 1, 0.6], [1, -1, 2, -1]], [[0.5, 0.6, '3fL/5', 'middle'], [1.5, -1, '−fL', 'middle']], 'T');
+    ['1', '2', '3'].forEach((t, i) => T(s, X(i), 254, t, 'lbl-n mid'));
+  };
+  /* ---------- TD4 ---------- */
+  FIG['td4-model'] = (s) => {
+    axis(s, 410, 14, 262); T(s, 404, 24, 'axe', 'lbl-n end');
+    TD2.e.forEach(([a, b], i) => { const p = td2P(...TD2.n[a]), q = td2P(...TD2.n[b]); bar(s, p[0], p[1], q[0], q[1], 'var(--ink)', i === 6 ? 3 : 5); circ(s, (p[0] + q[0]) / 2 - (i === 2 || i === 6 ? 14 : 0), (p[1] + q[1]) / 2, String(i + 1)); });
+    for (let i = 0; i <= 14; i++) { const x = 58 + i * 25; arrow(s, x, 231, x, 254, 'arr', 6); }
+    Tc(s, 230, 268, 'fz = −f sur les éléments 1 et 4', RED, 'middle', 11.5);
+    TD2.n.forEach((n) => { const [x, y] = td2P(...n); node(s, x, y); });
+    clampL(s, 50, 225);
+    lines(s, 30, 176, [['U₁ = 0', RED], ['W₁ = 0', RED], ['θ₁ = 0', RED]], 'end');
+    Tc(s, 222, 122, 'U₃ W₃ θ₃', BLUE, 'end');
+    Tc(s, 236, 212, 'U₂ W₂ θ₂', BLUE, 'start');
+    lines(s, 418, 200, [['U₄ = θ₄ = 0', RED], ['W₄', BLUE]]);
+    lines(s, 418, 40, [['U₅ = θ₅ = 0', RED], ['W₅', BLUE]]);
+    Tc(s, 418, 130, '7 : A/2, I/2', 'var(--muted)', 'start', 11.5);
+  };
+  FIG['td4-loads'] = (s) => {
+    const x1 = 110, x2 = 430;
+    distDown(s, x1 + 10, x2 - 10, 72, 12); Tc(s, 270, 24, 'fz = −f sur ℓ = 2L (charge totale −2fL)', RED, 'middle', 11.5);
+    beamBase(s, 72, [x1, x2]);
+    Tc(s, 270, 112, '⇓ équivalent nodal (moitié à chaque nœud + moments ∓fz ℓ²/12)', 'var(--muted)', 'middle', 11);
+    const y = 175; beamBase(s, y, [x1, x2]);
+    arrow(s, x1, y - 50, x1, y - 8, 'arr', 9); Tc(s, x1 - 8, y - 32, '−fL', RED, 'end');
+    arrow(s, x2, y - 50, x2, y - 8, 'arr', 9); Tc(s, x2 + 8, y - 32, '−fL', RED, 'start');
+    marc(s, x1, y, 22, true, 'arr'); Tc(s, x1, y + 42, '+fL²/3', RED, 'middle');
+    marc(s, x2, y, 22, false, 'arr'); Tc(s, x2, y + 42, '−fL²/3', RED, 'middle');
+    Tc(s, 270, 226, 'nœud 1 encastré : seuls U₂, W₂, θ₂ comptent', 'var(--muted)', 'middle', 11);
+  };
+  FIG['td4-M'] = (s) => {
+    const EI = 2.1e11 * 4.3216e-8, M = (x) => EI * (5.0 - 5.4 * x) * 1e-3, X = (x) => 70 + x * 150, yb = 110, k = 1.4;
+    el('line', { x1: X(0), y1: yb, x2: X(2) + 10, y2: yb, class: 'ax' }, s); T(s, X(2) + 14, yb + 4, 'x (m)', 'lbl-m');
+    el('polygon', { points: `${X(0)},${yb} ${X(0)},${yb - k * M(0)} ${X(2)},${yb - k * M(2)} ${X(2)},${yb}`, class: 'mdiag' }, s);
+    Tc(s, X(0) + 6, yb - k * M(0) - 6, 'M(0) = 5·10⁻³ EI ≈ 45 N·m', 'var(--fe)', 'start', 11.5);
+    Tc(s, X(2) - 4, yb - k * M(2) + 16, 'M(2 m) ≈ −53 N·m', 'var(--fe)', 'end', 11.5);
+    T(s, X(0), yb + 18, 'nœud 1', 'lbl-n mid'); T(s, X(2), yb - 8, 'nœud 2', 'lbl-n mid');
+    const sx = 480, y1 = 70, y2 = 150, ym = 110;
+    el('line', { x1: sx, y1, x2: sx, y2, class: 'sec' }, s);
+    for (let i = 0; i <= 6; i++) { const y = y1 + (y2 - y1) * i / 6, L = 40 * (ym - y) / (ym - y1); if (Math.abs(L) > 3) arrow(s, sx, y, sx + L, y, 'arr', 6); }
+    el('line', { x1: sx + 40, y1, x2: sx - 40, y2, stroke: RED, 'stroke-width': 1.2 }, s);
+    Tc(s, sx, 50, 'section au nœud 1', 'var(--ink)', 'middle', 11.5);
+    Tc(s, sx + 44, y1 + 4, '+21 MPa', RED, 'start', 11.5); Tc(s, sx - 44, y2 + 4, '−21 MPa', RED, 'end', 11.5);
+    Tc(s, sx, 178, 'traction en haut, compression en bas', 'var(--muted)', 'middle', 11);
+  };
+  /* ---------- Médian A24 ---------- */
+  FIG['a24-axes'] = (s) => {
+    const P = (X, Y) => [70 + X * 120, 60 - Y * 120];
+    const N = [[0, 0], [1, -1], [1, 0], [2, 0]], Es = [[0, 1], [1, 3], [1, 2], [2, 3]];
+    Es.forEach(([a, b], i) => {
+      const p = P(...N[a]), q = P(...N[b]); bar(s, p[0], p[1], q[0], q[1], i < 2 ? 'var(--ink)' : 'var(--muted)', i < 2 ? 5 : 7);
+      const L = Math.hypot(q[0] - p[0], q[1] - p[1]), ux = (q[0] - p[0]) / L, uy = (q[1] - p[1]) / L, mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+      const ox = -uy * 18, oy = ux * 18;
+      arrow(s, mx + ox - ux * 20, my + oy - uy * 20, mx + ox + ux * 20, my + oy + uy * 20, 'arr-f', 8);
+      circ(s, mx - ox, my - oy, String(i + 1));
+    });
+    N.forEach((n, i) => { const [x, y] = P(...n); node(s, x, y); T(s, x + (i === 3 ? 12 : -12), y + (i === 1 ? 20 : 16), String(i + 1), 'lbl-n mid'); });
+    pinTop(s, 70, 60); pinTop(s, 190, 60);
+    lines(s, 340, 50, [['1 (1→2) bois : c = √2/2, s = −√2/2', 'var(--ink)'], ['2 (2→4) bois : c = √2/2, s = √2/2', 'var(--ink)'], ['3 (2→3) alu : c = 0, s = 1', 'var(--ink)'], ['4 (3→4) alu : c = 1, s = 0', 'var(--ink)']], 'start', 11);
+    lines(s, 340, 130, [['[P] = [ c²  cs ; cs  s² ]', 'var(--fe)'], ['bois : E · alu : 4E', 'var(--muted)'], ['flèche verte = axe local x', 'var(--muted)']], 'start', 11);
+  };
+  FIG['a24-proj'] = (s) => {
+    const n1 = [60, 50], n2 = [200, 190], d = [Math.SQRT1_2, Math.SQRT1_2], k = 90;
+    el('line', { x1: 30, y1: 20, x2: 250, y2: 240, class: 'ghost', 'stroke-width': 1.2 }, s);
+    bar(s, ...n1, ...n2, 'var(--ink)', 5); node(s, ...n1); node(s, ...n2);
+    T(s, 50, 44, '1', 'lbl-n end'); T(s, 212, 196, '2', 'lbl-n');
+    const tip = [n2[0] - 0.78 * k, n2[1] + 0.12 * k], u = -0.467, foot = [n2[0] + u * k * d[0], n2[1] + u * k * d[1]];
+    el('line', { x1: tip[0], y1: tip[1], x2: foot[0], y2: foot[1], class: 'ghost', 'stroke-width': 1.3 }, s);
+    arrow(s, ...n2, ...tip, 'arr-n', 9); arrow(s, ...n2, ...foot, 'arr-f', 10);
+    Tc(s, tip[0] - 4, tip[1] + 18, '(U₂, V₂)', BLUE, 'middle');
+    Tc(s, foot[0] - 8, foot[1] - 6, 'u₂', 'var(--fe)', 'end');
+    lines(s, 236, 60, [['c = √2/2, s = −√2/2', 'var(--ink)'], ['u₂ = c U₂ + s V₂', 'var(--fe)'], ['   = (√2/2)(U₂ − V₂)', 'var(--fe)'], ['   = −0,47·10⁻³ m', 'var(--fe)'], ['u₂ − u₁ < 0 : la barre', 'var(--muted)'], ['raccourcit → compression', 'var(--comp)']], 'start', 11.5);
+  };
+  function section(s, x, pts, inward, col, lbl) {
+    el('line', { x1: x, y1: 40, x2: x, y2: 130, class: 'sec' }, s);
+    pts.forEach((y) => { if (inward) arrow(s, x + 56, y, x + 6, y, 'arr', 7); else arrow(s, x + 4, y, x + 54, y, 'arr', 7); });
+    Tc(s, x + 28, 154, lbl, col, 'middle', 11.5);
+  }
+  FIG['a24-sec'] = (s) => {
+    const ys = [44, 64, 85, 106, 126];
+    section(s, 110, ys, true, 'var(--comp)', 'élt 1 : σ = −5,8 MPa (compression)');
+    section(s, 360, ys, false, 'var(--tens)', 'élt 3 : σ = +8,4 MPa (traction)');
+    Tc(s, 260, 20, 'σ = N/A : la même valeur en tout point de la section', 'var(--muted)', 'middle', 11.5);
+  };
+  FIG['sec-lin'] = (s) => {
+    const x = 260, y1 = 35, y2 = 135, ym = 85;
+    el('line', { x1: x, y1, x2: x, y2, class: 'sec' }, s);
+    el('line', { x1: x - 70, y1: ym, x2: x + 70, y2: ym, class: 'ghost', 'stroke-width': 1 }, s);
+    for (let i = 0; i <= 8; i++) { const y = y1 + (y2 - y1) * i / 8, L = 55 * (ym - y) / (ym - y1); if (Math.abs(L) > 3) arrow(s, x, y, x + L, y, 'arr', 6); }
+    el('line', { x1: x + 55, y1, x2: x - 55, y2, stroke: RED, 'stroke-width': 1.2 }, s);
+    Tc(s, x, 20, 'M = fL²/12 > 0 : σ = M z / I', 'var(--ink)', 'middle', 11.5);
+    Tc(s, x + 60, y1 + 4, 'z = +h/2 : +σmax (traction)', RED, 'start', 11.5);
+    Tc(s, x - 60, y2 + 4, 'z = −h/2 : −σmax (compression)', RED, 'end', 11.5);
+    Tc(s, x - 76, ym + 4, 'fibre moyenne : σ = 0', 'var(--muted)', 'end', 11);
+  };
+  FIG['a24b-model'] = (s) => {
+    const y = 95, x1 = 100, x2 = 440;
+    beamBase(s, y, [x1, x2]); pin(s, x1, y); pin(s, x2, y);
+    T(s, 270, y - 12, 'E, I, L', 'lbl-m mid'); circ(s, 270, y + 22, '1');
+    marc(s, x1, y, 24, false, 'arr'); Tc(s, x1, y - 36, '−fL²/12', RED, 'middle');
+    marc(s, x2, y, 24, true, 'arr'); Tc(s, x2, y - 36, '+fL²/12', RED, 'middle');
+    lines(s, x1, 150, [['W₁ = 0 (appui)', RED], ['θ₁ ?', BLUE]], 'middle');
+    lines(s, x2, 150, [['W₂ = 0 (antisymétrie)', RED], ['θ₂ ?', BLUE]], 'middle');
+  };
+  FIG['a24b-M'] = (s) => {
+    const X = (x) => 60 + x * 200, yb = 110, k = 560;
+    el('line', { x1: X(0), y1: yb, x2: X(2) + 10, y2: yb, class: 'ax' }, s); T(s, X(2) + 14, yb + 4, 'x', 'lbl-m');
+    el('polygon', { points: `${X(0)},${yb} ${X(0)},${yb - k / 12} ${X(1)},${yb - k / 12} ${X(1)},${yb}`, class: 'mdiag' }, s);
+    el('polygon', { points: `${X(1)},${yb} ${X(1)},${yb + k / 12} ${X(2)},${yb + k / 12} ${X(2)},${yb}`, class: 'mdiag' }, s);
+    let d = '';
+    for (let i = 0; i <= 80; i++) { const x = i / 40, m = x <= 1 ? x * (1 - x) / 2 : -(x - 1) * (2 - x) / 2; d += (i ? 'L' : 'M') + X(x) + ',' + (yb - k * m); }
+    el('path', { d, class: 'curve-e' }, s);
+    Tc(s, X(0.5), yb - k / 12 + 16, 'EF : fL²/12', 'var(--fe)', 'middle', 11.5);
+    Tc(s, X(0.5) + 14, yb - k / 8 - 4, 'exact (RdM) : max fL²/8', 'var(--exact)', 'start', 11.5);
+    Tc(s, X(1.5), yb + k / 12 - 6, 'EF : −fL²/12', 'var(--fe)', 'middle', 11.5);
+    Tc(s, 270, 208, 'aire du rectangle = aire sous la parabole : l\'EF donne la moyenne', 'var(--muted)', 'middle', 11);
+    T(s, X(0), yb + 16, '1', 'lbl-n mid'); T(s, X(1), yb - 6, '2', 'lbl-n mid'); T(s, X(2), yb + 16, '3', 'lbl-n mid');
+  };
+  FIG['a24c-model'] = (s) => {
+    axis(s, 180, 8, 250);
+    const n1 = [180, 230], n2 = [180, 30], n4 = [196, 230], n3 = [196 + 141, 230 - 141];
+    el('rect', { x: 160, y: 236, width: 56, height: 7, class: 'wall' }, s);
+    bar(s, ...n1, ...n2, 'var(--ink)', 6); bar(s, ...n2, ...n3, 'var(--ink)', 2.5); bar(s, ...n4, ...n3, 'var(--ink)', 6);
+    [n1, n2, n3, n4].forEach((p) => node(s, ...p));
+    circ(s, 162, 135, '1'); circ(s, 262, 48, '2'); circ(s, 282, 172, '3');
+    lines(s, 8, 80, [['1 : poutre 2D (U, W, θ)', 'var(--ink)'], ['    Aₑ/2, Iₑ/2, L', 'var(--muted)'], ['2 : barre 2D (U, W)', 'var(--ink)'], ['    Aₕ, Lₕ', 'var(--muted)'], ['3 : poutre 2D', 'var(--ink)'], ['    Aₑ, Iₑ, L', 'var(--muted)']], 'start', 11);
+    Tc(s, 172, 262, 'U₁=W₁=θ₁=0', RED, 'end', 11); Tc(s, 204, 262, 'U₄=W₄=0, θ₄ ?', RED, 'start', 11);
+    Tc(s, 188, 26, 'U₂ = θ₂ = 0, W₂ ?', RED, 'start', 11); Tc(s, n3[0] + 10, n3[1] + 4, 'U₃ W₃ θ₃ ?', BLUE, 'start', 11);
+    T(s, 172, 274, 'tube central sur l\'axe : section coupée en deux', 'lbl-m end', { 'font-size': 10.5 });
+  };
+  /* ---------- Médian A25 ---------- */
+  FIG['a25-model'] = (s) => {
+    const P = (X, Y) => [60 + X * 120, 50 - Y * 120];
+    const N = [[0, 0], [2, 0], [1, -1], [2, -1]], Es = [[0, 2], [0, 1], [1, 2], [2, 3], [1, 3]];
+    axis(s, 300, 10, 225);
+    Es.forEach(([a, b], i) => { const p = P(...N[a]), q = P(...N[b]); bar(s, p[0], p[1], q[0], q[1], 'var(--ink)', i === 4 ? 3 : 5); circ(s, (p[0] + q[0]) / 2 + (i === 4 ? -14 : 0), (p[1] + q[1]) / 2 + (i === 1 ? -14 : 0), String(i + 1)); });
+    N.forEach((n) => node(s, ...P(...n)));
+    pinTop(s, 60, 50);
+    lines(s, 46, 70, [['U₁ = 0', RED], ['V₁ = 0', RED]], 'end');
+    lines(s, 310, 40, [['U₂ = 0', RED], ['V₂', BLUE]]);
+    Tc(s, 180, 196, 'U₃, V₃', BLUE, 'middle');
+    lines(s, 310, 168, [['U₄ = 0', RED], ['V₄', BLUE]]);
+    lines(s, 345, 90, [['1, 3 : E, A, L√2', 'var(--muted)'], ['2 : E, A, 2L', 'var(--muted)'], ['4 : E, A, L', 'var(--muted)'], ['5 : E, A/2, L (sur l\'axe)', 'var(--muted)']], 'start', 11);
+  };
+  FIG['a25-el5'] = (s) => {
+    bar(s, 120, 40, 120, 180, 'var(--ink)', 3); node(s, 120, 40); node(s, 120, 180);
+    T(s, 108, 44, '2', 'lbl-n end'); T(s, 108, 184, '4', 'lbl-n end');
+    arrow(s, 146, 70, 146, 160, 'arr-f', 9); Tc(s, 154, 116, 'x', 'var(--fe)');
+    lines(s, 182, 50, [['c = 0, s = −1', 'var(--ink)'], ['u = cU + sV = −V', 'var(--fe)'], ['u₁ = −V₂ = 35,4 a', 'var(--ink)'], ['u₂ = −V₄ = 36,9 a', 'var(--ink)'], ['u₂ > u₁ : allongement', 'var(--muted)'], ['→ traction, N = 3ρAgL/4', 'var(--tens)']], 'start', 11.5);
+  };
+  FIG['a25b-model'] = (s) => {
+    const y = 110, xs = [70, 270, 470];
+    distUp(s, 290, 460, y, 7); Tc(s, 375, 60, 'fz = f', RED, 'middle');
+    clampL(s, 70, y); pin(s, 470, y); axis(s, 470, 14, 192);
+    beamBase(s, y, xs); circ(s, 170, 130, '1'); circ(s, 370, 130, '2');
+    arrow(s, 270, y - 8, 270, y - 58, 'arr', 10); Tc(s, 262, y - 50, 'fL/2', RED, 'end');
+    marc(s, 270, y, 24, false, 'arr'); Tc(s, 262, y + 48, '−fL²/12', RED, 'end');
+    Tc(s, 70, 170, 'W₁ = θ₁ = 0', RED, 'middle'); Tc(s, 290, 170, 'W₂ ?  θ₂ ?', BLUE, 'start'); Tc(s, 470, 186, 'W₃ = θ₃ = 0', RED, 'end');
+  };
+  FIG['a25b-reac'] = (s) => {
+    const y = 100, xs = [70, 270, 470];
+    distUp(s, 290, 450, y, 7, 30); Tc(s, 370, 58, 'charge totale +fL/2', RED, 'middle', 11.5);
+    clampL(s, 70, y); axis(s, 470, 14, 180); beamBase(s, y, xs);
+    arrow(s, 70, y + 8, 70, y + 50, 'arr-f', 9); Tc(s, 80, y + 50, 'R₁Z = −3fL/16', 'var(--fe)');
+    arrow(s, 470, y + 8, 470, y + 58, 'arr-f', 9); Tc(s, 460, y + 58, 'R₃Z = −5fL/16', 'var(--fe)', 'end');
+    Tc(s, 270, 24, '−3/16 − 5/16 + 1/2 = 0 ✓ (en fL)', 'var(--ink)', 'middle', 12);
+  };
+  FIG['a25-mech'] = (s) => {
+    const g1 = el('g', null, s);
+    el('polygon', { points: '40,40 200,40 200,125 40,125', fill: 'none', class: 'ghost' }, g1);
+    el('polygon', { points: '78,40 238,40 200,125 40,125', fill: 'none', stroke: 'var(--comp)', 'stroke-width': 4, 'stroke-linejoin': 'round' }, g1);
+    [[78, 40], [238, 40], [200, 125], [40, 125]].forEach((p) => node(g1, ...p));
+    arrow(g1, 110, 24, 160, 24, 'arr-n', 8);
+    Tc(g1, 130, 152, 'sans diagonale : mécanisme', 'var(--comp)', 'middle', 11.5);
+    Tc(g1, 130, 166, 'il se plie sans allonger de barre', 'var(--muted)', 'middle', 11);
+    const g2 = el('g', { transform: 'translate(270,0)' }, s);
+    el('polygon', { points: '40,40 200,40 200,125 40,125', fill: 'none', stroke: 'var(--ink)', 'stroke-width': 4, 'stroke-linejoin': 'round' }, g2);
+    bar(g2, 40, 125, 200, 40, 'var(--tens)', 4);
+    [[40, 40], [200, 40], [200, 125], [40, 125]].forEach((p) => node(g2, ...p));
+    Tc(g2, 120, 152, 'avec une diagonale : rigide', 'var(--tens)', 'middle', 11.5);
+    Tc(g2, 120, 166, '[K] redevient inversible', 'var(--muted)', 'middle', 11);
+  };
+
+  /* ---------- Matrices colorées ---------- */
+  const k4 = [['12', '−6L', '−12', '−6L'], ['−6L', '4L²', '6L', '2L²'], ['−12', '6L', '12', '6L'], ['−6L', '2L²', '6L', '4L²']];
+  const MAT = {
+    'td1-K': { rl: ['u₁', 'u₂', 'u₃'], v: [['3', '−3', '0'], ['−3', '3+1', '−1'], ['0', '−1', '1']], blocks: [[0, 1], [1, 2]], f: 'EA/L ×', leg: [[1, 'élément 1 (3E, 2A, 2L)'], [2, 'élément 2 (E, A, L)']], cap: 'Assemblage : les deux blocs 2×2 se superposent sur la case du nœud 2.' },
+    'td1-Kr': { rl: ['u₁', 'u₂', 'u₃'], v: [['3', '−3', '0'], ['−3', '4', '−1'], ['0', '−1', '1']], blocks: [[0, 1], [1, 2]], f: 'EA/L ×', s: [0], r: true, cap: 'u₁ = 0 : on barre la ligne et la colonne de u₁, il reste le bloc 2×2.' },
+    'td2-k1': { rl: ['U₁', 'V₁', 'U₂', 'V₂'], v: [['1', '0', '−1', '0'], ['0', '0', '0', '0'], ['−1', '0', '1', '0'], ['0', '0', '0', '0']], f: 'EA/2L ×', s: [0, 1], r: true, cap: 'Élément 1 complet (c = 1, s = 0) : le nœud 1 est bloqué, il reste U₂, V₂.' },
+    'td2-k7': { rl: ['U₄', 'V₄', 'U₅', 'V₅'], v: [['0', '0', '0', '0'], ['0', '1', '0', '−1'], ['0', '0', '0', '0'], ['0', '−1', '0', '1']], f: 'EA/4L ×', s: [0, 2], r: true, cap: 'Élément 7 (c = 0, s = 1, A/2) : U₄ et U₅ sont bloqués par la symétrie.' },
+    'td3-k1': { rl: ['W₁', 'θ₁', 'W₂', 'θ₂'], v: k4, f: 'EI/L³ ×', s: [0, 1, 2], r: true, cap: 'Élément 1 : seul θ₂ est libre.' },
+    'td3-k2': { rl: ['W₂', 'θ₂', 'W₃', 'θ₃'], v: k4, f: 'EI/L³ ×', s: [0, 3], r: true, cap: 'Élément 2 : θ₂ et W₃ sont libres.' },
+    'td3-K': { rl: ['W₁', 'θ₁', 'W₂', 'θ₂', 'W₃', 'θ₃'], v: [['12', '−6L', '−12', '−6L', '0', '0'], ['−6L', '4L²', '6L', '2L²', '0', '0'], ['−12', '6L', '24', '0', '−12', '−6L'], ['−6L', '2L²', '0', '8L²', '6L', '2L²'], ['0', '0', '−12', '6L', '12', '6L'], ['0', '0', '−6L', '2L²', '6L', '4L²']], blocks: [[0, 1, 2, 3], [2, 3, 4, 5]], f: 'EI/L³ ×', s: [0, 1, 2, 5], r: true, leg: [[1, 'élément 1'], [2, 'élément 2']], cap: 'Assemblage puis CL : seul le bloc (θ₂, W₃) reste, c\'est [K′].' },
+    'a24-k3': { rl: ['U₂', 'V₂', 'U₃', 'V₃'], v: [['0', '0', '0', '0'], ['0', '1', '0', '−1'], ['0', '0', '0', '0'], ['0', '−1', '0', '1']], f: '4EA/L ×', s: [2, 3], r: true, cap: 'Élément 3 (alu, c = 0, s = 1) : nœud 3 bloqué.' },
+    'a24-k4': { rl: ['U₃', 'V₃', 'U₄', 'V₄'], v: [['1', '0', '−1', '0'], ['0', '0', '0', '0'], ['−1', '0', '1', '0'], ['0', '0', '0', '0']], f: '4EA/L ×', s: [0, 1], r: true, cap: 'Élément 4 (alu, c = 1, s = 0) : nœud 3 bloqué.' },
+    'a24-K': { rl: ['U₂', 'V₂', 'U₄', 'V₄'], v: [['a+a', '−a+a', '−a', '−a'], ['−a+a', 'a+a+4', '−a', '−a'], ['−a', '−a', 'a+4', 'a'], ['−a', '−a', 'a', 'a']], c: [['12', '12', '2', '2'], ['12', '123', '2', '2'], ['2', '2', '24', '2'], ['2', '2', '2', '2']], f: 'EA/L ×', leg: [[1, 'élt 1'], [2, 'élt 2'], [3, 'élt 3'], [4, 'élt 4']], cap: 'a = 1/(2√2) ≈ 0,354. Chaque couleur est la contribution d\'une barre ; « −a+a » donne 0.' },
+    'a24b-k': { rl: ['W₁', 'θ₁', 'W₂', 'θ₂'], v: k4, f: 'EI/L³ ×', s: [0, 2], r: true, cap: 'W₁ (appui) et W₂ (antisymétrie) barrés : il reste 4L², 2L², 2L², 4L².' },
+    'a25-F': { rl: ['V₂', 'U₃', 'V₃', 'V₄'], cl: ['élt 1', 'élt 2', 'élt 3', 'élt 4', 'élt 5', 'total'], v: [['', '1', '√2/2', '', '1/4', '(5+2√2)/4'], ['', '', '', '', '', '0'], ['√2/2', '', '√2/2', '1/2', '', '(2+4√2)/4'], ['', '', '', '1/2', '1/4', '3/4']], col: true, f: '−ρ_V A g L ×', cap: 'Chaque colonne : la moitié du poids de la barre sur chacun de ses nœuds libres. On somme par ligne.' },
+    'a25-K': { rl: ['V₂', 'U₃', 'V₃', 'V₄'], v: [['a+½', '−a', '−a', '−½'], ['−a', 'a+a+1', '−a+a', '0'], ['−a', '−a+a', 'a+a', '0'], ['−½', '0', '0', '½']], c: [['35', '3', '3', '5'], ['3', '134', '13', ''], ['3', '13', '13', ''], ['5', '', '', '5']], f: 'EA/L ×', leg: [[1, 'élt 1'], [3, 'élt 3'], [4, 'élt 4'], [5, 'élt 5 (A/2)']], cap: 'a = 1/(2√2). L\'élément 2 n\'apporte rien : V₂ est perpendiculaire à son axe.' },
+    'a25b-k': { rl: ['W₂', 'θ₂'], v: [['12+12', '6L−6L'], ['6L−6L', '4L²+4L²']], c: [['12', '12'], ['12', '12']], f: 'EI/L³ ×', leg: [[1, 'élément 1 (fin)'], [2, 'élément 2 (début)']], cap: 'Les termes croisés s\'annulent : [K]eff = EI/L³ [24 0 ; 0 8L²].' }
+  };
+  function cmat(div, m) {
+    const n = m.rl.length, cl = m.cl || m.rl, k = cl.length, S = m.s || [];
+    const wrap = document.createElement('div'); wrap.className = 'cm-row';
+    if (m.f) { const f = document.createElement('div'); f.className = 'cm-f'; f.textContent = m.f; wrap.appendChild(f); }
+    const g = document.createElement('div'); g.className = 'cm-grid'; g.style.gridTemplateColumns = `auto repeat(${k}, minmax(40px, auto))`;
+    g.appendChild(document.createElement('div'));
+    cl.forEach((l, j) => { const h = document.createElement('div'); h.className = 'cm-h' + (S.includes(j) ? ' fx' : ''); h.textContent = l; g.appendChild(h); });
+    for (let i = 0; i < n; i++) {
+      const h = document.createElement('div'); h.className = 'cm-h' + (S.includes(i) ? ' fx' : ''); h.textContent = m.rl[i]; g.appendChild(h);
+      for (let j = 0; j < k; j++) {
+        const c = document.createElement('div'); c.className = 'cm-c'; c.textContent = m.v[i][j];
+        let els = [];
+        if (m.c) els = m.c[i][j].split('').map(Number);
+        else if (m.blocks) m.blocks.forEach((b, e) => { if (b.includes(i) && b.includes(j)) els.push(e + 1); });
+        else if (m.col && j < k - 1 && m.v[i][j]) els = [j + 1];
+        const cols = els.map((e) => `color-mix(in srgb, ${E5[e - 1]} 36%, var(--sheet))`);
+        if (cols.length === 1) c.style.background = cols[0];
+        else if (cols.length > 1) c.style.background = `linear-gradient(135deg, ${cols.map((x, q) => `${x} ${Math.round(q / cols.length * 100)}% ${Math.round((q + 1) / cols.length * 100)}%`).join(', ')})`;
+        const fx = S.includes(i) || S.includes(j);
+        if (fx) c.classList.add(m.r ? 'gone' : 'struck');
+        else if (m.r) c.classList.add('keep');
+        if (m.col && j === k - 1) c.classList.add('tot');
+        g.appendChild(c);
+      }
+    }
+    wrap.appendChild(g); div.appendChild(wrap);
+    if (m.leg || m.col) {
+      const lg = document.createElement('div'); lg.className = 'cm-leg';
+      (m.leg || cl.slice(0, -1).map((l, j) => [j + 1, l])).forEach(([e, l]) => { const sp = document.createElement('span'); sp.innerHTML = `<i style="background:${E5[e - 1]}"></i>`; sp.appendChild(document.createTextNode(l)); lg.appendChild(sp); });
+      div.appendChild(lg);
+    }
+    if (m.cap) { const p = document.createElement('p'); p.className = 'cm-cap'; p.textContent = m.cap; div.appendChild(p); }
+  }
+  document.querySelectorAll('svg[data-fig]').forEach((s) => { const f = FIG[s.dataset.fig]; if (f) try { f(s); } catch (e) { console.error(s.dataset.fig, e); } });
+  document.querySelectorAll('.cmat[data-mat]').forEach((d) => { const m = MAT[d.dataset.mat]; if (m) try { cmat(d, m); } catch (e) { console.error(d.dataset.mat, e); } });
 })();
 
 </script>
